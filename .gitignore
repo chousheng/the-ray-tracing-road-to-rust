@@ -9,3 +9,6 @@ out/
 *.log
 
 .env
+
+package-lock.json
+yarn.lock
