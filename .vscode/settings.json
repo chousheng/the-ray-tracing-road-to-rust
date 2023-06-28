@@ -1,5 +1,9 @@
 {
   "[mdx]": {
-    "editor.wordWrap": "on"
+    "editor.wordWrap": "on",
+    "editor.formatOnSave": true
+  },
+  "files.associations": {
+    "*.mdx": "markdown" // allow VS Code's built-in preview to work
   }
 }
