@@ -1,10 +1,15 @@
 {
-  "[markdown]": { // Cannot use "multiple language specific settings" like "[markdown][json]" Bug?
+  // Cannot use "multiple language specific settings" like "[markdown][json]". VS Code Bug?
+  "[markdown]": {
     "editor.wordWrap": "bounded",
     "editor.wordWrapColumn": 120,
+    "editor.formatOnSave": true
+  },
+  "[typescriptreact]": {
     "editor.formatOnSave": true
   },
   "files.associations": {
     "*.mdx": "markdown" // Allow VS Code's built-in preview to work
   },
+  "cSpell.words": ["usehooks"]
 }
