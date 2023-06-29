@@ -4,6 +4,7 @@ out/
 
 .DS_Store
 
+next-env.d.ts
 .next/
 .turbo/
 *.log
