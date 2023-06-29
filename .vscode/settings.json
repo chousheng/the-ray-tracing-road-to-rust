@@ -1,9 +1,10 @@
 {
-  "[mdx]": {
-    "editor.wordWrap": "on",
+  "[markdown]": { // Cannot use "multiple language specific settings" like "[markdown][json]" Bug?
+    "editor.wordWrap": "bounded",
+    "editor.wordWrapColumn": 120,
     "editor.formatOnSave": true
   },
   "files.associations": {
-    "*.mdx": "markdown" // allow VS Code's built-in preview to work
-  }
+    "*.mdx": "markdown" // Allow VS Code's built-in preview to work
+  },
 }
