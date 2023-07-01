@@ -16,15 +16,4 @@
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"],
-  "eslint.options": {
-    "extensions": [".js", ".jsx", ".md", ".mdx", ".ts", ".tsx"]
-  },
-  "eslint.validate": [
-    "markdown",
-    "mdx",
-    "javascript",
-    "javascriptreact",
-    "typescript",
-    "typescriptreact"
-  ]
 }
