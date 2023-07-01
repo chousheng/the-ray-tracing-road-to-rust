@@ -6,7 +6,13 @@
     "editor.formatOnSave": true
   },
   "[typescriptreact]": {
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll": true,
+      "source.fixAll.eslint": true,
+      "source.addMissingImports":true,
+      "source.organizeImports": true
+    }
   },
   "files.associations": {
     "*.mdx": "markdown" // Allow VS Code's built-in preview to work
