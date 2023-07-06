@@ -1,3 +1,5 @@
+import { SyncedTabs, Tab } from "../components/Tabs";
+
 ## The PPM Image Format
 
 Whenever you start a renderer, you need a way to see an image. The most straightforward way is to write it to a file. The catch is, there are so many formats. Many of those are complex. I always start with a plain text ppm file. Here’s a nice description from Wikipedia:
@@ -6,11 +8,43 @@ Whenever you start a renderer, you need a way to see an image. The most straight
 
 Let’s make some C++ code to output such a thing:
 
-```cpp filename="main.cc (Creating your first image)"
+<SyncedTabs items={['Rust', 'C++']}>
+<Tab>
+
+```rust filename="main.rs (Creating your first image)"
+fn main() {
+    // Image
+
+    const IMAGE_WIDTH: i32 = 256;
+    const IMAGE_HEIGHT: i32 = 256;
+
+    // Render
+
+    println!("P3\n{} {}\n255", IMAGE_WIDTH, IMAGE_HEIGHT);
+
+    for j in (0..IMAGE_HEIGHT).rev() {
+        for i in 0..IMAGE_WIDTH {
+            let r = i as f64 / (IMAGE_WIDTH - 1) as f64;
+            let g = j as f64 / (IMAGE_HEIGHT - 1) as f64;
+            let b = 0.25;
+
+            let ir = (255.999 * r) as i32;
+            let ig = (255.999 * g) as i32;
+            let ib = (255.999 * b) as i32;
+
+            println!("{} {} {}", ir, ig, ib);
+        }
+    }
+}
+```
+
+</Tab>
+<Tab>
+
+```cpp filename="main.cpp (Creating your first image)"
 #include <iostream>
 
 int main() {
-
     // Image
 
     const int image_width = 256;
@@ -20,10 +54,10 @@ int main() {
 
     std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
 
-    for (int j = image_height-1; j >= 0; --j) {
+    for (int j = image_height - 1; j >= 0; --j) {
         for (int i = 0; i < image_width; ++i) {
-            auto r = double(i) / (image_width-1);
-            auto g = double(j) / (image_height-1);
+            auto r = double(i) / (image_width - 1);
+            auto g = double(j) / (image_height - 1);
             auto b = 0.25;
 
             int ir = static_cast<int>(255.999 * r);
@@ -33,8 +67,13 @@ int main() {
             std::cout << ir << ' ' << ig << ' ' << ib << '\n';
         }
     }
+
+    return 0;
 }
 ```
+
+</Tab>
+</SyncedTabs>
 
 There are some things to note in that code:
 
@@ -48,17 +87,20 @@ There are some things to note in that code:
 
 ## Creating an Image File
 
-Because the file is written to the program output, you'll need to redirect it to an image file.
-Typically this is done from the command-line by using the `>` redirection operator, like so:
+Because the file is written to the program output, you'll need to redirect it to an image file. Typically this is done from the command-line by using the `>` redirection operator, like so:
 
 ```
+
 build\Release\inOneWeekend.exe > image.ppm
+
 ```
 
 This is how things would look on Windows. On Mac or Linux, it would look like this:
 
 ```
+
 build/inOneWeekend > image.ppm
+
 ```
 
 Opening the output file (in `ToyViewer` on my Mac, but try it in your favorite viewer and Google “ppm viewer” if your viewer doesn’t support it) shows this result:
@@ -94,21 +136,76 @@ Before we continue, let's add a progress indicator to our output. This is a hand
 
 Our program outputs the image to the standard output stream (`std::cout`), so leave that alone and instead write to the error output stream (`std::cerr`):
 
-```cpp filename="main.cc (Main render loop with progress reporting)" {2,16}
-    for (int j = image_height-1; j >= 0; --j) {
-        std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
+<SyncedTabs items={['Rust', 'C++']}>
+<Tab>
+
+```rust filename="main.rs (Main render loop with progress reporting)" {12,25-26}
+fn main() {
+    // Image
+
+    const IMAGE_WIDTH: i32 = 256;
+    const IMAGE_HEIGHT: i32 = 256;
+
+    // Render
+
+    println!("P3\n{} {}\n255", IMAGE_WIDTH, IMAGE_HEIGHT);
+
+    for j in (0..IMAGE_HEIGHT).rev() {
+        eprint!("\rScanlines remaining: {} ", j);
+        for i in 0..IMAGE_WIDTH {
+            let r = i as f64 / (IMAGE_WIDTH - 1) as f64;
+            let g = j as f64 / (IMAGE_HEIGHT - 1) as f64;
+            let b = 0.25;
+
+            let ir = (255.999 * r) as i32;
+            let ig = (255.999 * g) as i32;
+            let ib = (255.999 * b) as i32;
+
+            println!("{} {} {}", ir, ig, ib);
+        }
+    }
+
+    eprintln!("\nDone.");
+}
+```
+
+</Tab>
+<Tab>
+
+```cpp filename="main.cpp (Main render loop with progress reporting)" {14,28-29}
+#include <iostream>
+
+int main() {
+    // Image
+
+    const int image_width = 256;
+    const int image_height = 256;
+
+    // Render
+
+    std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
+
+    for (int j = image_height - 1; j >= 0; --j) {
+        std::cerr << "\rScanlines remaining: " << j << " ";
         for (int i = 0; i < image_width; ++i) {
-            auto r = double(i) / (image_width-1);
-            auto g = double(j) / (image_height-1);
+            auto r = double(i) / (image_width - 1);
+            auto g = double(j) / (image_height - 1);
             auto b = 0.25;
 
             int ir = static_cast<int>(255.999 * r);
             int ig = static_cast<int>(255.999 * g);
             int ib = static_cast<int>(255.999 * b);
 
-            std::cout << ir << ' ' << ig << ' ' << ib << '\n';
+            std::cout << ir << " " << ig << " " << ib << std::endl;
         }
     }
 
     std::cerr << "\nDone.\n";
+
+    return 0;
+}
+
 ```
+
+</Tab>
+</SyncedTabs>
