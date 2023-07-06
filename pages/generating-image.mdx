@@ -1,12 +1,13 @@
 import { SyncedTabs, Tab } from "../components/Tabs";
+import { Callout } from "nextra/components";
 
 ## The PPM Image Format
 
-Whenever you start a renderer, you need a way to see an image. The most straightforward way is to write it to a file. The catch is, there are so many formats. Many of those are complex. I always start with a plain text ppm file. Here’s a nice description from Wikipedia:
+Whenever you start a renderer, you need a way to see an image. The most straightforward way is to write it to a file. The catch is, there are so many formats. Many of those are complex. We choose to start with a plain text ppm file. Here’s a nice description from Wikipedia:
 
 ![PPM Example](../images/fig-1.01-ppm.jpg)
 
-Let’s make some C++ code to output such a thing:
+Let’s make some code to output such a thing:
 
 <SyncedTabs items={['Rust', 'C++']}>
 <Tab>
@@ -81,33 +82,35 @@ There are some things to note in that code:
 
 2. The rows are written out from top to bottom.
 
-3. By convention, each of the red/green/blue components range from 0.0 to 1.0. We will relax that later when we internally use high dynamic range, but before output we will tone map to the zero to one range, so this code won’t change.
+3. By convention, each of the red/green/blue components ranges from 0.0 to 1.0. We will relax that later when we internally use high dynamic range, but before output we will tone map to the zero to one range, so this code won’t change.
 
 4. Red goes from fully off (black) to fully on (bright red) from left to right, and green goes from black at the bottom to fully on at the top. Red and green together make yellow so we should expect the upper right corner to be yellow.
 
 ## Creating an Image File
 
-Because the file is written to the program output, you'll need to redirect it to an image file. Typically this is done from the command-line by using the `>` redirection operator, like so:
+Because the file is written to the program output, you'll need to redirect it to an image file. Typically this is done from the command line by using the `>` redirection operator, like so:
+
+```bash
+
+target/debug/ray-tracing > image.ppm
 
 ```
 
-build\Release\inOneWeekend.exe > image.ppm
-
-```
-
-This is how things would look on Windows. On Mac or Linux, it would look like this:
-
-```
-
-build/inOneWeekend > image.ppm
-
-```
-
-Opening the output file (in `ToyViewer` on my Mac, but try it in your favorite viewer and Google “ppm viewer” if your viewer doesn’t support it) shows this result:
+Opening the output file in an image viewer shows this result:
 
 ![Image 1: First PPM image](../images/img-1.01-first-ppm-image.png)
 
-Hooray! This is the graphics “hello world”. If your image doesn’t look like that, open the output file in a text editor and see what it looks like. It should start something like this:
+Hooray! This is the graphics “hello world.”
+
+<Callout type="info">
+    You can try opening the PPM file in your favorite viewer. Google “ppm
+    viewer” if your viewer doesn't support it. If you are on macOS, you can use
+    the built-in Preview app. If you are using Visual Studio Code, you can
+    install an extension that supports PPM and view the image within the code
+    editor.
+</Callout>
+
+If your image doesn’t look like that, open the output file in a text editor and see what it looks like. It should start something like this:
 
 ```ppm filename="image.ppm (First image output)"
 P3
@@ -128,13 +131,11 @@ P3
 
 If it doesn’t, then you probably just have some newlines or something similar that is confusing the image reader.
 
-If you want to produce more image types than PPM, I am a fan of `stb_image.h`, a header-only image library available on GitHub at https://github.com/nothings/stb.
-
 ## Adding a Progress Indicator
 
 Before we continue, let's add a progress indicator to our output. This is a handy way to track the progress of a long render, and also to possibly identify a run that's stalled out due to an infinite loop or other problem.
 
-Our program outputs the image to the standard output stream (`std::cout`), so leave that alone and instead write to the error output stream (`std::cerr`):
+Our program outputs the image to the standard output stream, so leave that alone and instead write to the error output stream:
 
 <SyncedTabs items={['Rust', 'C++']}>
 <Tab>
