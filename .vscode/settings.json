@@ -2,7 +2,7 @@
   // Cannot use "multiple language specific settings" like "[markdown][json]". VS Code Bug?
   "[markdown]": {
     "editor.wordWrap": "bounded",
-    "editor.wordWrapColumn": 120,
+    "editor.wordWrapColumn": 100,
     "editor.formatOnSave": true
   },
   "[typescriptreact]": {
