@@ -1,5 +1,6 @@
-import { SyncedTabs, Tab } from "../components/Tabs";
 import { Callout } from "nextra/components";
+
+import { SyncedTabs, Tab } from "../components/Tabs";
 
 ## The PPM Image Format
 
@@ -88,7 +89,7 @@ There are some things to note in that code:
 
 ## Creating an Image File
 
-Because the file is written to the program output, you'll need to redirect it to an image file. Typically this is done from the command line by using the `>` redirection operator, like so:
+Because the file is written to the standard output, you'll need to redirect it to an image file. Typically this is done from the command line by using the `>` redirection operator, like so:
 
 ```bash
 
@@ -103,11 +104,9 @@ Opening the output file in an image viewer shows this result:
 Hooray! This is the graphics “hello world.”
 
 <Callout type="info">
-    You can try opening the PPM file in your favorite viewer. Google “ppm
-    viewer” if your viewer doesn't support it. If you are on macOS, you can use
-    the built-in Preview app. If you are using Visual Studio Code, you can
-    install an extension that supports PPM and view the image within the code
-    editor.
+
+You can try opening the PPM file in your favorite viewer. Google “ppm viewer” if your viewer doesn't support it. If you are on macOS, you can use the built-in Preview app. If you are using Visual Studio Code, you can install an extension that supports PPM and view the image within the code editor.
+
 </Callout>
 
 If your image doesn’t look like that, open the output file in a text editor and see what it looks like. It should start something like this:
