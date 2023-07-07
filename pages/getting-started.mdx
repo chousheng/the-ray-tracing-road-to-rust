@@ -1,0 +1,160 @@
+import { Steps } from "nextra-theme-docs";
+
+import { SyncedTabs, Tab } from "../components/Tabs";
+
+## Setting up environment
+
+### macOS
+
+<SyncedTabs items={['Rust', 'C++']}>
+<Tab>
+
+Install the Rust compiler and the Cargo package manager via [rustup](https://rustup.rs/) in your terminal:
+
+```sh
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+
+Alternatively, you can install Rust via Homebrew:
+
+```sh
+brew install rust
+```
+
+That's it.
+
+</Tab>
+<Tab>
+
+First, we need a compiler. We recommend using clang, which is included if you install [xcode](https://developer.apple.com/xcode/). But the version with xcode may be old. It is a good idea to install a newer clang version via Homebrew:
+
+```sh
+brew install llvm
+```
+
+And follow the post-install instruction to add it to your PATH. For example:
+
+```sh
+echo 'export PATH="/opt/homebrew/opt/llvm/bin:$PATH"' >> ~/.zprofile
+```
+
+Note that if you are using an Intel-based Mac, the install path may be different. If you want Homebrew to show the post-install instruction again, you can:
+
+```sh
+brew info llvm
+```
+
+Check if clang is installed correctly:
+
+```sh
+clang --version
+```
+
+Second, we need a build tool. In this project, instead of using a meta build tool like CMake to generate Makefiles, we choose to use GNU make directly because we are not going to use any third-party libraries. Check if make is installed:
+
+```sh
+make --version
+```
+
+If not, you can install via Homebrew:
+
+```sh
+brew install make
+```
+
+</Tab>
+</SyncedTabs>
+
+## Initializing the project
+
+<SyncedTabs items={['Rust', 'C++']}>
+<Tab>
+
+Rust comes with the Cargo build tool. To initialize a project, we can:
+
+```sh
+cargo new ray-tracing
+```
+
+</Tab>
+<Tab>
+
+1. Make a project folder
+
+```sh
+mkdir ray-tracing
+```
+
+2. Create a main.cpp
+
+```cpp
+#include <iostream>
+
+int main() {
+    std::cout << "Hello, world!" << std::endl;
+    return 0;
+}
+
+```
+
+3. Download the Makefile and put it inside the `ray-tracing` folder
+
+</Tab>
+</SyncedTabs>
+
+## Getting hello world!
+
+<SyncedTabs items={['Rust', 'C++']}>
+<Tab>
+
+Change into the `ray-tracing` directory and run `cargo run`:
+
+```sh
+cd ray-tracing
+cargo run
+```
+
+Then, you should see below in your terminal:
+
+```
+Hello, world!
+```
+
+</Tab>
+<Tab>
+
+Change into the `raytracing` directory and run `make run`:
+
+```sh
+cd ray-tracing
+make run
+```
+
+Then, you should see in your terminal:
+
+```
+Hello, world!
+```
+
+</Tab>
+</SyncedTabs>
+
+## Tweaking code editor
+
+If you are using Visual Studio Code, you can install the following extensions which can help the development:
+
+<SyncedTabs items={["Rust", "C++"]}>
+<Tab>
+
+-   Rust Analyzer (code completion and code formatting)
+-   CodeLLDB (debugging)
+
+</Tab>
+<Tab>
+
+-   C/C++ for Visual Studio Code (code building)
+-   clangd (code completion and code formatting)
+-   CodeLLDB (debugging)
+
+</Tab>
+</SyncedTabs>
