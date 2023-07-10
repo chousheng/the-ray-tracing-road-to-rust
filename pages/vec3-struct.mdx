@@ -1,20 +1,16 @@
 import { SyncedTabs, Tab } from "../components/Tabs";
 
-## The vec3 Class
+## The Vec3 Struct
 
-Almost all graphics programs have some class(es) for storing geometric vectors and colors. In many
-systems these vectors are 4D (3D plus a homogeneous coordinate for geometry, and RGB plus an alpha
-transparency channel for colors). For our purposes, three coordinates suffices. We’ll use the same
-class `vec3` for colors, locations, directions, offsets, whatever. Some people don’t like this
-because it doesn’t prevent you from doing something silly, like adding a color to a location. They
-have a good point, but we’re going to always take the “less code” route when not obviously wrong.
-In spite of this, we do declare two aliases for `vec3`: `point3` and `color`. Since these two types
-are just aliases for `vec3`, you won't get warnings if you pass a `color` to a function expecting a
-`point3`, for example. We use them only to clarify intent and use.
+Almost all graphics programs have some data structures for storing geometric vectors and colors. In many systems, these vectors are 4D: 3D plus a homogeneous coordinate for geometry and RGB plus an alpha transparency channel for colors.
 
-## Variables and Methods
+For our purposes, using three coordinates suffices. We'll use the same `Vec3` for colors, locations, directions, offsets, whatever. Some people don't like this because it doesn't prevent you from doing something silly, like adding a color to a location. They have a good point, but we're going to take the "less code" route when it's not obviously wrong.
 
-Here’s the top part of my `vec3` class:
+We'll declare two aliases for `Vec3`: `Point3` and `Color`. Since these two types are just aliases for Vec3, we won't get warnings if you pass a `Color` to a function expecting a `Point3` for example. We use them only to clarify intent.
+
+## Vec3 Variables and Methods
+
+Here's the basic part of the `Vec3` struct:
 
 <SyncedTabs items={['Rust', 'C++']}>
 <Tab>
@@ -87,12 +83,11 @@ using Point3 = Vec3; // 3D point
 </Tab>
 </SyncedTabs>
 
-We use `double` here, but some ray tracers use `float`. Either one is fine -- follow your own
-tastes.
+We use double-precision floating-point here, but some ray tracers use single-precision. Either one is fine. Follow your own tastes.
 
-## vec3 Utility Functions
+## Vec3 Utility Functions
 
-The second part of the header file contains vector utility functions:
+The other part of `Vec3` contains vector utility functions:
 
 <SyncedTabs items={['Rust', 'C++']}>
 <Tab>
@@ -371,8 +366,7 @@ inline Vec3 unit_vector(Vec3 v) {
 
 ## Color Utility Functions
 
-Using our new `vec3` class, we'll create a utility function to write a single pixel's color out to
-the standard output stream.
+Using our new `Color` (alias `Vec3`), we'll create a utility function to write a single pixel's color out to the output stream.
 
 <SyncedTabs items={['Rust', 'C++']}>
 <Tab>
