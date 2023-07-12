@@ -1,5 +1,7 @@
-import { ReactNode, useEffect, useState } from "react";
-import { useLocalStorage } from "usehooks-ts";
+import { ReactNode, useRef } from "react";
+
+import { useLocalStorage } from "../hooks/useLocalStorage";
+import { useScrollCompensation } from "../hooks/useScrollCompensation";
 
 import { Tabs as NextraTabs } from "nextra-theme-docs";
 export { Tab } from "nextra-theme-docs";
@@ -12,23 +14,32 @@ type Props = {
 
 export function SyncedTabs({
   items,
-  storageKey = "abc",
+  storageKey = "tab",
   children = null,
 }: Props) {
-  const [data, setData] = useLocalStorage(storageKey, undefined);
-  const [selectedIndex, setSelectedIndex] = useState(undefined);
+  const [activeTab, setActiveTab] = useLocalStorage(storageKey, items[0]);
 
-  useEffect(() => setSelectedIndex(items.indexOf(data)), [data, items]);
+  let activeTabIdx = items.indexOf(activeTab);
+  if (activeTabIdx === -1) {
+    activeTabIdx = 0;
+  }
+
+  const pinElementToTheViewport = useScrollCompensation();
+
+  const pinElementRef = useRef();
 
   return (
-    <NextraTabs
-      items={items}
-      selectedIndex={selectedIndex}
-      onChange={(index) => {
-        setData(items[index]);
-      }}
-    >
-      {children}
-    </NextraTabs>
+    <div ref={pinElementRef}>
+      <NextraTabs
+        items={items}
+        selectedIndex={activeTabIdx}
+        onChange={(index) => {
+          pinElementToTheViewport(pinElementRef.current);
+          setActiveTab(items[index]);
+        }}
+      >
+        {children}
+      </NextraTabs>
+    </div>
   );
 }
