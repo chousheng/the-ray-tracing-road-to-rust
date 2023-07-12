@@ -1,9 +1,11 @@
-export default {
-  logo: <span>Ray Tracing from C++ to Rust</span>,
+const config = {
+  logo: <span>The Ray Tracing Road to Rust</span>,
   project: {
-    link: 'https://github.com/chousheng/raytracing-cpp-rust'
+    link: "https://github.com/chousheng/raytracing-cpp-rust",
   },
   footer: {
-    component: null
-  }
-}
+    component: null,
+  },
+};
+
+export default config;
