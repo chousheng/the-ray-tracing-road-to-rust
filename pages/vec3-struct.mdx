@@ -1,4 +1,4 @@
-import { SyncedTabs, Tab } from "../components/Tabs";
+import { Tabs, Tab } from "../components/Tabs";
 
 ## The Vec3 Struct
 
@@ -12,8 +12,8 @@ We'll declare two aliases for `Vec3`: `Point3` and `Color`. Since these two type
 
 Here's the basic part of the `Vec3` struct:
 
-<SyncedTabs items={['Rust', 'C++']}>
-<Tab>
+<Tabs>
+<Tab label="Rust">
 
 ```rust filename="vec3.rs (Vec3 struct)"
 #[derive(Copy, Clone, Default)]
@@ -44,7 +44,7 @@ pub type Point3 = Vec3; // 3D point
 ```
 
 </Tab>
-<Tab>
+<Tab label="C++">
 
 ```cpp filename="vec3.h (Vec3 class)"
 #ifndef VEC3_H
@@ -81,7 +81,7 @@ using Point3 = Vec3; // 3D point
 ```
 
 </Tab>
-</SyncedTabs>
+</Tabs>
 
 We use double-precision floating-point here, but some ray tracers use single-precision. Either one is fine. Follow your own tastes.
 
@@ -89,8 +89,8 @@ We use double-precision floating-point here, but some ray tracers use single-pre
 
 The other part of `Vec3` contains vector utility functions:
 
-<SyncedTabs items={['Rust', 'C++']}>
-<Tab>
+<Tabs>
+<Tab label="Rust">
 
 ```rust filename="vec3.rs (Vec3 utility functions)" {1-3,25-32,37-143}
 use std::fmt::{Display, Formatter, Result};
@@ -239,7 +239,7 @@ pub fn unit_vector(v: Vec3) -> Vec3 {
 ```
 
 </Tab>
-<Tab>
+<Tab label="C++">
 
 ```cpp filename="vec3.h (Vec3 utility functions)" {4-6,27-60,68-116}
 #ifndef VEC3_H
@@ -362,14 +362,14 @@ inline Vec3 unit_vector(Vec3 v) {
 ```
 
 </Tab>
-</SyncedTabs>
+</Tabs>
 
 ## Color Utility Functions
 
 Using our new `Color` (alias `Vec3`), we'll create a utility function to write a single pixel's color out to the output stream.
 
-<SyncedTabs items={['Rust', 'C++']}>
-<Tab>
+<Tabs>
+<Tab label="Rust">
 
 ```rust filename="color.rs (Color utility functions)"
 use std::io::Write;
@@ -389,7 +389,7 @@ pub fn write_color(out: &mut impl Write, pixel_color: Color) {
 ```
 
 </Tab>
-<Tab>
+<Tab label="C++">
 
 ```cpp filename="color.h (Color utility functions)"
 #ifndef COLOR_H
@@ -414,12 +414,12 @@ inline void write_color(std::ostream &out, Color pixel_color) {
 ```
 
 </Tab>
-</SyncedTabs>
+</Tabs>
 
 Now we can change our main to use this:
 
-<SyncedTabs items={['Rust', 'C++']}>
-<Tab>
+<Tabs>
+<Tab label="Rust">
 
 ```rust filename="main.rs (Final code for the first PPM image)" {1-7,24-25}
 mod color;
@@ -455,7 +455,7 @@ fn main() {
 ```
 
 </Tab>
-<Tab>
+<Tab label="C++">
 
 ```cpp filename="main.cpp (Final code for the first PPM image)" {3-4,21-22}
 #include <iostream>
@@ -490,4 +490,4 @@ int main() {
 ```
 
 </Tab>
-</SyncedTabs>
+</Tabs>

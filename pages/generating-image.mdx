@@ -1,6 +1,6 @@
 import { Callout } from "nextra/components";
 
-import { SyncedTabs, Tab } from "../components/Tabs";
+import { Tabs, Tab } from "../components/Tabs";
 
 ## The PPM Image Format
 
@@ -12,8 +12,8 @@ Here's a nice description from Wikipedia:
 
 Let's make some code to output such a thing:
 
-<SyncedTabs items={['Rust', 'C++']}>
-<Tab>
+<Tabs>
+<Tab label="Rust">
 
 ```rust filename="main.rs (Creating your first image)"
 fn main() {
@@ -43,7 +43,7 @@ fn main() {
 ```
 
 </Tab>
-<Tab>
+<Tab label="C++">
 
 ```cpp filename="main.cpp (Creating your first image)"
 #include <iostream>
@@ -77,7 +77,7 @@ int main() {
 ```
 
 </Tab>
-</SyncedTabs>
+</Tabs>
 
 There are some things to note in that code:
 
@@ -136,8 +136,8 @@ Before we continue, let's add a progress indicator to our output. This is a hand
 
 Our program outputs the image to the standard output stream, so leave that alone and instead write to the error output stream:
 
-<SyncedTabs items={['Rust', 'C++']}>
-<Tab>
+<Tabs>
+<Tab label="Rust">
 
 ```rust filename="main.rs (Main render loop with progress reporting)" {12,25-26}
 fn main() {
@@ -170,7 +170,7 @@ fn main() {
 ```
 
 </Tab>
-<Tab>
+<Tab label="C++">
 
 ```cpp filename="main.cpp (Main render loop with progress reporting)" {14,28-29}
 #include <iostream>
@@ -208,4 +208,4 @@ int main() {
 ```
 
 </Tab>
-</SyncedTabs>
+</Tabs>

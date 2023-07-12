@@ -1,41 +1,54 @@
-import { ReactNode, useRef } from "react";
+import { Tab as NextraTab, Tabs as NextraTabs } from "nextra-theme-docs";
+import {
+  Children,
+  ReactElement,
+  ReactNode,
+  isValidElement,
+  useRef,
+} from "react";
 
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { useScrollCompensation } from "../hooks/useScrollCompensation";
 
-import { Tabs as NextraTabs } from "nextra-theme-docs";
-export { Tab } from "nextra-theme-docs";
+const extractChildrenLabels = (children) => {
+  return Children.toArray(children)
+    .filter((child) => isValidElement(child) && child.props.label)
+    .map((child: ReactElement) => child.props.label);
+};
 
 type Props = {
-  items: string[];
+  labels?: string[];
   storageKey?: string;
   children?: ReactNode;
 };
 
-export function SyncedTabs({
-  items,
-  storageKey = "tab",
-  children = null,
-}: Props) {
-  const [activeTab, setActiveTab] = useLocalStorage(storageKey, items[0]);
+export function Tabs({ labels, storageKey = "tab", children = null }: Props) {
+  // labels in this parent "Tabs" takes higher priority than labels in children "Tab"
+  const lbs = labels ?? extractChildrenLabels(children);
 
-  let activeTabIdx = items.indexOf(activeTab);
+  // Save tab in localStorage
+  const [activeTabLabel, saveActiveTabLabel] = useLocalStorage(
+    storageKey,
+    lbs[0]
+  );
+
+  let activeTabIdx = lbs.indexOf(activeTabLabel);
   if (activeTabIdx === -1) {
     activeTabIdx = 0;
   }
 
-  const pinElementToTheViewport = useScrollCompensation();
-
+  // Prevent content jumping by compensating the scroll value when switching tabs
+  const pinElementToViewport = useScrollCompensation();
   const pinElementRef = useRef();
 
   return (
     <div ref={pinElementRef}>
       <NextraTabs
-        items={items}
+        items={lbs}
         selectedIndex={activeTabIdx}
         onChange={(index) => {
-          pinElementToTheViewport(pinElementRef.current);
-          setActiveTab(items[index]);
+          pinElementToViewport(pinElementRef.current);
+          saveActiveTabLabel(lbs[index]);
         }}
       >
         {children}
@@ -43,3 +56,5 @@ export function SyncedTabs({
     </div>
   );
 }
+
+export { NextraTab as Tab };

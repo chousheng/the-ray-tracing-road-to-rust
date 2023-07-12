@@ -13,17 +13,17 @@ export function useLocalStorage(storageKey, initialValue) {
     return state;
   };
 
-  const state = useSyncExternalStore(
+  const value = useSyncExternalStore(
     subscribe,
     getSnapShot,
     () => initialValue
   );
 
-  const setState = (newState) => {
-    localStorage.setItem(storageKey, newState);
+  const saveValue = (value) => {
+    localStorage.setItem(storageKey, value);
     // We need to manually dispatch a custom event
     window.dispatchEvent(new Event("storage"));
   };
 
-  return [state, setState];
+  return [value, saveValue];
 }

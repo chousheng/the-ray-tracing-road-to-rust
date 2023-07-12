@@ -1,12 +1,13 @@
 import { useRef } from "react";
-import { useIsomorphicLayoutEffect } from "usehooks-ts";
+
+import { useIsomorphicLayoutEffect } from "./useIsomorphicLayoutEffect";
 
 export function useScrollCompensation() {
   const compensateScrollCallback = useRef(undefined);
 
   const pinnedElement = useRef<HTMLElement>();
 
-  const pinElementToTheViewport = (element: HTMLElement) => {
+  const pinElementToViewport = (element: HTMLElement) => {
     // Get the element position before DOM changed
     const top = element.getBoundingClientRect().top;
     pinnedElement.current = element;
@@ -33,5 +34,5 @@ export function useScrollCompensation() {
     }
   });
 
-  return pinElementToTheViewport;
+  return pinElementToViewport;
 }
