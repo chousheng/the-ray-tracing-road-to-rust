@@ -381,9 +381,9 @@ pub type Color = Vec3; // RGB color
 
 pub fn write_color(out: &mut impl Write, pixel_color: Color) {
     // Write the translated [0,255] value of each color component.
-    let r: i32 = (255.999 * pixel_color.x()) as i32;
-    let g: i32 = (255.999 * pixel_color.y()) as i32;
-    let b: i32 = (255.999 * pixel_color.z()) as i32;
+    let r = (255.999 * pixel_color.x()) as i32;
+    let g = (255.999 * pixel_color.y()) as i32;
+    let b = (255.999 * pixel_color.z()) as i32;
     writeln!(out, "{} {} {}", r, g, b).expect("writing color");
 }
 ```
@@ -404,9 +404,10 @@ using Color = Vec3; // RGB color
 
 inline void write_color(std::ostream &out, Color pixel_color) {
     // Write the translated [0,255] value of each color component.
-    out << static_cast<int>(255.999 * pixel_color.x()) << " "
-        << static_cast<int>(255.999 * pixel_color.y()) << " "
-        << static_cast<int>(255.999 * pixel_color.z()) << "\n";
+    auto r = static_cast<int>(255.999 * pixel_color.x());
+    auto g = static_cast<int>(255.999 * pixel_color.y());
+    auto b = static_cast<int>(255.999 * pixel_color.z());
+    out << r << " " << g << " " << b << "\n";
 }
 
 #endif
