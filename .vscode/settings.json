@@ -5,7 +5,7 @@
     "editor.wordWrapColumn": 100,
     "editor.formatOnSave": true
   },
-  "[typescriptreact]": {
+  "[typescriptreact][typescript]": {
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
       "source.fixAll": true,
