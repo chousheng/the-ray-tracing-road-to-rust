@@ -24,7 +24,7 @@ fn main() {
 
     // Render
 
-    println!("P3\n{} {}\n255", IMAGE_WIDTH, IMAGE_HEIGHT);
+    print!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT);
 
     for j in (0..IMAGE_HEIGHT).rev() {
         for i in 0..IMAGE_WIDTH {
@@ -36,7 +36,7 @@ fn main() {
             let ig = (255.999 * g) as i32;
             let ib = (255.999 * b) as i32;
 
-            println!("{} {} {}", ir, ig, ib);
+            print!("{} {} {}\n", ir, ig, ib);
         }
     }
 }
@@ -60,8 +60,8 @@ int main() {
 
     for (int j = IMAGE_HEIGHT - 1; j >= 0; --j) {
         for (int i = 0; i < IMAGE_WIDTH; ++i) {
-            auto r = double(i) / (IMAGE_WIDTH - 1);
-            auto g = double(j) / (IMAGE_HEIGHT - 1);
+            auto r = static_cast<double>(i) / (IMAGE_WIDTH - 1);
+            auto g = static_cast<double>(j) / (IMAGE_HEIGHT - 1);
             auto b = 0.25;
 
             int ir = static_cast<int>(255.999 * r);
@@ -148,7 +148,7 @@ fn main() {
 
     // Render
 
-    println!("P3\n{} {}\n255", IMAGE_WIDTH, IMAGE_HEIGHT);
+    print!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT);
 
     for j in (0..IMAGE_HEIGHT).rev() {
         eprint!("\rScanlines remaining: {} ", j);
@@ -161,11 +161,11 @@ fn main() {
             let ig = (255.999 * g) as i32;
             let ib = (255.999 * b) as i32;
 
-            println!("{} {} {}", ir, ig, ib);
+            print!("{} {} {}\n", ir, ig, ib);
         }
     }
 
-    eprintln!("\nDone.");
+    eprint!("\nDone.\n");
 }
 ```
 
@@ -186,17 +186,17 @@ int main() {
     std::cout << "P3\n" << IMAGE_WIDTH << ' ' << IMAGE_HEIGHT << "\n255\n";
 
     for (int j = IMAGE_HEIGHT - 1; j >= 0; --j) {
-        std::cerr << "\rScanlines remaining: " << j << " ";
+        std::cerr << "\rScanlines remaining: " << j << ' ';
         for (int i = 0; i < IMAGE_WIDTH; ++i) {
-            auto r = double(i) / (IMAGE_WIDTH - 1);
-            auto g = double(j) / (IMAGE_HEIGHT - 1);
+            auto r = static_cast<double>(i) / (IMAGE_WIDTH - 1);
+            auto g = static_cast<double>(j) / (IMAGE_HEIGHT - 1);
             auto b = 0.25;
 
             int ir = static_cast<int>(255.999 * r);
             int ig = static_cast<int>(255.999 * g);
             int ib = static_cast<int>(255.999 * b);
 
-            std::cout << ir << " " << ig << " " << ib << std::endl;
+            std::cout << ir << ' ' << ig << ' ' << ib << '\n';
         }
     }
 
@@ -204,7 +204,6 @@ int main() {
 
     return 0;
 }
-
 ```
 
 </Tab>

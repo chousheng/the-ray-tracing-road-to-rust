@@ -52,11 +52,9 @@ pub type Point3 = Vec3; // 3D point
 
 class Vec3 {
 public:
-    Vec3() : e{0, 0, 0} {
-    }
+    Vec3() : e{0, 0, 0} {}
 
-    Vec3(double e0, double e1, double e2) : e{e0, e1, e2} {
-    }
+    Vec3(double e0, double e1, double e2) : e{e0, e1, e2} {}
 
     double x() const {
         return e[0];
@@ -241,7 +239,7 @@ pub fn unit_vector(v: Vec3) -> Vec3 {
 </Tab>
 <Tab label="C++">
 
-```cpp filename="vec3.h (Vec3 utility functions)" {4-6,27-60,68-116}
+```cpp filename="vec3.h (Vec3 utility functions)" {4-6,25-58,66-116}
 #ifndef VEC3_H
 #define VEC3_H
 
@@ -250,11 +248,9 @@ pub fn unit_vector(v: Vec3) -> Vec3 {
 
 class Vec3 {
 public:
-    Vec3() : e{0, 0, 0} {
-    }
+    Vec3() : e{0, 0, 0} {}
 
-    Vec3(double e0, double e1, double e2) : e{e0, e1, e2} {
-    }
+    Vec3(double e0, double e1, double e2) : e{e0, e1, e2} {}
 
     double x() const {
         return e[0];
@@ -274,24 +270,24 @@ public:
     }
 
     // Vec3 += Vec3
-    Vec3 &operator+=(const Vec3 &v) {
+    Vec3 &operator+=(Vec3 v) {
         e[0] += v.e[0];
         e[1] += v.e[1];
         e[2] += v.e[2];
         return *this;
     }
 
-    // Vec3 *= Vec3
-    Vec3 &operator*=(const double t) {
+    // Vec3 *= double
+    Vec3 &operator*=(double t) {
         e[0] *= t;
         e[1] *= t;
         e[2] *= t;
         return *this;
     }
 
-    // Vec3 /= Vec3
-    Vec3 &operator/=(const double t) {
-        return *this *= 1 / t;
+    // Vec3 /= double
+    Vec3 &operator/=(double t) {
+        return *this *= 1.0 / t;
     }
 
     double length() const {
@@ -310,32 +306,32 @@ public:
 using Point3 = Vec3; // 3D point
 
 // Output formatting
-inline std::ostream &operator<<(std::ostream &out, const Vec3 &v) {
-    return out << v.e[0] << " " << v.e[1] << "" << v.e[2];
+inline std::ostream &operator<<(std::ostream &out, Vec3 v) {
+    return out << v.e[0] << ' ' << v.e[1] << ' ' << v.e[2];
 }
 
 // Vec3 + Vec3
-inline Vec3 operator+(const Vec3 &u, const Vec3 &v) {
+inline Vec3 operator+(Vec3 u, Vec3 v) {
     return Vec3(u.e[0] + v.e[0], u.e[1] + v.e[1], u.e[2] + v.e[2]);
 }
 
 // Vec3 - Vec3
-inline Vec3 operator-(const Vec3 &u, const Vec3 &v) {
+inline Vec3 operator-(Vec3 u, Vec3 v) {
     return Vec3(u.e[0] - v.e[0], u.e[1] - v.e[1], u.e[2] - v.e[2]);
 }
 
 // Vec3 * Vec3
-inline Vec3 operator*(const Vec3 &u, const Vec3 &v) {
+inline Vec3 operator*(Vec3 u, Vec3 v) {
     return Vec3(u.e[0] * v.e[0], u.e[1] * v.e[1], u.e[2] * v.e[2]);
 }
 
 // double * Vec3
-inline Vec3 operator*(double t, const Vec3 &v) {
+inline Vec3 operator*(double t, Vec3 v) {
     return Vec3(t * v.e[0], t * v.e[1], t * v.e[2]);
 }
 
 // Vec3 * double
-inline Vec3 operator*(const Vec3 &v, double t) {
+inline Vec3 operator*(Vec3 v, double t) {
     return t * v;
 }
 
@@ -344,14 +340,16 @@ inline Vec3 operator/(Vec3 v, double t) {
     return (1 / t) * v;
 }
 
-inline double dot(const Vec3 &u, const Vec3 &v) {
+inline double dot(Vec3 u, Vec3 v) {
     return u.e[0] * v.e[0] + u.e[1] * v.e[1] + u.e[2] * v.e[2];
 }
 
-inline Vec3 cross(const Vec3 &u, const Vec3 &v) {
-    return Vec3(u.e[1] * v.e[2] - u.e[2] * v.e[1],
-                u.e[2] * v.e[0] - u.e[0] * v.e[2],
-                u.e[0] * v.e[1] - u.e[1] * v.e[0]);
+inline Vec3 cross(Vec3 u, Vec3 v) {
+    return Vec3(
+        u.e[1] * v.e[2] - u.e[2] * v.e[1],
+        u.e[2] * v.e[0] - u.e[0] * v.e[2],
+        u.e[0] * v.e[1] - u.e[1] * v.e[0]
+    );
 }
 
 inline Vec3 unit_vector(Vec3 v) {
@@ -407,7 +405,7 @@ inline void write_color(std::ostream &out, Color pixel_color) {
     auto r = static_cast<int>(255.999 * pixel_color.x());
     auto g = static_cast<int>(255.999 * pixel_color.y());
     auto b = static_cast<int>(255.999 * pixel_color.z());
-    out << r << " " << g << " " << b << "\n";
+    out << r << ' ' << g << ' ' << b << '\n';
 }
 
 #endif
@@ -437,7 +435,7 @@ fn main() {
 
     // Render
 
-    println!("P3\n{} {}\n255", IMAGE_WIDTH, IMAGE_HEIGHT);
+    print!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT);
 
     for j in (0..IMAGE_HEIGHT).rev() {
         eprint!("\rScanlines remaining: {} ", j);
@@ -450,7 +448,7 @@ fn main() {
         }
     }
 
-    eprintln!("\nDone.");
+    eprint!("\nDone.\n");
 }
 ```
 
@@ -473,10 +471,10 @@ int main() {
     std::cout << "P3\n" << IMAGE_WIDTH << ' ' << IMAGE_HEIGHT << "\n255\n";
 
     for (int j = IMAGE_HEIGHT - 1; j >= 0; --j) {
-        std::cerr << "\rScanlines remaining: " << j << " ";
+        std::cerr << "\rScanlines remaining: " << j << ' ';
         for (int i = 0; i < IMAGE_WIDTH; ++i) {
-            auto r = double(i) / (IMAGE_WIDTH - 1);
-            auto g = double(j) / (IMAGE_HEIGHT - 1);
+            auto r = static_cast<double>(i) / (IMAGE_WIDTH - 1);
+            auto g = static_cast<double>(j) / (IMAGE_HEIGHT - 1);
             auto b = 0.25;
             Color pixel_color(r, g, b);
             write_color(std::cout, pixel_color);
