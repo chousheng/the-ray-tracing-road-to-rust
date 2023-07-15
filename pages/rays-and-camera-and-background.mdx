@@ -1,3 +1,5 @@
+import { Tabs, Tab } from "../components/Tabs";
+
 ## The ray Class
 
 The one thing that all ray tracers have is a ray class and a computation of what color is seen along
@@ -12,33 +14,77 @@ and this is what is often called a half-line or ray.
 
 The function $\mathbf{P}(t)$ in more verbose code form I call `ray::at(t)`:
 
+<Tabs>
+<Tab label="Rust">
+
+```rust filename="ray.rs (The ray struct)"
+use crate::vec3::{Point3, Vec3};
+
+#[derive(Default)]
+pub struct Ray {
+    orig: Point3,
+    dir: Vec3,
+}
+
+impl Ray {
+    pub fn new(origin: Point3, direction: Vec3) -> Self {
+        Ray {
+            orig: origin,
+            dir: direction,
+        }
+    }
+
+    pub fn origin(&self) -> Point3 {
+        self.orig
+    }
+
+    pub fn direction(&self) -> Vec3 {
+        self.dir
+    }
+
+    pub fn at(&self, t: f64) -> Point3 {
+        self.orig + t * self.dir
+    }
+}
+```
+
+</Tab>
+<Tab label="C++">
+
 ```cpp filename="ray.h (The ray class)"
 #ifndef RAY_H
 #define RAY_H
 
 #include "vec3.h"
 
-class ray {
-    public:
-        ray() {}
-        ray(const point3& origin, const vec3& direction)
-            : orig(origin), dir(direction)
-        {}
+class Ray {
+public:
+    Ray() {}
 
-        point3 origin() const  { return orig; }
-        vec3 direction() const { return dir; }
+    Ray(Point3 origin, Vec3 direction) : orig(origin), dir(direction) {}
 
-        point3 at(double t) const {
-            return orig + t*dir;
-        }
+    Point3 origin() const {
+        return orig;
+    }
 
-    public:
-        point3 orig;
-        vec3 dir;
+    Vec3 direction() const {
+        return dir;
+    }
+
+    Point3 at(double t) const {
+        return orig + t * dir;
+    }
+
+public:
+    Point3 orig;
+    Vec3 dir;
 };
 
 #endif
 ```
+
+</Tab>
+</Tabs>
 
 ## Sending Rays Into the Scene
 
@@ -72,55 +118,130 @@ that makes for simpler and slightly faster code.
 Below in code, the ray `r` goes to approximately the pixel centers (I won’t worry about exactness
 for now because we’ll add antialiasing later):
 
-```cpp filename="main.cc (Rendering a blue-to-white gradient)"
+<Tabs>
+<Tab label="Rust">
+
+```rust filename="main.rs (Rendering a blue-to-white gradient)" {2,8-15,20-36,45-51}
+mod color;
+mod ray;
+mod vec3;
+
+use std::io;
+
+use color::Color;
+use ray::Ray;
+use vec3::{Point3, Vec3};
+
+fn ray_color(r: &Ray) -> Color {
+    let unit_direction = vec3::unit_vector(r.direction());
+    let t = 0.5 * (unit_direction.y() + 1.0);
+    (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
+}
+
+fn main() {
+    // Image
+
+    const ASPECT_RATIO: f64 = 16.0 / 9.0;
+    const IMAGE_WIDTH: i32 = 400;
+    const IMAGE_HEIGHT: i32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as i32;
+
+    // Camera
+
+    let viewport_height = 2.0;
+    let viewport_width = ASPECT_RATIO * viewport_height;
+    let focal_length = 1.0;
+
+    let origin = Point3::new(0.0, 0.0, 0.0);
+    let horizontal = Vec3::new(viewport_width, 0.0, 0.0);
+    let vertical = Vec3::new(0.0, viewport_height, 0.0);
+    let lower_left_corner = origin
+        - horizontal / 2.0
+        - vertical / 2.0
+        - Vec3::new(0.0, 0.0, focal_length);
+
+    // Render
+
+    print!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT);
+
+    for j in (0..IMAGE_HEIGHT).rev() {
+        eprint!("\rScanlines remaining: {} ", j);
+        for i in 0..IMAGE_WIDTH {
+            let u = i as f64 / (IMAGE_WIDTH - 1) as f64;
+            let v = j as f64 / (IMAGE_HEIGHT - 1) as f64;
+            let r = Ray::new(
+                origin,
+                lower_left_corner + u * horizontal + v * vertical - origin,
+            );
+            let pixel_color = ray_color(&r);
+            color::write_color(&mut io::stdout(), pixel_color);
+        }
+    }
+
+    eprint!("\nDone.\n");
+}
+```
+
+</Tab>
+<Tab label="C++">
+
+```cpp filename="main.cpp (Rendering a blue-to-white gradient)" {4-11,16-30,39-45}
+#include <iostream>
+
 #include "color.h"
 #include "ray.h"
 #include "vec3.h"
 
-#include <iostream>
-
-color ray_color(const ray& r) {
-    vec3 unit_direction = unit_vector(r.direction());
-    auto t = 0.5*(unit_direction.y() + 1.0);
-    return (1.0-t)*color(1.0, 1.0, 1.0) + t*color(0.5, 0.7, 1.0);
+Color ray_color(const Ray &r) {
+    Vec3 unit_direction = unit_vector(r.direction());
+    auto t = 0.5 * (unit_direction.y() + 1.0);
+    return (1.0 - t) * Color(1.0, 1.0, 1.0) + t * Color(0.5, 0.7, 1.0);
 }
 
 int main() {
     // Image
 
-    const auto aspect_ratio = 16.0 / 9.0;
-    const int image_width = 400;
-    const int image_height = static_cast<int>(image_width / aspect_ratio);
+    const double ASPECT_RATIO = 16.0 / 9.0;
+    const int IMAGE_WIDTH = 400;
+    const int IMAGE_HEIGHT = static_cast<int>(IMAGE_WIDTH / ASPECT_RATIO);
 
     // Camera
 
     auto viewport_height = 2.0;
-    auto viewport_width = aspect_ratio * viewport_height;
+    auto viewport_width = ASPECT_RATIO * viewport_height;
     auto focal_length = 1.0;
 
-    auto origin = point3(0, 0, 0);
-    auto horizontal = vec3(viewport_width, 0, 0);
-    auto vertical = vec3(0, viewport_height, 0);
-    auto lower_left_corner = origin - horizontal/2 - vertical/2 - vec3(0, 0, focal_length);
+    auto origin = Point3(0.0, 0.0, 0.0);
+    auto horizontal = Vec3(viewport_width, 0.0, 0.0);
+    auto vertical = Vec3(0.0, viewport_height, 0.0);
+    auto lower_left_corner = origin - horizontal / 2.0 - vertical / 2.0
+        - Vec3(0.0, 0.0, focal_length);
 
     // Render
 
-    std::cout << "P3\n" << image_width << " " << image_height << "\n255\n";
+    std::cout << "P3\n" << IMAGE_WIDTH << ' ' << IMAGE_HEIGHT << "\n255\n";
 
-    for (int j = image_height-1; j >= 0; --j) {
-        std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
-        for (int i = 0; i < image_width; ++i) {
-            auto u = double(i) / (image_width-1);
-            auto v = double(j) / (image_height-1);
-            ray r(origin, lower_left_corner + u*horizontal + v*vertical - origin);
-            color pixel_color = ray_color(r);
+    for (int j = IMAGE_HEIGHT - 1; j >= 0; --j) {
+        std::cerr << "\rScanlines remaining: " << j << ' ';
+        for (int i = 0; i < IMAGE_WIDTH; ++i) {
+            auto u = static_cast<double>(i) / (IMAGE_WIDTH - 1);
+            auto v = static_cast<double>(j) / (IMAGE_HEIGHT - 1);
+            Ray r(
+                origin,
+                lower_left_corner + u * horizontal + v * vertical - origin
+            );
+            Color pixel_color = ray_color(r);
             write_color(std::cout, pixel_color);
         }
     }
 
     std::cerr << "\nDone.\n";
+
+    return 0;
 }
 ```
+
+</Tab>
+</Tabs>
 
 The `ray_color(ray)` function linearly blends white and blue depending on the height of the $y$
 coordinate _after_ scaling the ray direction to unit length (so $-1.0 < y < 1.0$). Because we're
