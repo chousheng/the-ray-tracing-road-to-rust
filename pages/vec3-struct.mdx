@@ -6,7 +6,7 @@ Almost all graphics programs have some data structures for storing geometric vec
 
 For our purposes, using three coordinates suffices. We'll use the same `Vec3` for colors, locations, directions, offsets, whatever. Some people don't like this because it doesn't prevent you from doing something silly, like adding a color to a location. They have a good point, but we're going to take the "less code" route when it's not obviously wrong.
 
-We'll declare two aliases for `Vec3`: `Point3` and `Color`. Since these two types are just aliases for Vec3, we won't get warnings if you pass a `Color` to a function expecting a `Point3` for example. We use them only to clarify intent.
+We'll declare two aliases for `Vec3`: `Point3` and `Color`. Since these two types are just aliases for `Vec3`, we won't get warnings if you pass a `Color` to a function expecting a `Point3` for example. We use them only to clarify intent.
 
 ## Vec3 Variables and Methods
 
@@ -146,22 +146,22 @@ impl Neg for Vec3 {
 
 // Vec3 += Vec3
 impl AddAssign for Vec3 {
-    fn add_assign(&mut self, rhs: Self) {
-        *self = *self + rhs;
+    fn add_assign(&mut self, v: Self) {
+        *self = *self + v;
     }
 }
 
 // Vec3 *= f64
 impl MulAssign<f64> for Vec3 {
-    fn mul_assign(&mut self, rhs: f64) {
-        *self = *self * rhs;
+    fn mul_assign(&mut self, t: f64) {
+        *self = *self * t;
     }
 }
 
 // Vec3 /= f64
 impl DivAssign<f64> for Vec3 {
-    fn div_assign(&mut self, rhs: f64) {
-        *self = *self / rhs;
+    fn div_assign(&mut self, t: f64) {
+        *self = *self / t;
     }
 }
 
@@ -169,8 +169,8 @@ impl DivAssign<f64> for Vec3 {
 impl Add for Vec3 {
     type Output = Vec3;
 
-    fn add(self, rhs: Self) -> Self::Output {
-        Vec3::new(self.x() + rhs.x(), self.y() + rhs.y(), self.z() + rhs.z())
+    fn add(self, v: Self) -> Self::Output {
+        Vec3::new(self.x() + v.x(), v.y() + v.y(), self.z() + v.z())
     }
 }
 
@@ -178,8 +178,8 @@ impl Add for Vec3 {
 impl Sub for Vec3 {
     type Output = Vec3;
 
-    fn sub(self, rhs: Self) -> Self::Output {
-        Vec3::new(self.x() - rhs.x(), self.y() - rhs.y(), self.z() - rhs.z())
+    fn sub(self, v: Self) -> Self::Output {
+        Vec3::new(self.x() - v.x(), self.y() - v.y(), self.z() - v.z())
     }
 }
 
@@ -187,8 +187,8 @@ impl Sub for Vec3 {
 impl Mul for Vec3 {
     type Output = Vec3;
 
-    fn mul(self, rhs: Vec3) -> Self::Output {
-        Vec3::new(self.x() * rhs.x(), self.y() * rhs.y(), self.z() * rhs.z())
+    fn mul(self, v: Vec3) -> Self::Output {
+        Vec3::new(self.x() * v.x(), self.y() * v.y(), self.z() * v.z())
     }
 }
 
@@ -196,8 +196,8 @@ impl Mul for Vec3 {
 impl Mul<Vec3> for f64 {
     type Output = Vec3;
 
-    fn mul(self, rhs: Vec3) -> Self::Output {
-        Vec3::new(self * rhs.x(), self * rhs.y(), self * rhs.z())
+    fn mul(self, v: Vec3) -> Self::Output {
+        Vec3::new(self * v.x(), self * v.y(), self * v.z())
     }
 }
 
@@ -205,8 +205,8 @@ impl Mul<Vec3> for f64 {
 impl Mul<f64> for Vec3 {
     type Output = Vec3;
 
-    fn mul(self, rhs: f64) -> Self::Output {
-        Vec3::new(self.x() * rhs, self.y() * rhs, self.z() * rhs)
+    fn mul(self, t: f64) -> Self::Output {
+        Vec3::new(self.x() * t, self.y() * t, self.z() * t)
     }
 }
 
@@ -214,8 +214,8 @@ impl Mul<f64> for Vec3 {
 impl Div<f64> for Vec3 {
     type Output = Vec3;
 
-    fn div(self, rhs: f64) -> Self::Output {
-        Vec3::new(self.x() / rhs, self.y() / rhs, self.z() / rhs)
+    fn div(self, t: f64) -> Self::Output {
+        Vec3::new(self.x() / t, self.y() / t, self.z() / t)
     }
 }
 
