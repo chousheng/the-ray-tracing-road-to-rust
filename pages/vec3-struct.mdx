@@ -2,11 +2,11 @@ import { Tabs, Tab } from "../components/Tabs";
 
 ## The Vec3 Struct
 
-Almost all graphics programs have some data structures for storing geometric vectors and colors. In many systems, these vectors are 4D: 3D plus a homogeneous coordinate for geometry and RGB plus an alpha transparency channel for colors.
+Almost all graphics programs have some data structures for storing geometric vectors and colors. In many systems, these vectors are 4D (3D plus a homogeneous coordinate for geometry and RGB plus an alpha transparency channel for colors). For our purposes, using three coordinates suffices.
 
-For our purposes, using three coordinates suffices. We'll use the same `Vec3` for colors, locations, directions, offsets, whatever. Some people don't like this because it doesn't prevent you from doing something silly, like adding a color to a location. They have a good point, but we're going to take the "less code" route when it's not obviously wrong.
+We'll use the same `Vec3` for colors, locations, directions, offsets, whatever. Some people don't like this because it doesn't prevent you from doing something silly, like adding a color to a location. They have a good point, but we're going to take the "less code" route when it's not obviously wrong.
 
-We'll declare two aliases for `Vec3`: `Point3` and `Color`. Since these two types are just aliases for `Vec3`, we won't get warnings if you pass a `Color` to a function expecting a `Point3` for example. We use them only to clarify intent.
+We're going to declare two aliases for `Vec3`: `Point3` and `Color`. Since these two types are just aliases for `Vec3`, we won't get warnings if you pass a `Color` to a function expecting a `Point3` for example. We use them only to clarify intent.
 
 ## Vec3 Variables and Methods
 
@@ -81,7 +81,7 @@ using Point3 = Vec3; // 3D point
 </Tab>
 </Tabs>
 
-We use double-precision floating-point here, but some ray tracers use single-precision. Either one is fine. Follow your own tastes.
+We use `f64` here, but some ray tracers use single-precision. Either one is fine -- follow your own tastes.
 
 ## Vec3 Utility Functions
 
