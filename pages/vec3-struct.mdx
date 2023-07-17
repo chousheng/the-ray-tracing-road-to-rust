@@ -170,7 +170,7 @@ impl Add for Vec3 {
     type Output = Vec3;
 
     fn add(self, v: Self) -> Self::Output {
-        Vec3::new(self.x() + v.x(), v.y() + v.y(), self.z() + v.z())
+        Vec3::new(self.x() + v.x(), self.y() + v.y(), self.z() + v.z())
     }
 }
 
