@@ -3,15 +3,15 @@
   "[markdown]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.wordWrap": "bounded",
-    "editor.wordWrapColumn": 100,
+    "editor.wordWrapColumn": 80,
     "editor.formatOnSave": true
   },
   "[typescriptreact][typescript][javascriptreact][javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
-      "source.fixAll": true,
-      "source.fixAll.eslint": true,
+      //"source.fixAll": true,
+      //"source.fixAll.eslint": true,
       "source.addMissingImports": true,
       "source.organizeImports": true
     }
