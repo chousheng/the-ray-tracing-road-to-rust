@@ -22,7 +22,6 @@ sensor and never need more light, so we only have an aperture when we want defoc
 
 ## A Thin Lens Approximation
 
-<div class="together">
 A real camera has a complicated compound lens. For our code we could simulate the order: sensor,
 then lens, then aperture. Then we could figure out where to send the rays, and flip the image after
 it's computed (the image is projected upside down on the film). Graphics people, however, usually
@@ -30,17 +29,12 @@ use a thin lens approximation:
 
 ![Figure [cam-lens]: Camera lens model](../images/fig-1.17-cam-lens.jpg)
 
-</div>
-
-<div class="together">
 We don't need to simulate any of the inside of the camera. For the purposes of rendering an image
 outside the camera, that would be unnecessary complexity. Instead, I usually start rays from the
 lens, and send them toward the focus plane (`focus_dist` away from the lens), where everything on
 that plane is in perfect focus.
 
 ![Figure [cam-film-plane]: Camera focus plane](../images/fig-1.18-cam-film-plane.jpg)
-
-</div>
 
 ## Generating Sample Rays
 
@@ -123,7 +117,6 @@ defocus disk of radius zero (no blur at all), so all rays originated at the disk
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     [Listing [camera-dof]: <kbd>[camera.h]</kbd> Camera with adjustable depth-of-field (dof)]
 
-<div class='together'>
 Using a big aperture:
 
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
@@ -140,5 +133,3 @@ Using a big aperture:
 We get:
 
 ![Image 20: Spheres with depth-of-field](../images/img-1.20-depth-of-field.png class=pixel)
-
-</div>

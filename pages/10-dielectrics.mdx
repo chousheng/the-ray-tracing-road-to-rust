@@ -6,14 +6,11 @@ choosing between reflection or refraction, and only generating one scattered ray
 
 ## Refraction
 
-<div class='together'>
 The hardest part to debug is the refracted ray. I usually first just have all the light refract if
 there is a refraction ray at all. For this project, I tried to put two glass balls in our scene, and
 I got this (I have not told you how to do this right or wrong yet, but soon!):
 
 ![Image 13: Glass first](../images/img-1.13-glass-first.png class=pixel)
-
-</div>
 
 Is that right? Glass balls look odd in real life. But no, it isn't right. The world should be
 flipped upside down and no weird black stuff. I just printed out the ray straight through the middle
@@ -21,7 +18,6 @@ of the image and it was clearly wrong. That often does the job.
 
 ## Snell's Law
 
-<div class='together'>
 The refraction is described by Snell's law:
 
 $$ \eta \cdot \sin\theta = \eta' \cdot \sin\theta' $$
@@ -32,9 +28,6 @@ Where $\theta$ and $\theta'$ are the angles from the normal, and $\eta$ and $\et
 
 ![Figure [refraction]: Ray refraction](../images/fig-1.13-refraction.jpg)
 
-</div>
-
-<div class='together'>
 In order to determine the direction of the refracted ray, we have to solve for $\sin\theta'$:
 
 $$ \sin\theta' = \frac{\eta}{\eta'} \cdot \sin\theta $$
@@ -81,9 +74,6 @@ When we combine them back together, we can write a function to calculate $\mathb
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     [Listing [refract]: <kbd>[vec3.h]</kbd> Refraction function]
 
-</div>
-
-<div class='together'>
 And the dielectric material that always refracts is:
 
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
@@ -110,9 +100,6 @@ And the dielectric material that always refracts is:
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     [Listing [dielectric]: <kbd>[material.h]</kbd> Dielectric material class that always refracts]
 
-</div>
-
-<div class='together'>
 Now we'll update the scene to change the left and center spheres to glass:
 
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
@@ -124,8 +111,6 @@ Now we'll update the scene to change the left and center spheres to glass:
     auto material_right  = make_shared<metal>(color(0.8, 0.6, 0.2), 1.0);
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     [Listing [two-glass]: <kbd>[main.cc]</kbd> Changing left and center spheres to glass]
-
-</div>
 
 This gives us the following result:
 
@@ -148,7 +133,6 @@ The value of $\sin\theta'$ cannot be greater than 1. So, if,
 
 $$ \frac{1.5}{1.0} \cdot \sin\theta > 1.0 $$,
 
-<div class="together">
 the equality between the two sides of the equation is broken, and a solution cannot exist. If a
 solution does not exist, the glass cannot refract, and therefore must reflect the ray:
 
@@ -163,13 +147,10 @@ solution does not exist, the glass cannot refract, and therefore must reflect th
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     [Listing [dielectric]: <kbd>[material.h]</kbd> Determining if the ray can refract]
 
-</div>
-
 Here all the light is reflected, and because in practice that is usually inside solid objects, it
 is called "total internal reflection". This is why sometimes the water-air boundary acts as a
 perfect mirror when you are submerged.
 
-<div class='together'>
 We can solve for `sin_theta` using the trigonometric qualities:
 
 $$ \sin\theta = \sqrt{1 - \cos^2\theta} $$
@@ -192,9 +173,6 @@ $$ \cos\theta = \mathbf{R} \cdot \mathbf{n} $$
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     [Listing [dielectric]: <kbd>[material.h]</kbd> Determining if the ray can refract]
 
-</div>
-
-<div class='together'>
 And the dielectric material that always refracts (when possible) is:
 
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
@@ -232,9 +210,6 @@ And the dielectric material that always refracts (when possible) is:
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     [Listing [dielectric]: <kbd>[material.h]</kbd> Dielectric material class with reflection]
 
-</div>
-
-<div class='together'>
 Attenuation is always 1 -- the glass surface absorbs nothing. If we try that out with these
 parameters:
 
@@ -251,11 +226,8 @@ We get:
 ![Image 15: Glass sphere that sometimes refracts
   ](../images/img-1.15-glass-sometimes-refract.png class=pixel)
 
-</div>
-
 ## Schlick Approximation
 
-<div class='together'>
 Now real glass has reflectivity that varies with angle -- look at a window at a steep angle and it
 becomes a mirror. There is a big ugly equation for that, but almost everybody uses a cheap and
 surprisingly accurate polynomial approximation by Christophe Schlick. This yields our full glass
@@ -306,11 +278,8 @@ material:
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     [Listing [glass]: <kbd>[material.h]</kbd> Full glass material]
 
-</div>
-
 ## Modeling a Hollow Glass Sphere
 
-<div class='together'>
 An interesting and easy trick with dielectric spheres is to note that if you use a negative radius,
 the geometry is unaffected, but the surface normal points inward. This can be used as a bubble to
 make a hollow glass sphere:
@@ -326,11 +295,6 @@ make a hollow glass sphere:
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     [Listing [scene-hollow-glass]: <kbd>[main.cc]</kbd> Scene with hollow glass sphere]
 
-</div>
-
-<div class='together'>
 This gives:
 
 ![Image 16: A hollow glass sphere](../images/img-1.16-glass-hollow.png class=pixel)
-
-</div>

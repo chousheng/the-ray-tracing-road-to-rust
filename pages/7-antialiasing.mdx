@@ -13,7 +13,6 @@ One thing we need is a random number generator that returns real random numbers.
 that returns a canonical random number which by convention returns a random real in the range
 $0 ≤ r < 1$. The "less than" before the 1 is important as we will sometimes take advantage of that.
 
-<div class='together'>
 A simple approach to this is to use the `rand()` function that can be found in `<cstdlib>`. This
 function returns a random integer in the range 0 and `RAND_MAX`. Hence we can get a real random
 number as desired with the following code snippet, added to `rtweekend.h`:
@@ -34,9 +33,6 @@ number as desired with the following code snippet, added to `rtweekend.h`:
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     [Listing [random-double]: <kbd>[rtweekend.h]</kbd> random_double() functions]
 
-</div>
-
-<div class='together'>
 C++ did not traditionally have a standard random number generator, but newer versions of C++ have
 addressed this issue with the `<random>` header (if imperfectly according to some experts).
 If you want to use this, you can obtain a random number with the conditions we need as follows:
@@ -52,19 +48,13 @@ If you want to use this, you can obtain a random number with the conditions we n
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     [Listing [random-double-alt]: <kbd>[rtweekend.h]</kbd> random_double(), alternate implemenation]
 
-</div>
-
 ## Generating Pixels with Multiple Samples
 
-<div class='together'>
 For a given pixel we have several samples within that pixel and send rays through each of the
 samples. The colors of these rays are then averaged:
 
 ![Figure [pixel-samples]: Pixel samples](../images/fig-1.07-pixel-samples.jpg)
 
-</div>
-
-<div class='together'>
 Now's a good time to create a `camera` class to manage our virtual camera and the related tasks of
 scene scampling. The following class implements a simple camera using the axis-aligned camera from
 before:
@@ -103,8 +93,6 @@ before:
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     [Listing [camera-initial]: <kbd>[camera.h]</kbd> The camera class]
 
-</div>
-
 To handle the multi-sampled color computation, we'll update the `write_color()` function. Rather
 than adding in a fractional contribution each time we accumulate more light to the color, just add
 the full color each iteration, and then perform a single divide at the end (by the number of
@@ -140,7 +128,6 @@ samples) when writing out the color. In addition, we'll add a handy utility func
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     [Listing [write-color-clamped]: <kbd>[color.h]</kbd> The multi-sample write_color() function]
 
-<div class='together'>
 Main is also changed:
 
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
@@ -196,8 +183,6 @@ Main is also changed:
     }
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     [Listing [main-multi-sample]: <kbd>[main.cc]</kbd> Rendering with multi-sampled pixels]
-
-</div>
 
 Zooming into the image that is produced, we can see the difference in edge pixels.
 
