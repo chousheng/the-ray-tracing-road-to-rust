@@ -1,0 +1,209 @@
+# Positionable Camera
+
+Cameras, like dielectrics, are a pain to debug. So I always develop mine incrementally. First, let's
+allow an adjustable field of view (_fov_). This is the angle you see through the portal. Since our
+image is not square, the fov is different horizontally and vertically. I always use vertical fov. I
+also usually specify it in degrees and change to radians inside a constructor -- a matter of
+personal taste.
+
+## Camera Viewing Geometry
+
+<div class='together'>
+I first keep the rays coming from the origin and heading to the $z = -1$ plane. We could make it the
+$z = -2$ plane, or whatever, as long as we made $h$ a ratio to that distance. Here is our setup:
+
+![Figure [cam-view-geom]: Camera viewing geometry](../images/fig-1.14-cam-view-geom.jpg)
+
+</div>
+
+<div class='together'>
+This implies $h = \tan(\frac{\theta}{2})$. Our camera now becomes:
+
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+    class camera {
+        public:
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+            camera(
+                double vfov, // vertical field-of-view in degrees
+                double aspect_ratio
+            ) {
+                auto theta = degrees_to_radians(vfov);
+                auto h = tan(theta/2);
+                auto viewport_height = 2.0 * h;
+                auto viewport_width = aspect_ratio * viewport_height;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+
+                auto focal_length = 1.0;
+
+                origin = point3(0, 0, 0);
+                horizontal = vec3(viewport_width, 0.0, 0.0);
+                vertical = vec3(0.0, viewport_height, 0.0);
+                lower_left_corner = origin - horizontal/2 - vertical/2 - vec3(0, 0, focal_length);
+            }
+
+            ray get_ray(double u, double v) const {
+                return ray(origin, lower_left_corner + u*horizontal + v*vertical - origin);
+            }
+
+        private:
+            point3 origin;
+            point3 lower_left_corner;
+            vec3 horizontal;
+            vec3 vertical;
+    };
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    [Listing [camera-fov]: <kbd>[camera.h]</kbd> Camera with adjustable field-of-view (fov)]
+
+</div>
+
+<div class='together'>
+When calling it with camera `cam(90, aspect_ratio)` and these spheres:
+
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+    int main() {
+        ...
+        // World
+
+
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+        auto R = cos(pi/4);
+        hittable_list world;
+
+        auto material_left  = make_shared<lambertian>(color(0,0,1));
+        auto material_right = make_shared<lambertian>(color(1,0,0));
+
+        world.add(make_shared<sphere>(point3(-R, 0, -1), R, material_left));
+        world.add(make_shared<sphere>(point3( R, 0, -1), R, material_right));
+
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+
+        // Camera
+
+
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+        camera cam(90.0, aspect_ratio);
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+
+        // Render
+
+        std::cout << "P3\n" << image_width << " " << image_height << "\n255\n";
+
+        for (int j = image_height-1; j >= 0; --j) {
+        ...
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    [Listing [scene-wide-angle]: <kbd>[main.cc]</kbd> Scene with wide-angle camera]
+
+gives:
+
+![Image 17: A wide-angle view](../images/img-1.17-wide-view.png class=pixel)
+
+</div>
+
+## Positioning and Orienting the Camera
+
+To get an arbitrary viewpoint, let's first name the points we care about. We'll call the position
+where we place the camera _lookfrom_, and the point we look at _lookat_. (Later, if you want, you
+could define a direction to look in instead of a point to look at.)
+
+We also need a way to specify the roll, or sideways tilt, of the camera: the rotation around the
+lookat-lookfrom axis. Another way to think about it is that even if you keep `lookfrom` and `lookat`
+constant, you can still rotate your head around your nose. What we need is a way to specify an "up"
+vector for the camera. This up vector should lie in the plane orthogonal to the view direction.
+
+![Figure [cam-view-dir]: Camera view direction](../images/fig-1.15-cam-view-dir.jpg)
+
+We can actually use any up vector we want, and simply project it onto this plane to get an up vector
+for the camera. I use the common convention of naming a "view up" (_vup_) vector. A couple of cross
+products, and we now have a complete orthonormal basis $(u,v,w)$ to describe our camera's
+orientation.
+
+![Figure [cam-view-up]: Camera view up direction](../images/fig-1.16-cam-view-up.jpg)
+
+Remember that `vup`, `v`, and `w` are all in the same plane. Note that, like before when our fixed
+camera faced -Z, our arbitrary view camera faces -w. And keep in mind that we can -- but we don't
+have to -- use world up $(0,1,0)$ to specify vup. This is convenient and will naturally keep your
+camera horizontally level until you decide to experiment with crazy camera angles.
+
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+    class camera {
+        public:
+            camera(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+                point3 lookfrom,
+                point3 lookat,
+                vec3   vup,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+                double vfov, // vertical field-of-view in degrees
+                double aspect_ratio
+            ) {
+                auto theta = degrees_to_radians(vfov);
+                auto h = tan(theta/2);
+                auto viewport_height = 2.0 * h;
+                auto viewport_width = aspect_ratio * viewport_height;
+
+
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+                auto w = unit_vector(lookfrom - lookat);
+                auto u = unit_vector(cross(vup, w));
+                auto v = cross(w, u);
+
+                origin = lookfrom;
+                horizontal = viewport_width * u;
+                vertical = viewport_height * v;
+                lower_left_corner = origin - horizontal/2 - vertical/2 - w;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+            }
+
+
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+            ray get_ray(double s, double t) const {
+                return ray(origin, lower_left_corner + s*horizontal + t*vertical - origin);
+            }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+
+        private:
+            point3 origin;
+            point3 lower_left_corner;
+            vec3 horizontal;
+            vec3 vertical;
+    };
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    [Listing [camera-orient]: <kbd>[camera.h]</kbd> Positionable and orientable camera]
+
+<div class='together'>
+We'll change back to the prior scene, and use the new viewpoint:
+
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+    hittable_list world;
+
+    auto material_ground = make_shared<lambertian>(color(0.8, 0.8, 0.0));
+    auto material_center = make_shared<lambertian>(color(0.1, 0.2, 0.5));
+    auto material_left   = make_shared<dielectric>(1.5);
+    auto material_right  = make_shared<metal>(color(0.8, 0.6, 0.2), 0.0);
+
+    world.add(make_shared<sphere>(point3( 0.0, -100.5, -1.0), 100.0, material_ground));
+    world.add(make_shared<sphere>(point3( 0.0,    0.0, -1.0),   0.5, material_center));
+    world.add(make_shared<sphere>(point3(-1.0,    0.0, -1.0),   0.5, material_left));
+    world.add(make_shared<sphere>(point3(-1.0,    0.0, -1.0), -0.45, material_left));
+    world.add(make_shared<sphere>(point3( 1.0,    0.0, -1.0),   0.5, material_right));
+
+    camera cam(point3(-2,2,1), point3(0,0,-1), vec3(0,1,0), 90, aspect_ratio);
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    [Listing [scene-free-view]: <kbd>[main.cc]</kbd> Scene with alternate viewpoint]
+
+to get:
+
+![Image 18: A distant view](../images/img-1.18-view-distant.png class=pixel)
+
+And we can change field of view:
+
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+    camera cam(point3(-2,2,1), point3(0,0,-1), vec3(0,1,0), 20, aspect_ratio);
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    [Listing [change-field-view]: <kbd>[main.cc]</kbd> Change field of view]
+
+to get:
+
+![Image 19: Zooming in](../images/img-1.19-view-zoom.png class=pixel)
+
+</div>
