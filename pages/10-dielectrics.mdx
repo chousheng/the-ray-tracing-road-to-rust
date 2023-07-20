@@ -10,7 +10,7 @@ The hardest part to debug is the refracted ray. I usually first just have all th
 there is a refraction ray at all. For this project, I tried to put two glass balls in our scene, and
 I got this (I have not told you how to do this right or wrong yet, but soon!):
 
-![Image 13: Glass first](../images/img-1.13-glass-first.png class=pixel)
+![Image 13: Glass first](../images/img-1.13-glass-first.png)
 
 Is that right? Glass balls look odd in real life. But no, it isn't right. The world should be
 flipped upside down and no weird black stuff. I just printed out the ray straight through the middle
@@ -64,19 +64,18 @@ $$
 
 When we combine them back together, we can write a function to calculate $\mathbf{R'}$:
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="vec3.h | Refraction function"
     vec3 refract(const vec3& uv, const vec3& n, double etai_over_etat) {
         auto cos_theta = fmin(dot(-uv, n), 1.0);
         vec3 r_out_perp =  etai_over_etat * (uv + cos_theta*n);
         vec3 r_out_parallel = -sqrt(fabs(1.0 - r_out_perp.length_squared())) * n;
         return r_out_perp + r_out_parallel;
     }
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [refract]: <kbd>[vec3.h]</kbd> Refraction function]
+```
 
 And the dielectric material that always refracts is:
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="material.h | Dielectric material class that always refracts"
     class dielectric : public material {
         public:
             dielectric(double index_of_refraction) : ir(index_of_refraction) {}
@@ -97,25 +96,21 @@ And the dielectric material that always refracts is:
         public:
             double ir; // Index of Refraction
     };
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [dielectric]: <kbd>[material.h]</kbd> Dielectric material class that always refracts]
+```
 
 Now we'll update the scene to change the left and center spheres to glass:
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="main.cpp | Changing left and center spheres to glass"
     auto material_ground = make_shared<lambertian>(color(0.8, 0.8, 0.0));
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+
     auto material_center = make_shared<dielectric>(1.5);
     auto material_left   = make_shared<dielectric>(1.5);
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
     auto material_right  = make_shared<metal>(color(0.8, 0.6, 0.2), 1.0);
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [two-glass]: <kbd>[main.cc]</kbd> Changing left and center spheres to glass]
+```
 
 This gives us the following result:
 
-![Image 14: Glass sphere that always refracts
-  ](../images/img-1.14-glass-always-refract.png class=pixel)
+![Image 14: Glass sphere that always refracts](../images/img-1.14-glass-always-refract.png)
 
 ## Total Internal Reflection
 
@@ -136,7 +131,7 @@ $$ \frac{1.5}{1.0} \cdot \sin\theta > 1.0 $$,
 the equality between the two sides of the equation is broken, and a solution cannot exist. If a
 solution does not exist, the glass cannot refract, and therefore must reflect the ray:
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="material.h | Determining if the ray can refract"
     if (refraction_ratio * sin_theta > 1.0) {
         // Must Reflect
         ...
@@ -144,8 +139,7 @@ solution does not exist, the glass cannot refract, and therefore must reflect th
         // Can Refract
         ...
     }
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [dielectric]: <kbd>[material.h]</kbd> Determining if the ray can refract]
+```
 
 Here all the light is reflected, and because in practice that is usually inside solid objects, it
 is called "total internal reflection". This is why sometimes the water-air boundary acts as a
@@ -159,7 +153,7 @@ and
 
 $$ \cos\theta = \mathbf{R} \cdot \mathbf{n} $$
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="material.h | Determining if the ray can refract"
     double cos_theta = fmin(dot(-unit_direction, rec.normal), 1.0);
     double sin_theta = sqrt(1.0 - cos_theta*cos_theta);
 
@@ -170,12 +164,11 @@ $$ \cos\theta = \mathbf{R} \cdot \mathbf{n} $$
         // Can Refract
         ...
     }
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [dielectric]: <kbd>[material.h]</kbd> Determining if the ray can refract]
+```
 
 And the dielectric material that always refracts (when possible) is:
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="material.h | Dielectric material class with reflection"
     class dielectric : public material {
         public:
             dielectric(double index_of_refraction) : ir(index_of_refraction) {}
@@ -187,7 +180,7 @@ And the dielectric material that always refracts (when possible) is:
                 double refraction_ratio = rec.front_face ? (1.0/ir) : ir;
 
                 vec3 unit_direction = unit_vector(r_in.direction());
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+
                 double cos_theta = fmin(dot(-unit_direction, rec.normal), 1.0);
                 double sin_theta = sqrt(1.0 - cos_theta*cos_theta);
 
@@ -200,31 +193,27 @@ And the dielectric material that always refracts (when possible) is:
                     direction = refract(unit_direction, rec.normal, refraction_ratio);
 
                 scattered = ray(rec.p, direction);
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
                 return true;
             }
 
         public:
             double ir; // Index of Refraction
     };
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [dielectric]: <kbd>[material.h]</kbd> Dielectric material class with reflection]
+```
 
 Attenuation is always 1 -- the glass surface absorbs nothing. If we try that out with these
 parameters:
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="main.cc | Scene with dielectric and shiny sphere"
     auto material_ground = make_shared<lambertian>(color(0.8, 0.8, 0.0));
     auto material_center = make_shared<lambertian>(color(0.1, 0.2, 0.5));
     auto material_left   = make_shared<dielectric>(1.5);
     auto material_right  = make_shared<metal>(color(0.8, 0.6, 0.2), 0.0);
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [scene-dielectric]: <kbd>[main.cc]</kbd> Scene with dielectric and shiny sphere]
+```
 
 We get:
 
-![Image 15: Glass sphere that sometimes refracts
-  ](../images/img-1.15-glass-sometimes-refract.png class=pixel)
+![Image 15: Glass sphere that sometimes refracts](../images/img-1.15-glass-sometimes-refract.png)
 
 ## Schlick Approximation
 
@@ -233,7 +222,7 @@ becomes a mirror. There is a big ugly equation for that, but almost everybody us
 surprisingly accurate polynomial approximation by Christophe Schlick. This yields our full glass
 material:
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="material.h | Full glass material"
     class dielectric : public material {
         public:
             dielectric(double index_of_refraction) : ir(index_of_refraction) {}
@@ -251,9 +240,8 @@ material:
                 bool cannot_refract = refraction_ratio * sin_theta > 1.0;
                 vec3 direction;
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+
                 if (cannot_refract || reflectance(cos_theta, refraction_ratio) > random_double())
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
                     direction = reflect(unit_direction, rec.normal);
                 else
                     direction = refract(unit_direction, rec.normal, refraction_ratio);
@@ -264,7 +252,7 @@ material:
 
         public:
             double ir; // Index of Refraction
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+
 
         private:
             static double reflectance(double cosine, double ref_idx) {
@@ -273,10 +261,8 @@ material:
                 r0 = r0*r0;
                 return r0 + (1-r0)*pow((1 - cosine),5);
             }
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
     };
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [glass]: <kbd>[material.h]</kbd> Full glass material]
+```
 
 ## Modeling a Hollow Glass Sphere
 
@@ -284,17 +270,15 @@ An interesting and easy trick with dielectric spheres is to note that if you use
 the geometry is unaffected, but the surface normal points inward. This can be used as a bubble to
 make a hollow glass sphere:
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="main.cc | Scene with hollow glass sphere"
     world.add(make_shared<sphere>(point3( 0.0, -100.5, -1.0), 100.0, material_ground));
     world.add(make_shared<sphere>(point3( 0.0,    0.0, -1.0),   0.5, material_center));
     world.add(make_shared<sphere>(point3(-1.0,    0.0, -1.0),   0.5, material_left));
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+
     world.add(make_shared<sphere>(point3(-1.0,    0.0, -1.0),  -0.4, material_left));
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
     world.add(make_shared<sphere>(point3( 1.0,    0.0, -1.0),   0.5, material_right));
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [scene-hollow-glass]: <kbd>[main.cc]</kbd> Scene with hollow glass sphere]
+```
 
 This gives:
 
-![Image 16: A hollow glass sphere](../images/img-1.16-glass-hollow.png class=pixel)
+![Image 16: A hollow glass sphere](../images/img-1.16-glass-hollow.png)

@@ -44,7 +44,7 @@ larger the radius, the greater the defocus blur. You can think of our original c
 defocus disk of radius zero (no blur at all), so all rays originated at the disk center
 (`lookfrom`).
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="vec3.h | Generate random point inside unit disk"
     vec3 random_in_unit_disk() {
         while (true) {
             auto p = vec3(random_double(-1,1), random_double(-1,1), 0);
@@ -52,10 +52,9 @@ defocus disk of radius zero (no blur at all), so all rays originated at the disk
             return p;
         }
     }
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [rand-in-unit-disk]: <kbd>[vec3.h]</kbd> Generate random point inside unit disk]
+```
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="camera.h | Camera with adjustable depth-of-field (dof)"
     class camera {
         public:
             camera(
@@ -63,11 +62,10 @@ defocus disk of radius zero (no blur at all), so all rays originated at the disk
                 point3 lookat,
                 vec3   vup,
                 double vfov, // vertical field-of-view in degrees
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+
                 double aspect_ratio,
                 double aperture,
                 double focus_dist
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
             ) {
                 auto theta = degrees_to_radians(vfov);
                 auto h = tan(theta/2);
@@ -75,25 +73,23 @@ defocus disk of radius zero (no blur at all), so all rays originated at the disk
                 auto viewport_width = aspect_ratio * viewport_height;
 
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+
                 w = unit_vector(lookfrom - lookat);
                 u = unit_vector(cross(vup, w));
                 v = cross(w, u);
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
 
                 origin = lookfrom;
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+
                 horizontal = focus_dist * viewport_width * u;
                 vertical = focus_dist * viewport_height * v;
                 lower_left_corner = origin - horizontal/2 - vertical/2 - focus_dist*w;
 
                 lens_radius = aperture / 2;
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
             }
 
 
             ray get_ray(double s, double t) const {
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+
                 vec3 rd = lens_radius * random_in_unit_disk();
                 vec3 offset = u * rd.x() + v * rd.y();
 
@@ -101,7 +97,6 @@ defocus disk of radius zero (no blur at all), so all rays originated at the disk
                     origin + offset,
                     lower_left_corner + s*horizontal + t*vertical - origin - offset
                 );
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
             }
 
         private:
@@ -109,17 +104,15 @@ defocus disk of radius zero (no blur at all), so all rays originated at the disk
             point3 lower_left_corner;
             vec3 horizontal;
             vec3 vertical;
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+
             vec3 u, v, w;
             double lens_radius;
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
     };
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [camera-dof]: <kbd>[camera.h]</kbd> Camera with adjustable depth-of-field (dof)]
+```
 
 Using a big aperture:
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="main.cc | Scene camera with depth-of-field"
     point3 lookfrom(3,3,2);
     point3 lookat(0,0,-1);
     vec3 vup(0,1,0);
@@ -127,9 +120,8 @@ Using a big aperture:
     auto aperture = 2.0;
 
     camera cam(lookfrom, lookat, vup, 20, aspect_ratio, aperture, dist_to_focus);
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [scene-camera-dof]: <kbd>[main.cc]</kbd> Scene camera with depth-of-field]
+```
 
 We get:
 
-![Image 20: Spheres with depth-of-field](../images/img-1.20-depth-of-field.png class=pixel)
+![Image 20: Spheres with depth-of-field](../images/img-1.20-depth-of-field.png)

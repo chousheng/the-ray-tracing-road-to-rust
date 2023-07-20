@@ -41,7 +41,7 @@ We need a way to pick a random point in a unit radius sphere. We'll use what is 
 algorithm: a rejection method. First, pick a random point in the unit cube where x, y, and z all
 range from -1 to +1. Reject this point and try again if the point is outside the sphere.
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="vec3.h | vec3 random utility functions"
     class vec3 {
       public:
         ...
@@ -52,10 +52,9 @@ range from -1 to +1. Reject this point and try again if the point is outside the
         inline static vec3 random(double min, double max) {
             return vec3(random_double(min,max), random_double(min,max), random_double(min,max));
         }
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [vec-rand-util]: <kbd>[vec3.h]</kbd> vec3 random utility functions]
+```
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="Vec3.h | The random_in_unit_sphere() function"
     vec3 random_in_unit_sphere() {
         while (true) {
             auto p = vec3::random(-1,1);
@@ -63,28 +62,25 @@ range from -1 to +1. Reject this point and try again if the point is outside the
             return p;
         }
     }
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [random-in-unit-sphere]: <kbd>[vec3.h]</kbd> The random_in_unit_sphere() function]
+```
 
 Then update the `ray_color()` function to use the new random direction generator:
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="main.cc | ray_color() using a random ray direction"
     color ray_color(const ray& r, const hittable& world) {
         hit_record rec;
 
         if (world.hit(r, 0, infinity, rec)) {
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+
             point3 target = rec.p + rec.normal + random_in_unit_sphere();
             return 0.5 * ray_color(ray(rec.p, target - rec.p), world);
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
         }
 
         vec3 unit_direction = unit_vector(r.direction());
         auto t = 0.5*(unit_direction.y() + 1.0);
         return (1.0-t)*color(1.0, 1.0, 1.0) + t*color(0.5, 0.7, 1.0);
     }
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [ray-color-random-unit]: <kbd>[main.cc]</kbd> ray_color() using a random ray direction]
+```
 
 ## Limiting the Number of Child Rays
 
@@ -93,23 +89,21 @@ will it stop recursing? When it fails to hit anything. In some cases, however, t
 time — long enough to blow the stack. To guard against that, let's limit the maximum recursion
 depth, returning no light contribution at the maximum depth:
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+```cpp filename="main.cpp | ray_color() with depth limiting"
     color ray_color(const ray& r, const hittable& world, int depth) {
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+
         hit_record rec;
 
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+
         // If we've exceeded the ray bounce limit, no more light is gathered.
         if (depth <= 0)
             return color(0,0,0);
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
 
         if (world.hit(r, 0, infinity, rec)) {
             point3 target = rec.p + rec.normal + random_in_unit_sphere();
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+
             return 0.5 * ray_color(ray(rec.p, target - rec.p), world, depth-1);
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
         }
 
         vec3 unit_direction = unit_vector(r.direction());
@@ -127,9 +121,8 @@ depth, returning no light contribution at the maximum depth:
         const int image_width = 400;
         const int image_height = static_cast<int>(image_width / aspect_ratio);
         const int samples_per_pixel = 100;
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+
         const int max_depth = 50;
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
         ...
 
         // Render
@@ -144,9 +137,8 @@ depth, returning no light contribution at the maximum depth:
                     auto u = (i + random_double()) / (image_width-1);
                     auto v = (j + random_double()) / (image_height-1);
                     ray r = cam.get_ray(u, v);
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+
                     pixel_color += ray_color(r, world, max_depth);
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
                 }
                 write_color(std::cout, pixel_color, samples_per_pixel);
             }
@@ -154,12 +146,11 @@ depth, returning no light contribution at the maximum depth:
 
         std::cerr << "\nDone.\n";
     }
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [ray-color-depth]: <kbd>[main.cc]</kbd> ray_color() with depth limiting]
+```
 
 This gives us:
 
-![Image 7: First render of a diffuse sphere](../images/img-1.07-first-diffuse.png class=pixel)
+![Image 7: First render of a diffuse sphere](../images/img-1.07-first-diffuse.png)
 
 ## Using Gamma Correction for Accurate Color Intensity
 
@@ -172,33 +163,28 @@ for our purposes we just need to be aware of it. To a first approximation, we ca
 which means raising the color to the power $1/gamma$, or in our simple case ½, which is just
 square-root:
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="color.h | write_color(), with gamma correction "
     void write_color(std::ostream &out, color pixel_color, int samples_per_pixel) {
         auto r = pixel_color.x();
         auto g = pixel_color.y();
         auto b = pixel_color.z();
 
-
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
         // Divide the color by the number of samples and gamma-correct for gamma=2.0.
         auto scale = 1.0 / samples_per_pixel;
         r = sqrt(scale * r);
         g = sqrt(scale * g);
         b = sqrt(scale * b);
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
 
         // Write the translated [0,255] value of each color component.
         out << static_cast<int>(256 * clamp(r, 0.0, 0.999)) << ' '
             << static_cast<int>(256 * clamp(g, 0.0, 0.999)) << ' '
             << static_cast<int>(256 * clamp(b, 0.0, 0.999)) << '\n';
     }
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [write-color-gamma]: <kbd>[color.h]</kbd> write_color(), with gamma correction]
+```
 
 That yields light grey, as we desire:
 
-![Image 8: Diffuse sphere, with gamma correction
-  ](../images/img-1.08-gamma-correct.png class=pixel)
+![Image 8: Diffuse sphere, with gamma correction](../images/img-1.08-gamma-correct.png)
 
 ## Fixing Shadow Acne
 
@@ -206,10 +192,9 @@ There's also a subtle bug in there. Some of the reflected rays hit the object th
 off of not at exactly $t=0$, but instead at $t=-0.0000001$ or $t=0.00000001$ or whatever floating
 point approximation the sphere intersector gives us. So we need to ignore hits very near zero:
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="main.cc | Calculating reflected ray origins with tolerance"
     if (world.hit(r, 0.001, infinity, rec)) {
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [reflect-tolerance]: <kbd>[main.cc]</kbd> Calculating reflected ray origins with tolerance]
+```
 
 This gets rid of the shadow acne problem. Yes it is really called that.
 
@@ -227,49 +212,45 @@ distribution is more uniform. This is achieved by picking random points on the s
 sphere, offset along the surface normal. Picking random points on the unit sphere can be achieved by
 picking random points _in_ the unit sphere, and then normalizing those.
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
-    inline vec3 random_in_unit_sphere() {
-        ...
-    }
+```cpp filename="vec3.h | The random_unit_vector() function"
+inline vec3 random_in_unit_sphere() {
+    ...
+}
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
-    vec3 random_unit_vector() {
-        return unit_vector(random_in_unit_sphere());
-    }
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [random-unit-vector]: <kbd>[vec3.h]</kbd> The random_unit_vector() function]
+
+vec3 random_unit_vector() {
+    return unit_vector(random_in_unit_sphere());
+}
+```
 
 ![Figure [rand-unitvec]: Generating a random unit vector](../images/fig-1.10-rand-unitvec.png)
 
 This `random_unit_vector()` is a drop-in replacement for the existing `random_in_unit_sphere()`
 function.
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
-    color ray_color(const ray& r, const hittable& world, int depth) {
-        hit_record rec;
+```cpp filename="main.cc | ray_color() with replacement diffuse"
+color ray_color(const ray& r, const hittable& world, int depth) {
+    hit_record rec;
 
-        // If we've exceeded the ray bounce limit, no more light is gathered.
-        if (depth <= 0)
-            return color(0,0,0);
+    // If we've exceeded the ray bounce limit, no more light is gathered.
+    if (depth <= 0)
+        return color(0,0,0);
 
-        if (world.hit(r, 0.001, infinity, rec)) {
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
-            point3 target = rec.p + rec.normal + random_unit_vector();
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
-            return 0.5 * ray_color(ray(rec.p, target - rec.p), world, depth-1);
-        }
+    if (world.hit(r, 0.001, infinity, rec)) {
 
-        vec3 unit_direction = unit_vector(r.direction());
-        auto t = 0.5*(unit_direction.y() + 1.0);
-        return (1.0-t)*color(1.0, 1.0, 1.0) + t*color(0.5, 0.7, 1.0);
+        point3 target = rec.p + rec.normal + random_unit_vector();
+        return 0.5 * ray_color(ray(rec.p, target - rec.p), world, depth-1);
     }
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [ray-color-unit-sphere]: <kbd>[main.cc]</kbd> ray_color() with replacement diffuse]
+
+    vec3 unit_direction = unit_vector(r.direction());
+    auto t = 0.5*(unit_direction.y() + 1.0);
+    return (1.0-t)*color(1.0, 1.0, 1.0) + t*color(0.5, 0.7, 1.0);
+}
+```
 
 After rendering we get a similar image:
 
-![Image 9: Correct rendering of Lambertian spheres
-  ](../images/img-1.09-correct-lambertian.png class=pixel)
+![Image 9: Correct rendering of Lambertian spheres](../images/img-1.09-correct-lambertian.png)
 
 It's hard to tell the difference between these two diffuse methods, given that our scene of two
 spheres is so simple, but you should be able to notice two important visual differences:
@@ -303,45 +284,41 @@ A more intuitive approach is to have a uniform scatter direction for all angles 
 point, with no dependence on the angle from the normal. Many of the first raytracing papers used
 this diffuse method (before adopting Lambertian diffuse).
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
-    vec3 random_in_hemisphere(const vec3& normal) {
-        vec3 in_unit_sphere = random_in_unit_sphere();
-        if (dot(in_unit_sphere, normal) > 0.0) // In the same hemisphere as the normal
-            return in_unit_sphere;
-        else
-            return -in_unit_sphere;
-    }
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [random-in-hemisphere]: <kbd>[vec3.h]</kbd> The random_in_hemisphere(normal) function]
+```cpp filename="vec3.h | The random_in_hemisphere(normal) function"
+vec3 random_in_hemisphere(const vec3& normal) {
+    vec3 in_unit_sphere = random_in_unit_sphere();
+    if (dot(in_unit_sphere, normal) > 0.0) // In the same hemisphere as the normal
+        return in_unit_sphere;
+    else
+        return -in_unit_sphere;
+}
+```
 
 Plugging the new formula into the `ray_color()` function:
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
-    color ray_color(const ray& r, const hittable& world, int depth) {
-        hit_record rec;
+```cpp filename="main.cc | ray_color() with hemispherical scattering"
+color ray_color(const ray& r, const hittable& world, int depth) {
+    hit_record rec;
 
-        // If we've exceeded the ray bounce limit, no more light is gathered.
-        if (depth <= 0)
-            return color(0,0,0);
+    // If we've exceeded the ray bounce limit, no more light is gathered.
+    if (depth <= 0)
+        return color(0,0,0);
 
-        if (world.hit(r, 0.001, infinity, rec)) {
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
-            point3 target = rec.p + random_in_hemisphere(rec.normal);
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
-            return 0.5 * ray_color(ray(rec.p, target - rec.p), world, depth-1);
-        }
+    if (world.hit(r, 0.001, infinity, rec)) {
 
-        vec3 unit_direction = unit_vector(r.direction());
-        auto t = 0.5*(unit_direction.y() + 1.0);
-        return (1.0-t)*color(1.0, 1.0, 1.0) + t*color(0.5, 0.7, 1.0);
+        point3 target = rec.p + random_in_hemisphere(rec.normal);
+        return 0.5 * ray_color(ray(rec.p, target - rec.p), world, depth-1);
     }
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [ray-color-hemisphere]: <kbd>[main.cc]</kbd> ray_color() with hemispherical scattering]
+
+    vec3 unit_direction = unit_vector(r.direction());
+    auto t = 0.5*(unit_direction.y() + 1.0);
+    return (1.0-t)*color(1.0, 1.0, 1.0) + t*color(0.5, 0.7, 1.0);
+}
+```
 
 Gives us the following image:
 
-![Image 10: Rendering of diffuse spheres with hemispherical scattering
-  ](../images/img-1.10-rand-hemispherical.png class=pixel)
+![Image 10: Rendering of diffuse spheres with hemispherical scattering](../images/img-1.10-rand-hemispherical.png)
 
     Scenes will become more complicated over the course of the book. You are
     encouraged to switch between the different diffuse renderers presented here.

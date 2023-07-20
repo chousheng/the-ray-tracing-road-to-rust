@@ -13,7 +13,7 @@ two things:
 
 This suggests the abstract class:
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="material.h | The material class"
     #ifndef MATERIAL_H
     #define MATERIAL_H
 
@@ -29,8 +29,7 @@ This suggests the abstract class:
     };
 
     #endif
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [material-initial]: <kbd>[material.h]</kbd> The material class]
+```
 
 ## A Data Structure to Describe Ray-Object Intersections
 
@@ -39,20 +38,16 @@ You can use arguments instead; it's a matter of taste. Hittables and materials n
 other so there is some circularity of the references. In C++ you just need to alert the compiler
 that the pointer is to a class, which the "class material" in the hittable class below does:
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
-
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+```cpp filename="hittable.h | Hit record with added material pointer"
     #include "rtweekend.h"
 
     class material;
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
 
     struct hit_record {
         point3 p;
         vec3 normal;
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+
         shared_ptr<material> mat_ptr;
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
         double t;
         bool front_face;
 
@@ -61,8 +56,7 @@ that the pointer is to a class, which the "class material" in the hittable class
             normal = front_face ? outward_normal :-outward_normal;
         }
     };
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [hit-with-material]: <kbd>[hittable.h]</kbd> Hit record with added material pointer]
+```
 
 What we have set up here is that material will tell us how rays interact with the surface.
 `hit_record` is just a way to stuff a bunch of arguments into a struct so we can send them as a
@@ -74,14 +68,13 @@ functions of the material pointer to find out what ray, if any, is scattered.
 To achieve this, we must have a reference to the material for our sphere class to returned
 within `hit_record`. See the highlighted lines below:
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="sphere.h | Ray-sphere intersection with added material information"
     class sphere : public hittable {
         public:
             sphere() {}
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+
             sphere(point3 cen, double r, shared_ptr<material> m)
                 : center(cen), radius(r), mat_ptr(m) {};
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
 
             virtual bool hit(
                 const ray& r, double t_min, double t_max, hit_record& rec) const override;
@@ -89,9 +82,8 @@ within `hit_record`. See the highlighted lines below:
         public:
             point3 center;
             double radius;
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+
             shared_ptr<material> mat_ptr;
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
     };
 
     bool sphere::hit(const ray& r, double t_min, double t_max, hit_record& rec) const {
@@ -101,14 +93,12 @@ within `hit_record`. See the highlighted lines below:
         rec.p = r.at(rec.t);
         vec3 outward_normal = (rec.p - center) / radius;
         rec.set_face_normal(r, outward_normal);
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+
         rec.mat_ptr = mat_ptr;
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
 
         return true;
     }
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [sphere-material]: <kbd>[sphere.h]</kbd> Ray-sphere intersection with added material information]
+```
 
 ## Modeling Light Scatter and Reflectance
 
@@ -116,7 +106,7 @@ For the Lambertian (diffuse) case we already have, it can either scatter always 
 reflectance $R$, or it can scatter with no attenuation but absorb the fraction $1-R$ of the rays, or
 it could be a mixture of those strategies. For Lambertian materials we get this simple class:
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="material.h | The lambertian material class"
     class lambertian : public material {
         public:
             lambertian(const color& a) : albedo(a) {}
@@ -133,8 +123,7 @@ it could be a mixture of those strategies. For Lambertian materials we get this 
         public:
             color albedo;
     };
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [lambertian-initial]: <kbd>[material.h]</kbd> The lambertian material class]
+```
 
 Note we could just as well only scatter with some probability $p$ and have attenuation be
 $albedo/p$. Your choice.
@@ -147,7 +136,7 @@ NaNs), so we need to intercept the condition before we pass it on.
 In service of this, we'll create a new vector method -- `vec3::near_zero()` -- that returns true if
 the vector is very close to zero in all dimensions.
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="vec3.h | The vec3::near_zero() method"
     class vec3 {
         ...
         bool near_zero() const {
@@ -157,10 +146,9 @@ the vector is very close to zero in all dimensions.
         }
         ...
     };
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [vec3-near-zero]: <kbd>[vec3.h]</kbd> The vec3::near_zero() method]
+```
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="material.h | Lambertian scatter, bullet-proof"
     class lambertian : public material {
         public:
             lambertian(const color& a) : albedo(a) {}
@@ -170,12 +158,9 @@ the vector is very close to zero in all dimensions.
             ) const override {
                 auto scatter_direction = rec.normal + random_unit_vector();
 
-
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
                 // Catch degenerate scatter direction
                 if (scatter_direction.near_zero())
                     scatter_direction = rec.normal;
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
 
                 scattered = ray(rec.p, scatter_direction);
                 attenuation = albedo;
@@ -185,8 +170,7 @@ the vector is very close to zero in all dimensions.
         public:
             color albedo;
     };
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [lambertian-catch-zero]: <kbd>[material.h]</kbd> Lambertian scatter, bullet-proof]
+```
 
 ## Mirrored Light Reflection
 
@@ -199,16 +183,15 @@ The reflected ray direction in red is just $\mathbf{v} + 2\mathbf{b}$. In our de
 is a unit vector, but $\mathbf{v}$ may not be. The length of $\mathbf{b}$ should be $\mathbf{v}
 \cdot \mathbf{n}$. Because $\mathbf{v}$ points in, we will need a minus sign, yielding:
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="vec3.h | vec3 reflection function"
     vec3 reflect(const vec3& v, const vec3& n) {
         return v - 2*dot(v,n)*n;
     }
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [vec3-reflect]: <kbd>[vec3.h]</kbd> vec3 reflection function]
+```
 
 The metal material just reflects rays using that formula:
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="material.h | Metal material with reflectance function"
     class metal : public material {
         public:
             metal(const color& a) : albedo(a) {}
@@ -225,12 +208,11 @@ The metal material just reflects rays using that formula:
         public:
             color albedo;
     };
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [metal-material]: <kbd>[material.h]</kbd> Metal material with reflectance function]
+```
 
 We need to modify the `ray_color()` function to use this:
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="main.cc | Ray color with scattered reflectance"
     color ray_color(const ray& r, const hittable& world, int depth) {
         hit_record rec;
 
@@ -239,33 +221,30 @@ We need to modify the `ray_color()` function to use this:
             return color(0,0,0);
 
         if (world.hit(r, 0.001, infinity, rec)) {
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+
             ray scattered;
             color attenuation;
             if (rec.mat_ptr->scatter(r, rec, attenuation, scattered))
                 return attenuation * ray_color(scattered, world, depth-1);
             return color(0,0,0);
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
         }
 
         vec3 unit_direction = unit_vector(r.direction());
         auto t = 0.5*(unit_direction.y() + 1.0);
         return (1.0-t)*color(1.0, 1.0, 1.0) + t*color(0.5, 0.7, 1.0);
     }
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [ray-color-scatter]: <kbd>[main.cc]</kbd> Ray color with scattered reflectance]
+```
 
 ## A Scene with Metal Spheres
 
 Now let's add some metal spheres to our scene:
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="main.cc | Scene with metal spheres"
     ...
 
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+
     #include "material.h"
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
 
     ...
 
@@ -284,7 +263,7 @@ Now let's add some metal spheres to our scene:
         hittable_list world;
 
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+
         auto material_ground = make_shared<lambertian>(color(0.8, 0.8, 0.0));
         auto material_center = make_shared<lambertian>(color(0.7, 0.3, 0.3));
         auto material_left   = make_shared<metal>(color(0.8, 0.8, 0.8));
@@ -294,7 +273,6 @@ Now let's add some metal spheres to our scene:
         world.add(make_shared<sphere>(point3( 0.0,    0.0, -1.0),   0.5, material_center));
         world.add(make_shared<sphere>(point3(-1.0,    0.0, -1.0),   0.5, material_left));
         world.add(make_shared<sphere>(point3( 1.0,    0.0, -1.0),   0.5, material_right));
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
 
         // Camera
 
@@ -320,12 +298,11 @@ Now let's add some metal spheres to our scene:
 
         std::cerr << "\nDone.\n";
     }
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [scene-with-metal]: <kbd>[main.cc]</kbd> Scene with metal spheres]
+```
 
 Which gives:
 
-![Image 11: Shiny metal](../images/img-1.11-metal-shiny.png class=pixel)
+![Image 11: Shiny metal](../images/img-1.11-metal-shiny.png)
 
 ## Fuzzy Reflection
 
@@ -339,49 +316,43 @@ parameter that is just the radius of the sphere (so zero is no perturbation). Th
 big spheres or grazing rays, we may scatter below the surface. We can just have the surface
 absorb those.
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="material.h | Metal material fuzziness"
     class metal : public material {
         public:
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+
             metal(const color& a, double f) : albedo(a), fuzz(f < 1 ? f : 1) {}
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
 
             virtual bool scatter(
                 const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered
             ) const override {
                 vec3 reflected = reflect(unit_vector(r_in.direction()), rec.normal);
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+
                 scattered = ray(rec.p, reflected + fuzz*random_in_unit_sphere());
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
                 attenuation = albedo;
                 return (dot(scattered.direction(), rec.normal) > 0);
             }
 
         public:
             color albedo;
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+
             double fuzz;
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
     };
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [metal-fuzz]: <kbd>[material.h]</kbd> Metal material fuzziness]
+```
 
 We can try that out by adding fuzziness 0.3 and 1.0 to the metals:
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="main.cpp | Metal spheres with fuzziness"
     int main() {
         ...
         // World
 
         auto material_ground = make_shared<lambertian>(color(0.8, 0.8, 0.0));
         auto material_center = make_shared<lambertian>(color(0.7, 0.3, 0.3));
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+
         auto material_left   = make_shared<metal>(color(0.8, 0.8, 0.8), 0.3);
         auto material_right  = make_shared<metal>(color(0.8, 0.6, 0.2), 1.0);
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
         ...
     }
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [metal-fuzz-spheres]: <kbd>[main.cc]</kbd> Metal spheres with fuzziness]
+```
 
-![Image 12: Fuzzed metal](../images/img-1.12-metal-fuzz.png class=pixel)
+![Image 12: Fuzzed metal](../images/img-1.12-metal-fuzz.png)

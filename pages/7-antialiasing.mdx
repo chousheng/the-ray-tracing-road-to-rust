@@ -17,7 +17,7 @@ A simple approach to this is to use the `rand()` function that can be found in `
 function returns a random integer in the range 0 and `RAND_MAX`. Hence we can get a real random
 number as desired with the following code snippet, added to `rtweekend.h`:
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="rtweekend.h | random_double() functions"
     #include <cstdlib>
     ...
 
@@ -30,14 +30,13 @@ number as desired with the following code snippet, added to `rtweekend.h`:
         // Returns a random real in [min,max).
         return min + (max-min)*random_double();
     }
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [random-double]: <kbd>[rtweekend.h]</kbd> random_double() functions]
+```
 
 C++ did not traditionally have a standard random number generator, but newer versions of C++ have
 addressed this issue with the `<random>` header (if imperfectly according to some experts).
 If you want to use this, you can obtain a random number with the conditions we need as follows:
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="rtweekend.h | random_double(), alternate implemenation"
     #include <random>
 
     inline double random_double() {
@@ -45,8 +44,7 @@ If you want to use this, you can obtain a random number with the conditions we n
         static std::mt19937 generator;
         return distribution(generator);
     }
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [random-double-alt]: <kbd>[rtweekend.h]</kbd> random_double(), alternate implemenation]
+```
 
 ## Generating Pixels with Multiple Samples
 
@@ -59,7 +57,7 @@ Now's a good time to create a `camera` class to manage our virtual camera and th
 scene scampling. The following class implements a simple camera using the axis-aligned camera from
 before:
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="camera.h | The camera class"
     #ifndef CAMERA_H
     #define CAMERA_H
 
@@ -90,8 +88,7 @@ before:
             vec3 vertical;
     };
     #endif
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [camera-initial]: <kbd>[camera.h]</kbd> The camera class]
+```
 
 To handle the multi-sampled color computation, we'll update the `write_color()` function. Rather
 than adding in a fractional contribution each time we accumulate more light to the color, just add
@@ -99,16 +96,15 @@ the full color each iteration, and then perform a single divide at the end (by t
 samples) when writing out the color. In addition, we'll add a handy utility function to the
 `rtweekend.h` utility header: `clamp(x,min,max)`, which clamps the value `x` to the range [min,max]:
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="rtweekend.h | The clamp() utility function"
     inline double clamp(double x, double min, double max) {
         if (x < min) return min;
         if (x > max) return max;
         return x;
     }
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [clamp]: <kbd>[rtweekend.h]</kbd> The clamp() utility function]
+```
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
+```cpp filename="color.h | The multi-sample write_color() function"
     void write_color(std::ostream &out, color pixel_color, int samples_per_pixel) {
         auto r = pixel_color.x();
         auto g = pixel_color.y();
@@ -125,14 +121,12 @@ samples) when writing out the color. In addition, we'll add a handy utility func
             << static_cast<int>(256 * clamp(g, 0.0, 0.999)) << ' '
             << static_cast<int>(256 * clamp(b, 0.0, 0.999)) << '\n';
     }
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [write-color-clamped]: <kbd>[color.h]</kbd> The multi-sample write_color() function]
+```
 
 Main is also changed:
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+```cpp filename="main.cpp | Rendering with multi-sampled pixels"
     #include "camera.h"
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
 
     ...
 
@@ -143,9 +137,8 @@ Main is also changed:
         const auto aspect_ratio = 16.0 / 9.0;
         const int image_width = 400;
         const int image_height = static_cast<int>(image_width / aspect_ratio);
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+
         const int samples_per_pixel = 100;
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
 
         // World
 
@@ -155,9 +148,8 @@ Main is also changed:
 
         // Camera
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+
         camera cam;
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
 
         // Render
 
@@ -166,7 +158,7 @@ Main is also changed:
         for (int j = image_height-1; j >= 0; --j) {
             std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
             for (int i = 0; i < image_width; ++i) {
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++ highlight
+
                 color pixel_color(0, 0, 0);
                 for (int s = 0; s < samples_per_pixel; ++s) {
                     auto u = (i + random_double()) / (image_width-1);
@@ -175,16 +167,13 @@ Main is also changed:
                     pixel_color += ray_color(r, world);
                 }
                 write_color(std::cout, pixel_color, samples_per_pixel);
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C++
             }
         }
 
         std::cerr << "\nDone.\n";
     }
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [Listing [main-multi-sample]: <kbd>[main.cc]</kbd> Rendering with multi-sampled pixels]
+```
 
 Zooming into the image that is produced, we can see the difference in edge pixels.
 
-![Image 6: Before and after antialiasing
-  ](../images/img-1.06-antialias-before-after.png class=pixel)
+![Image 6: Before and after antialiasing](../images/img-1.06-antialias-before-after.png)
