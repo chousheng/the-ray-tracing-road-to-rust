@@ -9,7 +9,7 @@ The function $\mathbf{P}(t)$ in more verbose code form we call `ray::at(t)`:
 <Tabs>
 <Tab label="Rust">
 
-```rust filename="ray.rs (The ray struct)"
+```rust filename="ray.rs | The ray struct"
 use crate::vec3::{Point3, Vec3};
 
 #[derive(Default)]
@@ -43,7 +43,7 @@ impl Ray {
 </Tab>
 <Tab label="C++">
 
-```cpp filename="ray.h (The ray class)"
+```cpp filename="ray.h | The ray class"
 #ifndef RAY_H
 #define RAY_H
 
@@ -95,7 +95,7 @@ Below in code, the ray `r` goes to approximately the pixel centers (We won't wor
 <Tabs>
 <Tab label="Rust">
 
-```rust filename="main.rs (Rendering a blue-to-white gradient)" {2,8-15,20-36,45-51}
+```rust filename="main.rs | Rendering a blue-to-white gradient" {2,8-15,20-36,45-51}
 mod color;
 mod ray;
 mod vec3;
@@ -158,7 +158,7 @@ fn main() {
 </Tab>
 <Tab label="C++">
 
-```cpp filename="main.cpp (Rendering a blue-to-white gradient)" {4-11,16-30,39-45}
+```cpp filename="main.cpp | Rendering a blue-to-white gradient" {4-11,16-30,39-45}
 #include <iostream>
 
 #include "color.h"

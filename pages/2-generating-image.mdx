@@ -11,7 +11,7 @@ Let's make some code to output such a thing:
 <Tabs>
 <Tab label="Rust">
 
-```rust filename="main.rs (Creating your first image)"
+```rust filename="main.rs | Creating your first image"
 fn main() {
     // Image
 
@@ -41,7 +41,7 @@ fn main() {
 </Tab>
 <Tab label="C++">
 
-```cpp filename="main.cpp (Creating your first image)"
+```cpp filename="main.cpp | Creating your first image"
 #include <iostream>
 
 int main() {
@@ -107,7 +107,7 @@ You can try opening the PPM file in your favorite viewer. Google "ppm viewer" if
 
 If your image doesn't look like that, open the output file in a text editor and see what it looks like. It should start something like this:
 
-```ppm filename="image.ppm (First image output)"
+```ppm filename="image.ppm | First image output"
 P3
 256 256
 255
@@ -135,7 +135,7 @@ Our program outputs the image to the standard output stream, so leave that alone
 <Tabs>
 <Tab label="Rust">
 
-```rust filename="main.rs (Main render loop with progress reporting)" {12,25-26}
+```rust filename="main.rs | Main render loop with progress reporting" {12,25-26}
 fn main() {
     // Image
 
@@ -168,7 +168,7 @@ fn main() {
 </Tab>
 <Tab label="C++">
 
-```cpp filename="main.cpp (Main render loop with progress reporting)" {14,28-29}
+```cpp filename="main.cpp | Main render loop with progress reporting" {14,28-29}
 #include <iostream>
 
 int main() {

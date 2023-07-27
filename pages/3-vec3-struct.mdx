@@ -13,7 +13,7 @@ Here's the basic part of the `Vec3` struct:
 <Tabs>
 <Tab label="Rust">
 
-```rust filename="vec3.rs (Vec3 struct)"
+```rust filename="vec3.rs | Vec3 struct"
 #[derive(Copy, Clone, Default)]
 pub struct Vec3 {
     e: [f64; 3],
@@ -44,7 +44,7 @@ pub type Point3 = Vec3; // 3D point
 </Tab>
 <Tab label="C++">
 
-```cpp filename="vec3.h (Vec3 class)"
+```cpp filename="vec3.h | Vec3 class"
 #ifndef VEC3_H
 #define VEC3_H
 
@@ -88,7 +88,7 @@ The other part of `Vec3` contains vector utility functions:
 <Tabs>
 <Tab label="Rust">
 
-```rust filename="vec3.rs (Vec3 utility functions)" {1-3,25-32,37-143}
+```rust filename="vec3.rs | Vec3 utility functions" {1-3,25-32,37-143}
 use std::fmt::{Display, Formatter, Result};
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub};
 
@@ -237,7 +237,7 @@ pub fn unit_vector(v: Vec3) -> Vec3 {
 </Tab>
 <Tab label="C++">
 
-```cpp filename="vec3.h (Vec3 utility functions)" {4-6,25-58,66-116}
+```cpp filename="vec3.h | Vec3 utility functions" {4-6,25-58,66-116}
 #ifndef VEC3_H
 #define VEC3_H
 
@@ -367,7 +367,7 @@ Using our new `Color` (alias `Vec3`), we'll create a utility function to write a
 <Tabs>
 <Tab label="Rust">
 
-```rust filename="color.rs (Color utility functions)"
+```rust filename="color.rs | Color utility functions"
 use std::io::Write;
 
 use crate::vec3::Vec3;
@@ -387,7 +387,7 @@ pub fn write_color(out: &mut impl Write, pixel_color: Color) {
 </Tab>
 <Tab label="C++">
 
-```cpp filename="color.h (Color utility functions)"
+```cpp filename="color.h | Color utility functions"
 #ifndef COLOR_H
 #define COLOR_H
 
@@ -417,7 +417,7 @@ Now we can change our main to use this:
 <Tabs>
 <Tab label="Rust">
 
-```rust filename="main.rs (Final code for the first PPM image)" {1-7,24-25}
+```rust filename="main.rs | Final code for the first PPM image" {1-7,24-25}
 mod color;
 mod vec3;
 
@@ -453,7 +453,7 @@ fn main() {
 </Tab>
 <Tab label="C++">
 
-```cpp filename="main.cpp (Final code for the first PPM image)" {3-4,21-22}
+```cpp filename="main.cpp | Final code for the first PPM image" {3-4,21-22}
 #include <iostream>
 
 #include "color.h"
