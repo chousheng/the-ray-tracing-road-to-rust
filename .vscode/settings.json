@@ -1,9 +1,9 @@
 {
   // Cannot use "multiple language specific settings" like "[markdown][json]". VS Code Bug?
   "[markdown]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.defaultFormatter": "unifiedjs.vscode-remark",
     "editor.wordWrap": "bounded",
-    "editor.wordWrapColumn": 80,
+    "editor.wordWrapColumn": 100,
     "editor.formatOnSave": true
   },
   "[typescriptreact][typescript][javascriptreact][javascript]": {
@@ -18,6 +18,6 @@
     }
   },
   "files.associations": {
-    "*.mdx": "markdown" // Allow VS Code's built-in preview to work
+    "*.mdx": "markdown" // Allow VS Code's built-in preview to work and allow vscode-remark formatter to work
   }
 }
