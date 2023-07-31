@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "extract-code": "node scripts/extract-code.mjs",
+    "export-code": "node scripts/export-code.mjs",
     "import-code": "node scripts/import-code.mjs"
   },
   "dependencies": {
