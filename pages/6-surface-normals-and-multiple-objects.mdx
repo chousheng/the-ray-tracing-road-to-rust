@@ -19,7 +19,7 @@ one sphere in the scene, and it's directly in front of the camera, so we won't w
 values of $t$ yet. We'll just assume the closest hit point (smallest $t$). These changes in the code
 let us compute and visualize $\mathbf{n}$:
 
-```cpp filename="main.cc | Rendering surface normals on a sphere"
+```cpp filename="main.cpp | Rendering surface normals on a sphere"
 double hit_sphere(const point3& center, double radius, const ray& r) {
     vec3 oc = r.origin() - center;
     auto a = dot(r.direction(), r.direction());
@@ -127,7 +127,7 @@ something closer as we do our search, and we will only need the normal of the cl
 go with the simple solution and compute a bundle of stuff I will store in some structure. Here's
 the abstract class:
 
-```cpp filename="hittable.h | The hittable class"
+```cpp filename="hittable.h | The Hittable class"
 #ifndef HITTABLE_H
 #define HITTABLE_H
 
@@ -149,7 +149,7 @@ class hittable {
 
 And here's the sphere:
 
-```cpp filename="sphere.h | The sphere class"
+```cpp filename="sphere.h | The Sphere class"
 #ifndef SPHERE_H
 #define SPHERE_H
 
@@ -258,7 +258,7 @@ literature.
 We add the `front_face` bool to the `hit_record` struct. We'll also add a function to solve this
 calculation for us.
 
-```cpp filename="hittable.h | Adding front-face tracking to hit_record"
+```cpp filename="hittable.h | Adding front-face tracking to HitRecord"
 struct hit_record {
     point3 p;
     vec3 normal;
@@ -274,7 +274,7 @@ struct hit_record {
 
 And then we add the surface side determination to the class:
 
-```cpp filename="sphere.h | The sphere class with normal determination"
+```cpp filename="sphere.h | The Sphere class with normal determination"
 bool sphere::hit(const ray& r, double t_min, double t_max, hit_record& rec) const {
     ...
 
@@ -292,7 +292,7 @@ bool sphere::hit(const ray& r, double t_min, double t_max, hit_record& rec) cons
 We have a generic object called a `hittable` that the ray can intersect with. We now add a class
 that stores a list of `hittable`s:
 
-```cpp filename="hittable_list.h | The hittable_list class"
+```cpp filename="hittable_list.h | The HittableList class"
 #ifndef HITTABLE_LIST_H
 #define HITTABLE_LIST_H
 
@@ -393,7 +393,7 @@ There is no standard portable definition of pi, so we just define our own consta
 throw common useful constants and future utility functions in `rtweekend.h`, our general main header
 file.
 
-```cpp filename="rtweekend.h | The rtweekend.h common header"
+```cpp filename="rtweekend.h | The common header"
 #ifndef RTWEEKEND_H
 #define RTWEEKEND_H
 
@@ -429,7 +429,7 @@ inline double degrees_to_radians(double degrees) {
 
 And the new main:
 
-```cpp filename="main.cc | The new main with hittables"
+```cpp filename="main.cpp | The new main() with Hittables"
 #include "rtweekend.h"
 
 #include "color.h"

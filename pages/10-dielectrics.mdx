@@ -75,7 +75,7 @@ When we combine them back together, we can write a function to calculate $\mathb
 
 And the dielectric material that always refracts is:
 
-```cpp filename="material.h | Dielectric material class that always refracts"
+```cpp filename="material.h | Dielectric Material class that always refracts"
     class dielectric : public material {
         public:
             dielectric(double index_of_refraction) : ir(index_of_refraction) {}
@@ -168,7 +168,7 @@ $\cos\theta = \mathbf{R} \cdot \mathbf{n}$
 
 And the dielectric material that always refracts (when possible) is:
 
-```cpp filename="material.h | Dielectric material class with reflection"
+```cpp filename="material.h | Dielectric Material class with reflection"
     class dielectric : public material {
         public:
             dielectric(double index_of_refraction) : ir(index_of_refraction) {}
@@ -204,7 +204,7 @@ And the dielectric material that always refracts (when possible) is:
 Attenuation is always 1 -- the glass surface absorbs nothing. If we try that out with these
 parameters:
 
-```cpp filename="main.cc | Scene with dielectric and shiny sphere"
+```cpp filename="main.cpp | Scene with dielectric and shiny sphere"
     auto material_ground = make_shared<lambertian>(color(0.8, 0.8, 0.0));
     auto material_center = make_shared<lambertian>(color(0.1, 0.2, 0.5));
     auto material_left   = make_shared<dielectric>(1.5);
@@ -270,7 +270,7 @@ An interesting and easy trick with dielectric spheres is to note that if you use
 the geometry is unaffected, but the surface normal points inward. This can be used as a bubble to
 make a hollow glass sphere:
 
-```cpp filename="main.cc | Scene with hollow glass sphere"
+```cpp filename="main.cpp | Scene with hollow glass sphere"
     world.add(make_shared<sphere>(point3( 0.0, -100.5, -1.0), 100.0, material_ground));
     world.add(make_shared<sphere>(point3( 0.0,    0.0, -1.0),   0.5, material_center));
     world.add(make_shared<sphere>(point3(-1.0,    0.0, -1.0),   0.5, material_left));

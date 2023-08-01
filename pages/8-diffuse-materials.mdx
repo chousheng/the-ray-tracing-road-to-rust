@@ -41,7 +41,7 @@ We need a way to pick a random point in a unit radius sphere. We'll use what is 
 algorithm: a rejection method. First, pick a random point in the unit cube where x, y, and z all
 range from -1 to +1. Reject this point and try again if the point is outside the sphere.
 
-```cpp filename="vec3.h | vec3 random utility functions"
+```cpp filename="vec3.h | Vec3 random utility functions"
     class vec3 {
       public:
         ...
@@ -66,7 +66,7 @@ range from -1 to +1. Reject this point and try again if the point is outside the
 
 Then update the `ray_color()` function to use the new random direction generator:
 
-```cpp filename="main.cc | ray_color() using a random ray direction"
+```cpp filename="main.cpp | ray_color() using a random ray direction"
     color ray_color(const ray& r, const hittable& world) {
         hit_record rec;
 
@@ -163,7 +163,7 @@ for our purposes we just need to be aware of it. To a first approximation, we ca
 which means raising the color to the power $1/gamma$, or in our simple case ½, which is just
 square-root:
 
-```cpp filename="color.h | write_color(), with gamma correction "
+```cpp filename="color.h | write_color(), with gamma correction"
     void write_color(std::ostream &out, color pixel_color, int samples_per_pixel) {
         auto r = pixel_color.x();
         auto g = pixel_color.y();
@@ -192,7 +192,7 @@ There's also a subtle bug in there. Some of the reflected rays hit the object th
 off of not at exactly $t=0$, but instead at $t=-0.0000001$ or $t=0.00000001$ or whatever floating
 point approximation the sphere intersector gives us. So we need to ignore hits very near zero:
 
-```cpp filename="main.cc | Calculating reflected ray origins with tolerance"
+```cpp filename="main.cpp | Calculating reflected ray origins with tolerance"
     if (world.hit(r, 0.001, infinity, rec)) {
 ```
 
@@ -228,7 +228,7 @@ vec3 random_unit_vector() {
 This `random_unit_vector()` is a drop-in replacement for the existing `random_in_unit_sphere()`
 function.
 
-```cpp filename="main.cc | ray_color() with replacement diffuse"
+```cpp filename="main.cpp | ray_color() with replacement diffuse"
 color ray_color(const ray& r, const hittable& world, int depth) {
     hit_record rec;
 
@@ -296,7 +296,7 @@ vec3 random_in_hemisphere(const vec3& normal) {
 
 Plugging the new formula into the `ray_color()` function:
 
-```cpp filename="main.cc | ray_color() with hemispherical scattering"
+```cpp filename="main.cpp | ray_color() with hemispherical scattering"
 color ray_color(const ray& r, const hittable& world, int depth) {
     hit_record rec;
 

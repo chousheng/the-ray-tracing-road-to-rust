@@ -13,7 +13,7 @@ two things:
 
 This suggests the abstract class:
 
-```cpp filename="material.h | The material class"
+```cpp filename="material.h | The Material class"
     #ifndef MATERIAL_H
     #define MATERIAL_H
 
@@ -38,7 +38,7 @@ You can use arguments instead; it's a matter of taste. Hittables and materials n
 other so there is some circularity of the references. In C++ you just need to alert the compiler
 that the pointer is to a class, which the "class material" in the hittable class below does:
 
-```cpp filename="hittable.h | Hit record with added material pointer"
+```cpp filename="hittable.h | HitRecord with added Material pointer"
     #include "rtweekend.h"
 
     class material;
@@ -68,7 +68,7 @@ functions of the material pointer to find out what ray, if any, is scattered.
 To achieve this, we must have a reference to the material for our sphere class to returned
 within `hit_record`. See the highlighted lines below:
 
-```cpp filename="sphere.h | Ray-sphere intersection with added material information"
+```cpp filename="sphere.h | Ray-sphere intersection with added Material information"
     class sphere : public hittable {
         public:
             sphere() {}
@@ -106,7 +106,7 @@ For the Lambertian (diffuse) case we already have, it can either scatter always 
 reflectance $R$, or it can scatter with no attenuation but absorb the fraction $1-R$ of the rays, or
 it could be a mixture of those strategies. For Lambertian materials we get this simple class:
 
-```cpp filename="material.h | The lambertian material class"
+```cpp filename="material.h | The Lambertian Material class"
     class lambertian : public material {
         public:
             lambertian(const color& a) : albedo(a) {}
@@ -183,7 +183,7 @@ The reflected ray direction in red is just $\mathbf{v} + 2\mathbf{b}$. In our de
 is a unit vector, but $\mathbf{v}$ may not be. The length of $\mathbf{b}$ should be $\mathbf{v}
 \cdot \mathbf{n}$. Because $\mathbf{v}$ points in, we will need a minus sign, yielding:
 
-```cpp filename="vec3.h | vec3 reflection function"
+```cpp filename="vec3.h | Vec3 reflection function"
     vec3 reflect(const vec3& v, const vec3& n) {
         return v - 2*dot(v,n)*n;
     }
@@ -191,7 +191,7 @@ is a unit vector, but $\mathbf{v}$ may not be. The length of $\mathbf{b}$ should
 
 The metal material just reflects rays using that formula:
 
-```cpp filename="material.h | Metal material with reflectance function"
+```cpp filename="material.h | Metal Material with reflectance function"
     class metal : public material {
         public:
             metal(const color& a) : albedo(a) {}
@@ -212,7 +212,7 @@ The metal material just reflects rays using that formula:
 
 We need to modify the `ray_color()` function to use this:
 
-```cpp filename="main.cc | Ray color with scattered reflectance"
+```cpp filename="main.cpp | Ray color with scattered reflectance"
     color ray_color(const ray& r, const hittable& world, int depth) {
         hit_record rec;
 
@@ -239,7 +239,7 @@ We need to modify the `ray_color()` function to use this:
 
 Now let's add some metal spheres to our scene:
 
-```cpp filename="main.cc | Scene with metal spheres"
+```cpp filename="main.cpp | Scene with metal spheres"
     ...
 
 
@@ -316,7 +316,7 @@ parameter that is just the radius of the sphere (so zero is no perturbation). Th
 big spheres or grazing rays, we may scatter below the surface. We can just have the surface
 absorb those.
 
-```cpp filename="material.h | Metal material fuzziness"
+```cpp filename="material.h | Metal Material fuzziness"
     class metal : public material {
         public:
 
