@@ -121,6 +121,10 @@ const importCodeFromGitToMdx = async (importSpecs) => {
       titleToMdxListing[listing.title] = listing;
     }
 
+    //
+    // Checking missing code
+    //
+
     for (const title in titleToGitCommit) {
       if (!(title in titleToMdxListing)) {
         console.log("mdx missing: ", title);
@@ -130,6 +134,25 @@ const importCodeFromGitToMdx = async (importSpecs) => {
     for (const title in titleToMdxListing) {
       if (!(title in titleToGitCommit)) {
         console.log("git missing: ", title);
+      }
+    }
+
+    //
+    // Find inconsistent file name
+    //
+
+    for (const title in titleToGitCommit) {
+      if (title in titleToMdxListing) {
+        const gitCommit = titleToGitCommit[title];
+        const mdxListing = titleToMdxListing[title];
+
+        if (gitCommit.filename != "src/" + mdxListing.filename) {
+          console.log(
+            "inconsistent filename:",
+            "git=" + gitCommit.filename,
+            "mdx=" + mdxListing.filename,
+          );
+        }
       }
     }
 
