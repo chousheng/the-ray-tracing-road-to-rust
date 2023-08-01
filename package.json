@@ -28,7 +28,6 @@
     "typescript": "5.1.6",
     "unified": "^10.1.2",
     "unist-util-inspect": "^8.0.0",
-    "unist-util-visit": "^5.0.0",
-    "unist-util-visit-parents": "^6.0.1"
+    "unist-util-visit": "^5.0.0"
   }
 }

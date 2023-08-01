@@ -4,7 +4,7 @@ import fs from "node:fs";
 import remarkParse from "remark-parse";
 import { unified } from "unified";
 import { inspect } from "unist-util-inspect";
-import { visitParents } from "unist-util-visit-parents";
+import { visit } from "unist-util-visit";
 
 import { simpleGit } from "simple-git";
 
@@ -38,7 +38,7 @@ const extractCodeBlocksFromMdxFile = (filename, listingsByLang) => {
 
   const ast = unified().use(remarkParse).use(remarkConfig).parse(doc);
 
-  visitParents(ast, "code", (node, parents) => {
+  visit(ast, "code", (node) => {
     if (node.meta == null) {
       return;
     }
