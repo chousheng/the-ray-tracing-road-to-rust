@@ -17,26 +17,35 @@ A simple approach to this is to use the `rand()` function that can be found in `
 function returns a random integer in the range 0 and `RAND_MAX`. Hence we can get a real random
 number as desired with the following code snippet, added to `rtweekend.h`:
 
-```cpp filename="rtweekend.h | random_double() functions"
-    #include <cstdlib>
-    ...
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="common.rs | random_double() functions"
+    ```
+  </Tab>
 
-    inline double random_double() {
-        // Returns a random real in [0,1).
-        return rand() / (RAND_MAX + 1.0);
-    }
+  <Tab label="C++">
+    ```cpp filename="common.h | random_double() functions"
+        #include <cstdlib>
+        ...
 
-    inline double random_double(double min, double max) {
-        // Returns a random real in [min,max).
-        return min + (max-min)*random_double();
-    }
-```
+        inline double random_double() {
+            // Returns a random real in [0,1).
+            return rand() / (RAND_MAX + 1.0);
+        }
+
+        inline double random_double(double min, double max) {
+            // Returns a random real in [min,max).
+            return min + (max-min)*random_double();
+        }
+    ```
+  </Tab>
+</Tabs>
 
 C++ did not traditionally have a standard random number generator, but newer versions of C++ have
 addressed this issue with the `<random>` header (if imperfectly according to some experts).
 If you want to use this, you can obtain a random number with the conditions we need as follows:
 
-```cpp filename="rtweekend.h | random_double(), alternate implemenation"
+```cpp filename="random_double(), alternate implemenation"
     #include <random>
 
     inline double random_double() {
@@ -57,38 +66,47 @@ Now's a good time to create a `camera` class to manage our virtual camera and th
 scene scampling. The following class implements a simple camera using the axis-aligned camera from
 before:
 
-```cpp filename="camera.h | The Camera class"
-    #ifndef CAMERA_H
-    #define CAMERA_H
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="camera.rs | The Camera struct"
+    ```
+  </Tab>
 
-    #include "rtweekend.h"
+  <Tab label="C++">
+    ```cpp filename="camera.h | The Camera class"
+        #ifndef CAMERA_H
+        #define CAMERA_H
 
-    class camera {
-        public:
-            camera() {
-                auto aspect_ratio = 16.0 / 9.0;
-                auto viewport_height = 2.0;
-                auto viewport_width = aspect_ratio * viewport_height;
-                auto focal_length = 1.0;
+        #include "rtweekend.h"
 
-                origin = point3(0, 0, 0);
-                horizontal = vec3(viewport_width, 0.0, 0.0);
-                vertical = vec3(0.0, viewport_height, 0.0);
-                lower_left_corner = origin - horizontal/2 - vertical/2 - vec3(0, 0, focal_length);
-            }
+        class camera {
+            public:
+                camera() {
+                    auto aspect_ratio = 16.0 / 9.0;
+                    auto viewport_height = 2.0;
+                    auto viewport_width = aspect_ratio * viewport_height;
+                    auto focal_length = 1.0;
 
-            ray get_ray(double u, double v) const {
-                return ray(origin, lower_left_corner + u*horizontal + v*vertical - origin);
-            }
+                    origin = point3(0, 0, 0);
+                    horizontal = vec3(viewport_width, 0.0, 0.0);
+                    vertical = vec3(0.0, viewport_height, 0.0);
+                    lower_left_corner = origin - horizontal/2 - vertical/2 - vec3(0, 0, focal_length);
+                }
 
-        private:
-            point3 origin;
-            point3 lower_left_corner;
-            vec3 horizontal;
-            vec3 vertical;
-    };
-    #endif
-```
+                ray get_ray(double u, double v) const {
+                    return ray(origin, lower_left_corner + u*horizontal + v*vertical - origin);
+                }
+
+            private:
+                point3 origin;
+                point3 lower_left_corner;
+                vec3 horizontal;
+                vec3 vertical;
+        };
+        #endif
+    ```
+  </Tab>
+</Tabs>
 
 To handle the multi-sampled color computation, we'll update the `write_color()` function. Rather
 than adding in a fractional contribution each time we accumulate more light to the color, just add
@@ -96,83 +114,110 @@ the full color each iteration, and then perform a single divide at the end (by t
 samples) when writing out the color. In addition, we'll add a handy utility function to the
 `rtweekend.h` utility header: `clamp(x,min,max)`, which clamps the value `x` to the range \[min,max]:
 
-```cpp filename="rtweekend.h | The clamp() utility function"
-    inline double clamp(double x, double min, double max) {
-        if (x < min) return min;
-        if (x > max) return max;
-        return x;
-    }
-```
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="common.rs | The clamp() utility function"
+    ```
+  </Tab>
 
-```cpp filename="color.h | The multi-sample write_color() function"
-    void write_color(std::ostream &out, color pixel_color, int samples_per_pixel) {
-        auto r = pixel_color.x();
-        auto g = pixel_color.y();
-        auto b = pixel_color.z();
+  <Tab label="C++">
+    ```cpp filename="common.h | The clamp() utility function"
+        inline double clamp(double x, double min, double max) {
+            if (x < min) return min;
+            if (x > max) return max;
+            return x;
+        }
+    ```
+  </Tab>
+</Tabs>
 
-        // Divide the color by the number of samples.
-        auto scale = 1.0 / samples_per_pixel;
-        r *= scale;
-        g *= scale;
-        b *= scale;
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="color.rs | The multi-sample write_color() function"
+    ```
+  </Tab>
 
-        // Write the translated [0,255] value of each color component.
-        out << static_cast<int>(256 * clamp(r, 0.0, 0.999)) << ' '
-            << static_cast<int>(256 * clamp(g, 0.0, 0.999)) << ' '
-            << static_cast<int>(256 * clamp(b, 0.0, 0.999)) << '\n';
-    }
-```
+  <Tab label="C++">
+    ```cpp filename="color.h | The multi-sample write_color() function"
+        void write_color(std::ostream &out, color pixel_color, int samples_per_pixel) {
+            auto r = pixel_color.x();
+            auto g = pixel_color.y();
+            auto b = pixel_color.z();
+
+            // Divide the color by the number of samples.
+            auto scale = 1.0 / samples_per_pixel;
+            r *= scale;
+            g *= scale;
+            b *= scale;
+
+            // Write the translated [0,255] value of each color component.
+            out << static_cast<int>(256 * clamp(r, 0.0, 0.999)) << ' '
+                << static_cast<int>(256 * clamp(g, 0.0, 0.999)) << ' '
+                << static_cast<int>(256 * clamp(b, 0.0, 0.999)) << '\n';
+        }
+    ```
+  </Tab>
+</Tabs>
 
 Main is also changed:
 
-```cpp filename="main.cpp | Rendering with multi-sampled pixels"
-    #include "camera.h"
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="main.rs | Rendering with multi-sampled pixels"
+    ```
+  </Tab>
 
-    ...
+  <Tab label="C++">
+    ```cpp filename="main.cpp | Rendering with multi-sampled pixels"
+        #include "camera.h"
 
-    int main() {
+        ...
 
-        // Image
+        int main() {
 
-        const auto aspect_ratio = 16.0 / 9.0;
-        const int image_width = 400;
-        const int image_height = static_cast<int>(image_width / aspect_ratio);
+            // Image
 
-        const int samples_per_pixel = 100;
+            const auto aspect_ratio = 16.0 / 9.0;
+            const int image_width = 400;
+            const int image_height = static_cast<int>(image_width / aspect_ratio);
 
-        // World
+            const int samples_per_pixel = 100;
 
-        hittable_list world;
-        world.add(make_shared<sphere>(point3(0,0,-1), 0.5));
-        world.add(make_shared<sphere>(point3(0,-100.5,-1), 100));
+            // World
 
-        // Camera
+            hittable_list world;
+            world.add(make_shared<sphere>(point3(0,0,-1), 0.5));
+            world.add(make_shared<sphere>(point3(0,-100.5,-1), 100));
+
+            // Camera
 
 
-        camera cam;
+            camera cam;
 
-        // Render
+            // Render
 
-        std::cout << "P3\n" << image_width << " " << image_height << "\n255\n";
+            std::cout << "P3\n" << image_width << " " << image_height << "\n255\n";
 
-        for (int j = image_height-1; j >= 0; --j) {
-            std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
-            for (int i = 0; i < image_width; ++i) {
+            for (int j = image_height-1; j >= 0; --j) {
+                std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
+                for (int i = 0; i < image_width; ++i) {
 
-                color pixel_color(0, 0, 0);
-                for (int s = 0; s < samples_per_pixel; ++s) {
-                    auto u = (i + random_double()) / (image_width-1);
-                    auto v = (j + random_double()) / (image_height-1);
-                    ray r = cam.get_ray(u, v);
-                    pixel_color += ray_color(r, world);
+                    color pixel_color(0, 0, 0);
+                    for (int s = 0; s < samples_per_pixel; ++s) {
+                        auto u = (i + random_double()) / (image_width-1);
+                        auto v = (j + random_double()) / (image_height-1);
+                        ray r = cam.get_ray(u, v);
+                        pixel_color += ray_color(r, world);
+                    }
+                    write_color(std::cout, pixel_color, samples_per_pixel);
                 }
-                write_color(std::cout, pixel_color, samples_per_pixel);
             }
-        }
 
-        std::cerr << "\nDone.\n";
-    }
-```
+            std::cerr << "\nDone.\n";
+        }
+    ```
+  </Tab>
+</Tabs>
 
 Zooming into the image that is produced, we can see the difference in edge pixels.
 

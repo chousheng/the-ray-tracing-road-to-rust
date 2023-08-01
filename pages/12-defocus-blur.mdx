@@ -44,83 +44,110 @@ larger the radius, the greater the defocus blur. You can think of our original c
 defocus disk of radius zero (no blur at all), so all rays originated at the disk center
 (`lookfrom`).
 
-```cpp filename="vec3.h | Generate random point inside unit disk"
-    vec3 random_in_unit_disk() {
-        while (true) {
-            auto p = vec3(random_double(-1,1), random_double(-1,1), 0);
-            if (p.length_squared() >= 1) continue;
-            return p;
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="vec3.rs | Generate random point inside unit disk"
+    ```
+  </Tab>
+
+  <Tab label="C++">
+    ```cpp filename="vec3.h | Generate random point inside unit disk"
+        vec3 random_in_unit_disk() {
+            while (true) {
+                auto p = vec3(random_double(-1,1), random_double(-1,1), 0);
+                if (p.length_squared() >= 1) continue;
+                return p;
+            }
         }
-    }
-```
+    ```
+  </Tab>
+</Tabs>
 
-```cpp filename="camera.h | Camera with adjustable depth-of-field (dof)"
-    class camera {
-        public:
-            camera(
-                point3 lookfrom,
-                point3 lookat,
-                vec3   vup,
-                double vfov, // vertical field-of-view in degrees
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="camera.rs | Camera with adjustable depth-of-field (dof)"
+    ```
+  </Tab>
 
-                double aspect_ratio,
-                double aperture,
-                double focus_dist
-            ) {
-                auto theta = degrees_to_radians(vfov);
-                auto h = tan(theta/2);
-                auto viewport_height = 2.0 * h;
-                auto viewport_width = aspect_ratio * viewport_height;
+  <Tab label="C++">
+    ```cpp filename="camera.h | Camera with adjustable depth-of-field (dof)"
+        class camera {
+            public:
+                camera(
+                    point3 lookfrom,
+                    point3 lookat,
+                    vec3   vup,
+                    double vfov, // vertical field-of-view in degrees
 
-
-
-                w = unit_vector(lookfrom - lookat);
-                u = unit_vector(cross(vup, w));
-                v = cross(w, u);
-
-                origin = lookfrom;
-
-                horizontal = focus_dist * viewport_width * u;
-                vertical = focus_dist * viewport_height * v;
-                lower_left_corner = origin - horizontal/2 - vertical/2 - focus_dist*w;
-
-                lens_radius = aperture / 2;
-            }
+                    double aspect_ratio,
+                    double aperture,
+                    double focus_dist
+                ) {
+                    auto theta = degrees_to_radians(vfov);
+                    auto h = tan(theta/2);
+                    auto viewport_height = 2.0 * h;
+                    auto viewport_width = aspect_ratio * viewport_height;
 
 
-            ray get_ray(double s, double t) const {
 
-                vec3 rd = lens_radius * random_in_unit_disk();
-                vec3 offset = u * rd.x() + v * rd.y();
+                    w = unit_vector(lookfrom - lookat);
+                    u = unit_vector(cross(vup, w));
+                    v = cross(w, u);
 
-                return ray(
-                    origin + offset,
-                    lower_left_corner + s*horizontal + t*vertical - origin - offset
-                );
-            }
+                    origin = lookfrom;
 
-        private:
-            point3 origin;
-            point3 lower_left_corner;
-            vec3 horizontal;
-            vec3 vertical;
+                    horizontal = focus_dist * viewport_width * u;
+                    vertical = focus_dist * viewport_height * v;
+                    lower_left_corner = origin - horizontal/2 - vertical/2 - focus_dist*w;
 
-            vec3 u, v, w;
-            double lens_radius;
-    };
-```
+                    lens_radius = aperture / 2;
+                }
+
+
+                ray get_ray(double s, double t) const {
+
+                    vec3 rd = lens_radius * random_in_unit_disk();
+                    vec3 offset = u * rd.x() + v * rd.y();
+
+                    return ray(
+                        origin + offset,
+                        lower_left_corner + s*horizontal + t*vertical - origin - offset
+                    );
+                }
+
+            private:
+                point3 origin;
+                point3 lower_left_corner;
+                vec3 horizontal;
+                vec3 vertical;
+
+                vec3 u, v, w;
+                double lens_radius;
+        };
+    ```
+  </Tab>
+</Tabs>
 
 Using a big aperture:
 
-```cpp filename="main.cpp | Scene camera with depth-of-field"
-    point3 lookfrom(3,3,2);
-    point3 lookat(0,0,-1);
-    vec3 vup(0,1,0);
-    auto dist_to_focus = (lookfrom-lookat).length();
-    auto aperture = 2.0;
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="main.rs | Scene camera with depth-of-field"
+    ```
+  </Tab>
 
-    camera cam(lookfrom, lookat, vup, 20, aspect_ratio, aperture, dist_to_focus);
-```
+  <Tab label="C++">
+    ```cpp filename="main.cpp | Scene camera with depth-of-field"
+        point3 lookfrom(3,3,2);
+        point3 lookat(0,0,-1);
+        vec3 vup(0,1,0);
+        auto dist_to_focus = (lookfrom-lookat).length();
+        auto aperture = 2.0;
+
+        camera cam(lookfrom, lookat, vup, 20, aspect_ratio, aperture, dist_to_focus);
+    ```
+  </Tab>
+</Tabs>
 
 We get:
 

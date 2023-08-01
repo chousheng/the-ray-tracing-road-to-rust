@@ -41,46 +41,73 @@ We need a way to pick a random point in a unit radius sphere. We'll use what is 
 algorithm: a rejection method. First, pick a random point in the unit cube where x, y, and z all
 range from -1 to +1. Reject this point and try again if the point is outside the sphere.
 
-```cpp filename="vec3.h | Vec3 random utility functions"
-    class vec3 {
-      public:
-        ...
-        inline static vec3 random() {
-            return vec3(random_double(), random_double(), random_double());
-        }
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="vec3.rs | Vec3 random utility functions"
+    ```
+  </Tab>
 
-        inline static vec3 random(double min, double max) {
-            return vec3(random_double(min,max), random_double(min,max), random_double(min,max));
-        }
-```
+  <Tab label="C++">
+    ```cpp filename="vec3.h | Vec3 random utility functions"
+        class vec3 {
+          public:
+            ...
+            inline static vec3 random() {
+                return vec3(random_double(), random_double(), random_double());
+            }
 
-```cpp filename="Vec3.h | The random_in_unit_sphere() function"
-    vec3 random_in_unit_sphere() {
-        while (true) {
-            auto p = vec3::random(-1,1);
-            if (p.length_squared() >= 1) continue;
-            return p;
+            inline static vec3 random(double min, double max) {
+                return vec3(random_double(min,max), random_double(min,max), random_double(min,max));
+            }
+    ```
+  </Tab>
+</Tabs>
+
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="vec3.rs | The random_in_unit_sphere() function"
+    ```
+  </Tab>
+
+  <Tab label="C++">
+    ```cpp filename="Vec3.h | The random_in_unit_sphere() function"
+        vec3 random_in_unit_sphere() {
+            while (true) {
+                auto p = vec3::random(-1,1);
+                if (p.length_squared() >= 1) continue;
+                return p;
+            }
         }
-    }
-```
+    ```
+  </Tab>
+</Tabs>
 
 Then update the `ray_color()` function to use the new random direction generator:
 
-```cpp filename="main.cpp | ray_color() using a random ray direction"
-    color ray_color(const ray& r, const hittable& world) {
-        hit_record rec;
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="main.rs | ray_color() using a random ray direction"
+    ```
+  </Tab>
 
-        if (world.hit(r, 0, infinity, rec)) {
+  <Tab label="C++">
+    ```cpp filename="main.cpp | ray_color() using a random ray direction"
+        color ray_color(const ray& r, const hittable& world) {
+            hit_record rec;
 
-            point3 target = rec.p + rec.normal + random_in_unit_sphere();
-            return 0.5 * ray_color(ray(rec.p, target - rec.p), world);
+            if (world.hit(r, 0, infinity, rec)) {
+
+                point3 target = rec.p + rec.normal + random_in_unit_sphere();
+                return 0.5 * ray_color(ray(rec.p, target - rec.p), world);
+            }
+
+            vec3 unit_direction = unit_vector(r.direction());
+            auto t = 0.5*(unit_direction.y() + 1.0);
+            return (1.0-t)*color(1.0, 1.0, 1.0) + t*color(0.5, 0.7, 1.0);
         }
-
-        vec3 unit_direction = unit_vector(r.direction());
-        auto t = 0.5*(unit_direction.y() + 1.0);
-        return (1.0-t)*color(1.0, 1.0, 1.0) + t*color(0.5, 0.7, 1.0);
-    }
-```
+    ```
+  </Tab>
+</Tabs>
 
 ## Limiting the Number of Child Rays
 
@@ -89,64 +116,73 @@ will it stop recursing? When it fails to hit anything. In some cases, however, t
 time — long enough to blow the stack. To guard against that, let's limit the maximum recursion
 depth, returning no light contribution at the maximum depth:
 
-```cpp filename="main.cpp | ray_color() with depth limiting"
-    color ray_color(const ray& r, const hittable& world, int depth) {
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="main.rs | ray_color() with depth limiting"
+    ```
+  </Tab>
 
-        hit_record rec;
+  <Tab label="C++">
+    ```cpp filename="main.cpp | ray_color() with depth limiting"
+        color ray_color(const ray& r, const hittable& world, int depth) {
+
+            hit_record rec;
 
 
 
-        // If we've exceeded the ray bounce limit, no more light is gathered.
-        if (depth <= 0)
-            return color(0,0,0);
+            // If we've exceeded the ray bounce limit, no more light is gathered.
+            if (depth <= 0)
+                return color(0,0,0);
 
-        if (world.hit(r, 0, infinity, rec)) {
-            point3 target = rec.p + rec.normal + random_in_unit_sphere();
+            if (world.hit(r, 0, infinity, rec)) {
+                point3 target = rec.p + rec.normal + random_in_unit_sphere();
 
-            return 0.5 * ray_color(ray(rec.p, target - rec.p), world, depth-1);
+                return 0.5 * ray_color(ray(rec.p, target - rec.p), world, depth-1);
+            }
+
+            vec3 unit_direction = unit_vector(r.direction());
+            auto t = 0.5*(unit_direction.y() + 1.0);
+            return (1.0-t)*color(1.0, 1.0, 1.0) + t*color(0.5, 0.7, 1.0);
         }
 
-        vec3 unit_direction = unit_vector(r.direction());
-        auto t = 0.5*(unit_direction.y() + 1.0);
-        return (1.0-t)*color(1.0, 1.0, 1.0) + t*color(0.5, 0.7, 1.0);
-    }
-
-    ...
-
-    int main() {
-
-        // Image
-
-        const auto aspect_ratio = 16.0 / 9.0;
-        const int image_width = 400;
-        const int image_height = static_cast<int>(image_width / aspect_ratio);
-        const int samples_per_pixel = 100;
-
-        const int max_depth = 50;
         ...
 
-        // Render
+        int main() {
 
-        std::cout << "P3\n" << image_width << " " << image_height << "\n255\n";
+            // Image
 
-        for (int j = image_height-1; j >= 0; --j) {
-            std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
-            for (int i = 0; i < image_width; ++i) {
-                color pixel_color(0, 0, 0);
-                for (int s = 0; s < samples_per_pixel; ++s) {
-                    auto u = (i + random_double()) / (image_width-1);
-                    auto v = (j + random_double()) / (image_height-1);
-                    ray r = cam.get_ray(u, v);
+            const auto aspect_ratio = 16.0 / 9.0;
+            const int image_width = 400;
+            const int image_height = static_cast<int>(image_width / aspect_ratio);
+            const int samples_per_pixel = 100;
 
-                    pixel_color += ray_color(r, world, max_depth);
+            const int max_depth = 50;
+            ...
+
+            // Render
+
+            std::cout << "P3\n" << image_width << " " << image_height << "\n255\n";
+
+            for (int j = image_height-1; j >= 0; --j) {
+                std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
+                for (int i = 0; i < image_width; ++i) {
+                    color pixel_color(0, 0, 0);
+                    for (int s = 0; s < samples_per_pixel; ++s) {
+                        auto u = (i + random_double()) / (image_width-1);
+                        auto v = (j + random_double()) / (image_height-1);
+                        ray r = cam.get_ray(u, v);
+
+                        pixel_color += ray_color(r, world, max_depth);
+                    }
+                    write_color(std::cout, pixel_color, samples_per_pixel);
                 }
-                write_color(std::cout, pixel_color, samples_per_pixel);
             }
-        }
 
-        std::cerr << "\nDone.\n";
-    }
-```
+            std::cerr << "\nDone.\n";
+        }
+    ```
+  </Tab>
+</Tabs>
 
 This gives us:
 
@@ -163,24 +199,33 @@ for our purposes we just need to be aware of it. To a first approximation, we ca
 which means raising the color to the power $1/gamma$, or in our simple case ½, which is just
 square-root:
 
-```cpp filename="color.h | write_color(), with gamma correction"
-    void write_color(std::ostream &out, color pixel_color, int samples_per_pixel) {
-        auto r = pixel_color.x();
-        auto g = pixel_color.y();
-        auto b = pixel_color.z();
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="color.rs | write_color(), with gamma correction"
+    ```
+  </Tab>
 
-        // Divide the color by the number of samples and gamma-correct for gamma=2.0.
-        auto scale = 1.0 / samples_per_pixel;
-        r = sqrt(scale * r);
-        g = sqrt(scale * g);
-        b = sqrt(scale * b);
+  <Tab label="C++">
+    ```cpp filename="color.h | write_color(), with gamma correction"
+        void write_color(std::ostream &out, color pixel_color, int samples_per_pixel) {
+            auto r = pixel_color.x();
+            auto g = pixel_color.y();
+            auto b = pixel_color.z();
 
-        // Write the translated [0,255] value of each color component.
-        out << static_cast<int>(256 * clamp(r, 0.0, 0.999)) << ' '
-            << static_cast<int>(256 * clamp(g, 0.0, 0.999)) << ' '
-            << static_cast<int>(256 * clamp(b, 0.0, 0.999)) << '\n';
-    }
-```
+            // Divide the color by the number of samples and gamma-correct for gamma=2.0.
+            auto scale = 1.0 / samples_per_pixel;
+            r = sqrt(scale * r);
+            g = sqrt(scale * g);
+            b = sqrt(scale * b);
+
+            // Write the translated [0,255] value of each color component.
+            out << static_cast<int>(256 * clamp(r, 0.0, 0.999)) << ' '
+                << static_cast<int>(256 * clamp(g, 0.0, 0.999)) << ' '
+                << static_cast<int>(256 * clamp(b, 0.0, 0.999)) << '\n';
+        }
+    ```
+  </Tab>
+</Tabs>
 
 That yields light grey, as we desire:
 
@@ -192,9 +237,18 @@ There's also a subtle bug in there. Some of the reflected rays hit the object th
 off of not at exactly $t=0$, but instead at $t=-0.0000001$ or $t=0.00000001$ or whatever floating
 point approximation the sphere intersector gives us. So we need to ignore hits very near zero:
 
-```cpp filename="main.cpp | Calculating reflected ray origins with tolerance"
-    if (world.hit(r, 0.001, infinity, rec)) {
-```
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="main.rs | Calculating reflected ray origins with tolerance"
+    ```
+  </Tab>
+
+  <Tab label="C++">
+    ```cpp filename="main.cpp | Calculating reflected ray origins with tolerance"
+        if (world.hit(r, 0.001, infinity, rec)) {
+    ```
+  </Tab>
+</Tabs>
 
 This gets rid of the shadow acne problem. Yes it is really called that.
 
@@ -212,41 +266,59 @@ distribution is more uniform. This is achieved by picking random points on the s
 sphere, offset along the surface normal. Picking random points on the unit sphere can be achieved by
 picking random points *in* the unit sphere, and then normalizing those.
 
-```cpp filename="vec3.h | The random_unit_vector() function"
-inline vec3 random_in_unit_sphere() {
-    ...
-}
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="vec3.rs | The random_unit_vector() function"
+    ```
+  </Tab>
+
+  <Tab label="C++">
+    ```cpp filename="vec3.h | The random_unit_vector() function"
+    inline vec3 random_in_unit_sphere() {
+        ...
+    }
 
 
-vec3 random_unit_vector() {
-    return unit_vector(random_in_unit_sphere());
-}
-```
+    vec3 random_unit_vector() {
+        return unit_vector(random_in_unit_sphere());
+    }
+    ```
+  </Tab>
+</Tabs>
 
 ![Figure \[rand-unitvec\]: Generating a random unit vector](../images/fig-1.10-rand-unitvec.png)
 
 This `random_unit_vector()` is a drop-in replacement for the existing `random_in_unit_sphere()`
 function.
 
-```cpp filename="main.cpp | ray_color() with replacement diffuse"
-color ray_color(const ray& r, const hittable& world, int depth) {
-    hit_record rec;
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="main.rs | ray_color() with replacement diffuse"
+    ```
+  </Tab>
 
-    // If we've exceeded the ray bounce limit, no more light is gathered.
-    if (depth <= 0)
-        return color(0,0,0);
+  <Tab label="C++">
+    ```cpp filename="main.cpp | ray_color() with replacement diffuse"
+    color ray_color(const ray& r, const hittable& world, int depth) {
+        hit_record rec;
 
-    if (world.hit(r, 0.001, infinity, rec)) {
+        // If we've exceeded the ray bounce limit, no more light is gathered.
+        if (depth <= 0)
+            return color(0,0,0);
 
-        point3 target = rec.p + rec.normal + random_unit_vector();
-        return 0.5 * ray_color(ray(rec.p, target - rec.p), world, depth-1);
+        if (world.hit(r, 0.001, infinity, rec)) {
+
+            point3 target = rec.p + rec.normal + random_unit_vector();
+            return 0.5 * ray_color(ray(rec.p, target - rec.p), world, depth-1);
+        }
+
+        vec3 unit_direction = unit_vector(r.direction());
+        auto t = 0.5*(unit_direction.y() + 1.0);
+        return (1.0-t)*color(1.0, 1.0, 1.0) + t*color(0.5, 0.7, 1.0);
     }
-
-    vec3 unit_direction = unit_vector(r.direction());
-    auto t = 0.5*(unit_direction.y() + 1.0);
-    return (1.0-t)*color(1.0, 1.0, 1.0) + t*color(0.5, 0.7, 1.0);
-}
-```
+    ```
+  </Tab>
+</Tabs>
 
 After rendering we get a similar image:
 
@@ -284,37 +356,55 @@ A more intuitive approach is to have a uniform scatter direction for all angles 
 point, with no dependence on the angle from the normal. Many of the first raytracing papers used
 this diffuse method (before adopting Lambertian diffuse).
 
-```cpp filename="vec3.h | The random_in_hemisphere(normal) function"
-vec3 random_in_hemisphere(const vec3& normal) {
-    vec3 in_unit_sphere = random_in_unit_sphere();
-    if (dot(in_unit_sphere, normal) > 0.0) // In the same hemisphere as the normal
-        return in_unit_sphere;
-    else
-        return -in_unit_sphere;
-}
-```
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="vec3.rs | The random_in_hemisphere(normal) function"
+    ```
+  </Tab>
+
+  <Tab label="C++">
+    ```cpp filename="vec3.h | The random_in_hemisphere(normal) function"
+    vec3 random_in_hemisphere(const vec3& normal) {
+        vec3 in_unit_sphere = random_in_unit_sphere();
+        if (dot(in_unit_sphere, normal) > 0.0) // In the same hemisphere as the normal
+            return in_unit_sphere;
+        else
+            return -in_unit_sphere;
+    }
+    ```
+  </Tab>
+</Tabs>
 
 Plugging the new formula into the `ray_color()` function:
 
-```cpp filename="main.cpp | ray_color() with hemispherical scattering"
-color ray_color(const ray& r, const hittable& world, int depth) {
-    hit_record rec;
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="main.rs | ray_color() with hemispherical scattering"
+    ```
+  </Tab>
 
-    // If we've exceeded the ray bounce limit, no more light is gathered.
-    if (depth <= 0)
-        return color(0,0,0);
+  <Tab label="C++">
+    ```cpp filename="main.cpp | ray_color() with hemispherical scattering"
+    color ray_color(const ray& r, const hittable& world, int depth) {
+        hit_record rec;
 
-    if (world.hit(r, 0.001, infinity, rec)) {
+        // If we've exceeded the ray bounce limit, no more light is gathered.
+        if (depth <= 0)
+            return color(0,0,0);
 
-        point3 target = rec.p + random_in_hemisphere(rec.normal);
-        return 0.5 * ray_color(ray(rec.p, target - rec.p), world, depth-1);
+        if (world.hit(r, 0.001, infinity, rec)) {
+
+            point3 target = rec.p + random_in_hemisphere(rec.normal);
+            return 0.5 * ray_color(ray(rec.p, target - rec.p), world, depth-1);
+        }
+
+        vec3 unit_direction = unit_vector(r.direction());
+        auto t = 0.5*(unit_direction.y() + 1.0);
+        return (1.0-t)*color(1.0, 1.0, 1.0) + t*color(0.5, 0.7, 1.0);
     }
-
-    vec3 unit_direction = unit_vector(r.direction());
-    auto t = 0.5*(unit_direction.y() + 1.0);
-    return (1.0-t)*color(1.0, 1.0, 1.0) + t*color(0.5, 0.7, 1.0);
-}
-```
+    ```
+  </Tab>
+</Tabs>
 
 Gives us the following image:
 

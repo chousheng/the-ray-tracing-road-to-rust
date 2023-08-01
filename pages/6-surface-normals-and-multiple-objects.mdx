@@ -19,32 +19,41 @@ one sphere in the scene, and it's directly in front of the camera, so we won't w
 values of $t$ yet. We'll just assume the closest hit point (smallest $t$). These changes in the code
 let us compute and visualize $\mathbf{n}$:
 
-```cpp filename="main.cpp | Rendering surface normals on a sphere"
-double hit_sphere(const point3& center, double radius, const ray& r) {
-    vec3 oc = r.origin() - center;
-    auto a = dot(r.direction(), r.direction());
-    auto b = 2.0 * dot(oc, r.direction());
-    auto c = dot(oc, oc) - radius*radius;
-    auto discriminant = b*b - 4*a*c;
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="main.rs | Rendering surface normals on a sphere"
+    ```
+  </Tab>
 
-    if (discriminant < 0) {
-        return -1.0;
-    } else {
-        return (-b - sqrt(discriminant) ) / (2.0*a);
-    }
-}
+  <Tab label="C++">
+    ```cpp filename="main.cpp | Rendering surface normals on a sphere"
+    double hit_sphere(const point3& center, double radius, const ray& r) {
+        vec3 oc = r.origin() - center;
+        auto a = dot(r.direction(), r.direction());
+        auto b = 2.0 * dot(oc, r.direction());
+        auto c = dot(oc, oc) - radius*radius;
+        auto discriminant = b*b - 4*a*c;
 
-color ray_color(const ray& r) {
-    auto t = hit_sphere(point3(0,0,-1), 0.5, r);
-    if (t > 0.0) {
-        vec3 N = unit_vector(r.at(t) - vec3(0,0,-1));
-        return 0.5*color(N.x()+1, N.y()+1, N.z()+1);
+        if (discriminant < 0) {
+            return -1.0;
+        } else {
+            return (-b - sqrt(discriminant) ) / (2.0*a);
+        }
     }
-    vec3 unit_direction = unit_vector(r.direction());
-    t = 0.5*(unit_direction.y() + 1.0);
-    return (1.0-t)*color(1.0, 1.0, 1.0) + t*color(0.5, 0.7, 1.0);
-}
-```
+
+    color ray_color(const ray& r) {
+        auto t = hit_sphere(point3(0,0,-1), 0.5, r);
+        if (t > 0.0) {
+            vec3 N = unit_vector(r.at(t) - vec3(0,0,-1));
+            return 0.5*color(N.x()+1, N.y()+1, N.z()+1);
+        }
+        vec3 unit_direction = unit_vector(r.direction());
+        t = 0.5*(unit_direction.y() + 1.0);
+        return (1.0-t)*color(1.0, 1.0, 1.0) + t*color(0.5, 0.7, 1.0);
+    }
+    ```
+  </Tab>
+</Tabs>
 
 And that yields this picture:
 
@@ -54,7 +63,7 @@ And that yields this picture:
 
 Let's revisit the ray-sphere equation:
 
-```cpp filename="main.cpp | Ray-sphere intersection code (before)"
+```cpp filename="Ray-sphere intersection code (before)"
 double hit_sphere(const point3& center, double radius, const ray& r) {
     vec3 oc = r.origin() - center;
     auto a = dot(r.direction(), r.direction());
@@ -93,21 +102,30 @@ $$
 
 Using these observations, we can now simplify the sphere-intersection code to this:
 
-```cpp filename="main.cpp | Ray-sphere intersection code (after)"
-double hit_sphere(const point3& center, double radius, const ray& r) {
-    vec3 oc = r.origin() - center;
-    auto a = r.direction().length_squared();
-    auto half_b = dot(oc, r.direction());
-    auto c = oc.length_squared() - radius*radius;
-    auto discriminant = half_b*half_b - a*c;
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="main.rs | Ray-sphere intersection code (after)"
+    ```
+  </Tab>
 
-    if (discriminant < 0) {
-        return -1.0;
-    } else {
-        return (-half_b - sqrt(discriminant) ) / a;
+  <Tab label="C++">
+    ```cpp filename="main.cpp | Ray-sphere intersection code (after)"
+    double hit_sphere(const point3& center, double radius, const ray& r) {
+        vec3 oc = r.origin() - center;
+        auto a = r.direction().length_squared();
+        auto half_b = dot(oc, r.direction());
+        auto c = oc.length_squared() - radius*radius;
+        auto discriminant = half_b*half_b - a*c;
+
+        if (discriminant < 0) {
+            return -1.0;
+        } else {
+            return (-half_b - sqrt(discriminant) ) / a;
+        }
     }
-}
-```
+    ```
+  </Tab>
+</Tabs>
 
 ## An Abstraction for Hittable Objects
 
@@ -127,75 +145,93 @@ something closer as we do our search, and we will only need the normal of the cl
 go with the simple solution and compute a bundle of stuff I will store in some structure. Here's
 the abstract class:
 
-```cpp filename="hittable.h | The Hittable class"
-#ifndef HITTABLE_H
-#define HITTABLE_H
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="hittable.rs | The Hittable struct"
+    ```
+  </Tab>
 
-#include "ray.h"
+  <Tab label="C++">
+    ```cpp filename="hittable.h | The Hittable class"
+    #ifndef HITTABLE_H
+    #define HITTABLE_H
 
-struct hit_record {
-    point3 p;
-    vec3 normal;
-    double t;
-};
+    #include "ray.h"
 
-class hittable {
-    public:
-        virtual bool hit(const ray& r, double t_min, double t_max, hit_record& rec) const = 0;
-};
+    struct hit_record {
+        point3 p;
+        vec3 normal;
+        double t;
+    };
 
-#endif
-```
+    class hittable {
+        public:
+            virtual bool hit(const ray& r, double t_min, double t_max, hit_record& rec) const = 0;
+    };
+
+    #endif
+    ```
+  </Tab>
+</Tabs>
 
 And here's the sphere:
 
-```cpp filename="sphere.h | The Sphere class"
-#ifndef SPHERE_H
-#define SPHERE_H
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="sphere.rs | The Sphere struct"
+    ```
+  </Tab>
 
-#include "hittable.h"
-#include "vec3.h"
+  <Tab label="C++">
+    ```cpp filename="sphere.h | The Sphere class"
+    #ifndef SPHERE_H
+    #define SPHERE_H
 
-class sphere : public hittable {
-    public:
-        sphere() {}
-        sphere(point3 cen, double r) : center(cen), radius(r) {};
+    #include "hittable.h"
+    #include "vec3.h"
 
-        virtual bool hit(
-            const ray& r, double t_min, double t_max, hit_record& rec) const override;
+    class sphere : public hittable {
+        public:
+            sphere() {}
+            sphere(point3 cen, double r) : center(cen), radius(r) {};
 
-    public:
-        point3 center;
-        double radius;
-};
+            virtual bool hit(
+                const ray& r, double t_min, double t_max, hit_record& rec) const override;
 
-bool sphere::hit(const ray& r, double t_min, double t_max, hit_record& rec) const {
-    vec3 oc = r.origin() - center;
-    auto a = r.direction().length_squared();
-    auto half_b = dot(oc, r.direction());
-    auto c = oc.length_squared() - radius*radius;
+        public:
+            point3 center;
+            double radius;
+    };
 
-    auto discriminant = half_b*half_b - a*c;
-    if (discriminant < 0) return false;
-    auto sqrtd = sqrt(discriminant);
+    bool sphere::hit(const ray& r, double t_min, double t_max, hit_record& rec) const {
+        vec3 oc = r.origin() - center;
+        auto a = r.direction().length_squared();
+        auto half_b = dot(oc, r.direction());
+        auto c = oc.length_squared() - radius*radius;
 
-    // Find the nearest root that lies in the acceptable range.
-    auto root = (-half_b - sqrtd) / a;
-    if (root < t_min || t_max < root) {
-        root = (-half_b + sqrtd) / a;
-        if (root < t_min || t_max < root)
-            return false;
+        auto discriminant = half_b*half_b - a*c;
+        if (discriminant < 0) return false;
+        auto sqrtd = sqrt(discriminant);
+
+        // Find the nearest root that lies in the acceptable range.
+        auto root = (-half_b - sqrtd) / a;
+        if (root < t_min || t_max < root) {
+            root = (-half_b + sqrtd) / a;
+            if (root < t_min || t_max < root)
+                return false;
+        }
+
+        rec.t = root;
+        rec.p = r.at(rec.t);
+        rec.normal = (rec.p - center) / radius;
+
+        return true;
     }
 
-    rec.t = root;
-    rec.p = r.at(rec.t);
-    rec.normal = (rec.p - center) / radius;
-
-    return true;
-}
-
-#endif
-```
+    #endif
+    ```
+  </Tab>
+</Tabs>
 
 ## Front Faces Versus Back Faces
 
@@ -258,85 +294,112 @@ literature.
 We add the `front_face` bool to the `hit_record` struct. We'll also add a function to solve this
 calculation for us.
 
-```cpp filename="hittable.h | Adding front-face tracking to HitRecord"
-struct hit_record {
-    point3 p;
-    vec3 normal;
-    double t;
-    bool front_face;
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="hittable.rs | Adding front-face tracking to HitRecord"
+    ```
+  </Tab>
 
-    inline void set_face_normal(const ray& r, const vec3& outward_normal) {
-        front_face = dot(r.direction(), outward_normal) < 0;
-        normal = front_face ? outward_normal :-outward_normal;
-    }
-};
-```
+  <Tab label="C++">
+    ```cpp filename="hittable.h | Adding front-face tracking to HitRecord"
+    struct hit_record {
+        point3 p;
+        vec3 normal;
+        double t;
+        bool front_face;
+
+        inline void set_face_normal(const ray& r, const vec3& outward_normal) {
+            front_face = dot(r.direction(), outward_normal) < 0;
+            normal = front_face ? outward_normal :-outward_normal;
+        }
+    };
+    ```
+  </Tab>
+</Tabs>
 
 And then we add the surface side determination to the class:
 
-```cpp filename="sphere.h | The Sphere class with normal determination"
-bool sphere::hit(const ray& r, double t_min, double t_max, hit_record& rec) const {
-    ...
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="sphere.rs | The Sphere struct with normal determination"
+    ```
+  </Tab>
 
-    rec.t = root;
-    rec.p = r.at(rec.t);
-    vec3 outward_normal = (rec.p - center) / radius;
-    rec.set_face_normal(r, outward_normal);
+  <Tab label="C++">
+    ```cpp filename="sphere.h | The Sphere class with normal determination"
+    bool sphere::hit(const ray& r, double t_min, double t_max, hit_record& rec) const {
+        ...
 
-    return true;
-}
-```
+        rec.t = root;
+        rec.p = r.at(rec.t);
+        vec3 outward_normal = (rec.p - center) / radius;
+        rec.set_face_normal(r, outward_normal);
+
+        return true;
+    }
+    ```
+  </Tab>
+</Tabs>
 
 ## A List of Hittable Objects
 
 We have a generic object called a `hittable` that the ray can intersect with. We now add a class
 that stores a list of `hittable`s:
 
-```cpp filename="hittable_list.h | The HittableList class"
-#ifndef HITTABLE_LIST_H
-#define HITTABLE_LIST_H
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="hittable_list.rs | The HittableList struct"
+    ```
+  </Tab>
 
-#include "hittable.h"
+  <Tab label="C++">
+    ```cpp filename="hittable_list.h | The HittableList class"
+    #ifndef HITTABLE_LIST_H
+    #define HITTABLE_LIST_H
 
-#include <memory>
-#include <vector>
+    #include "hittable.h"
 
-using std::shared_ptr;
-using std::make_shared;
+    #include <memory>
+    #include <vector>
 
-class hittable_list : public hittable {
-    public:
-        hittable_list() {}
-        hittable_list(shared_ptr<hittable> object) { add(object); }
+    using std::shared_ptr;
+    using std::make_shared;
 
-        void clear() { objects.clear(); }
-        void add(shared_ptr<hittable> object) { objects.push_back(object); }
+    class hittable_list : public hittable {
+        public:
+            hittable_list() {}
+            hittable_list(shared_ptr<hittable> object) { add(object); }
 
-        virtual bool hit(
-            const ray& r, double t_min, double t_max, hit_record& rec) const override;
+            void clear() { objects.clear(); }
+            void add(shared_ptr<hittable> object) { objects.push_back(object); }
 
-    public:
-        std::vector<shared_ptr<hittable>> objects;
-};
+            virtual bool hit(
+                const ray& r, double t_min, double t_max, hit_record& rec) const override;
 
-bool hittable_list::hit(const ray& r, double t_min, double t_max, hit_record& rec) const {
-    hit_record temp_rec;
-    bool hit_anything = false;
-    auto closest_so_far = t_max;
+        public:
+            std::vector<shared_ptr<hittable>> objects;
+    };
 
-    for (const auto& object : objects) {
-        if (object->hit(r, t_min, closest_so_far, temp_rec)) {
-            hit_anything = true;
-            closest_so_far = temp_rec.t;
-            rec = temp_rec;
+    bool hittable_list::hit(const ray& r, double t_min, double t_max, hit_record& rec) const {
+        hit_record temp_rec;
+        bool hit_anything = false;
+        auto closest_so_far = t_max;
+
+        for (const auto& object : objects) {
+            if (object->hit(r, t_min, closest_so_far, temp_rec)) {
+                hit_anything = true;
+                closest_so_far = temp_rec.t;
+                rec = temp_rec;
+            }
         }
+
+        return hit_anything;
     }
 
-    return hit_anything;
-}
-
-#endif
-```
+    #endif
+    ```
+  </Tab>
+</Tabs>
 
 ## Some New C++ Features
 
@@ -393,105 +456,123 @@ There is no standard portable definition of pi, so we just define our own consta
 throw common useful constants and future utility functions in `rtweekend.h`, our general main header
 file.
 
-```cpp filename="rtweekend.h | The common header"
-#ifndef RTWEEKEND_H
-#define RTWEEKEND_H
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="common.rs | The common module"
+    ```
+  </Tab>
 
-#include <cmath>
-#include <limits>
-#include <memory>
+  <Tab label="C++">
+    ```cpp filename="common.h | The common header"
+    #ifndef RTWEEKEND_H
+    #define RTWEEKEND_H
+
+    #include <cmath>
+    #include <limits>
+    #include <memory>
 
 
-// Usings
+    // Usings
 
-using std::shared_ptr;
-using std::make_shared;
-using std::sqrt;
+    using std::shared_ptr;
+    using std::make_shared;
+    using std::sqrt;
 
-// Constants
+    // Constants
 
-const double infinity = std::numeric_limits<double>::infinity();
-const double pi = 3.1415926535897932385;
+    const double infinity = std::numeric_limits<double>::infinity();
+    const double pi = 3.1415926535897932385;
 
-// Utility Functions
+    // Utility Functions
 
-inline double degrees_to_radians(double degrees) {
-    return degrees * pi / 180.0;
-}
+    inline double degrees_to_radians(double degrees) {
+        return degrees * pi / 180.0;
+    }
 
-// Common Headers
+    // Common Headers
 
-#include "ray.h"
-#include "vec3.h"
+    #include "ray.h"
+    #include "vec3.h"
 
-#endif
-```
+    #endif
+    ```
+  </Tab>
+</Tabs>
 
 And the new main:
 
-```cpp filename="main.cpp | The new main() with Hittables"
-#include "rtweekend.h"
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="main.rs | The new main() with Hittables"
+    ```
+  </Tab>
 
-#include "color.h"
-#include "hittable_list.h"
-#include "sphere.h"
+  <Tab label="C++">
+    ```cpp filename="main.cpp | The new main() with Hittables"
+    #include "rtweekend.h"
 
-#include <iostream>
+    #include "color.h"
+    #include "hittable_list.h"
+    #include "sphere.h"
 
-color ray_color(const ray& r, const hittable& world) {
-    hit_record rec;
-    if (world.hit(r, 0, infinity, rec)) {
-        return 0.5 * (rec.normal + color(1,1,1));
-    }
+    #include <iostream>
 
-    vec3 unit_direction = unit_vector(r.direction());
-    auto t = 0.5*(unit_direction.y() + 1.0);
-    return (1.0-t)*color(1.0, 1.0, 1.0) + t*color(0.5, 0.7, 1.0);
-}
-
-int main() {
-
-    // Image
-
-    const auto aspect_ratio = 16.0 / 9.0;
-    const int image_width = 400;
-    const int image_height = static_cast<int>(image_width / aspect_ratio);
-
-    // World
-
-    hittable_list world;
-    world.add(make_shared<sphere>(point3(0,0,-1), 0.5));
-    world.add(make_shared<sphere>(point3(0,-100.5,-1), 100));
-
-    // Camera
-
-    auto viewport_height = 2.0;
-    auto viewport_width = aspect_ratio * viewport_height;
-    auto focal_length = 1.0;
-
-    auto origin = point3(0, 0, 0);
-    auto horizontal = vec3(viewport_width, 0, 0);
-    auto vertical = vec3(0, viewport_height, 0);
-    auto lower_left_corner = origin - horizontal/2 - vertical/2 - vec3(0, 0, focal_length);
-
-    // Render
-
-    std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
-
-    for (int j = image_height-1; j >= 0; --j) {
-        std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
-        for (int i = 0; i < image_width; ++i) {
-            auto u = double(i) / (image_width-1);
-            auto v = double(j) / (image_height-1);
-            ray r(origin, lower_left_corner + u*horizontal + v*vertical);
-            color pixel_color = ray_color(r, world);
-            write_color(std::cout, pixel_color);
+    color ray_color(const ray& r, const hittable& world) {
+        hit_record rec;
+        if (world.hit(r, 0, infinity, rec)) {
+            return 0.5 * (rec.normal + color(1,1,1));
         }
+
+        vec3 unit_direction = unit_vector(r.direction());
+        auto t = 0.5*(unit_direction.y() + 1.0);
+        return (1.0-t)*color(1.0, 1.0, 1.0) + t*color(0.5, 0.7, 1.0);
     }
 
-    std::cerr << "\nDone.\n";
-}
-```
+    int main() {
+
+        // Image
+
+        const auto aspect_ratio = 16.0 / 9.0;
+        const int image_width = 400;
+        const int image_height = static_cast<int>(image_width / aspect_ratio);
+
+        // World
+
+        hittable_list world;
+        world.add(make_shared<sphere>(point3(0,0,-1), 0.5));
+        world.add(make_shared<sphere>(point3(0,-100.5,-1), 100));
+
+        // Camera
+
+        auto viewport_height = 2.0;
+        auto viewport_width = aspect_ratio * viewport_height;
+        auto focal_length = 1.0;
+
+        auto origin = point3(0, 0, 0);
+        auto horizontal = vec3(viewport_width, 0, 0);
+        auto vertical = vec3(0, viewport_height, 0);
+        auto lower_left_corner = origin - horizontal/2 - vertical/2 - vec3(0, 0, focal_length);
+
+        // Render
+
+        std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
+
+        for (int j = image_height-1; j >= 0; --j) {
+            std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
+            for (int i = 0; i < image_width; ++i) {
+                auto u = double(i) / (image_width-1);
+                auto v = double(j) / (image_height-1);
+                ray r(origin, lower_left_corner + u*horizontal + v*vertical);
+                color pixel_color = ray_color(r, world);
+                write_color(std::cout, pixel_color);
+            }
+        }
+
+        std::cerr << "\nDone.\n";
+    }
+    ```
+  </Tab>
+</Tabs>
 
 This yields a picture that is really just a visualization of where the spheres are along with their
 surface normal. This is often a great way to look at your model for flaws and characteristics.

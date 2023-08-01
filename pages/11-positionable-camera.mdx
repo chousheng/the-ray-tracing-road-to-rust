@@ -15,68 +15,86 @@ $z = -2$ plane, or whatever, as long as we made $h$ a ratio to that distance. He
 
 This implies $h = \tan(\frac{\theta}{2})$. Our camera now becomes:
 
-```cpp filename="camera.h | Camera with adjustable field-of-view (fov)"
-    class camera {
-        public:
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="camera.rs | Camera with adjustable field-of-view (fov)"
+    ```
+  </Tab>
 
-            camera(
-                double vfov, // vertical field-of-view in degrees
-                double aspect_ratio
-            ) {
-                auto theta = degrees_to_radians(vfov);
-                auto h = tan(theta/2);
-                auto viewport_height = 2.0 * h;
-                auto viewport_width = aspect_ratio * viewport_height;
+  <Tab label="C++">
+    ```cpp filename="camera.h | Camera with adjustable field-of-view (fov)"
+        class camera {
+            public:
 
-                auto focal_length = 1.0;
+                camera(
+                    double vfov, // vertical field-of-view in degrees
+                    double aspect_ratio
+                ) {
+                    auto theta = degrees_to_radians(vfov);
+                    auto h = tan(theta/2);
+                    auto viewport_height = 2.0 * h;
+                    auto viewport_width = aspect_ratio * viewport_height;
 
-                origin = point3(0, 0, 0);
-                horizontal = vec3(viewport_width, 0.0, 0.0);
-                vertical = vec3(0.0, viewport_height, 0.0);
-                lower_left_corner = origin - horizontal/2 - vertical/2 - vec3(0, 0, focal_length);
-            }
+                    auto focal_length = 1.0;
 
-            ray get_ray(double u, double v) const {
-                return ray(origin, lower_left_corner + u*horizontal + v*vertical - origin);
-            }
+                    origin = point3(0, 0, 0);
+                    horizontal = vec3(viewport_width, 0.0, 0.0);
+                    vertical = vec3(0.0, viewport_height, 0.0);
+                    lower_left_corner = origin - horizontal/2 - vertical/2 - vec3(0, 0, focal_length);
+                }
 
-        private:
-            point3 origin;
-            point3 lower_left_corner;
-            vec3 horizontal;
-            vec3 vertical;
-    };
-```
+                ray get_ray(double u, double v) const {
+                    return ray(origin, lower_left_corner + u*horizontal + v*vertical - origin);
+                }
+
+            private:
+                point3 origin;
+                point3 lower_left_corner;
+                vec3 horizontal;
+                vec3 vertical;
+        };
+    ```
+  </Tab>
+</Tabs>
 
 When calling it with camera `cam(90, aspect_ratio)` and these spheres:
 
-```cpp filename="main.cpp | Scene with wide-angle camera"
-    int main() {
-        ...
-        // World
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="main.rs | Scene with wide-angle camera"
+    ```
+  </Tab>
+
+  <Tab label="C++">
+    ```cpp filename="main.cpp | Scene with wide-angle camera"
+        int main() {
+            ...
+            // World
 
 
 
-        auto R = cos(pi/4);
-        hittable_list world;
+            auto R = cos(pi/4);
+            hittable_list world;
 
-        auto material_left  = make_shared<lambertian>(color(0,0,1));
-        auto material_right = make_shared<lambertian>(color(1,0,0));
+            auto material_left  = make_shared<lambertian>(color(0,0,1));
+            auto material_right = make_shared<lambertian>(color(1,0,0));
 
-        world.add(make_shared<sphere>(point3(-R, 0, -1), R, material_left));
-        world.add(make_shared<sphere>(point3( R, 0, -1), R, material_right));
+            world.add(make_shared<sphere>(point3(-R, 0, -1), R, material_left));
+            world.add(make_shared<sphere>(point3( R, 0, -1), R, material_right));
 
-        // Camera
+            // Camera
 
-        camera cam(90.0, aspect_ratio);
+            camera cam(90.0, aspect_ratio);
 
-        // Render
+            // Render
 
-        std::cout << "P3\n" << image_width << " " << image_height << "\n255\n";
+            std::cout << "P3\n" << image_width << " " << image_height << "\n255\n";
 
-        for (int j = image_height-1; j >= 0; --j) {
-        ...
-```
+            for (int j = image_height-1; j >= 0; --j) {
+            ...
+    ```
+  </Tab>
+</Tabs>
 
 gives:
 
@@ -107,66 +125,84 @@ camera faced -Z, our arbitrary view camera faces -w. And keep in mind that we ca
 have to -- use world up $(0,1,0)$ to specify vup. This is convenient and will naturally keep your
 camera horizontally level until you decide to experiment with crazy camera angles.
 
-```cpp filename="camera.h | Positionable and orientable camera"
-    class camera {
-        public:
-            camera(
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="camera.rs | Positionable and orientable camera"
+    ```
+  </Tab>
 
-                point3 lookfrom,
-                point3 lookat,
-                vec3   vup,
-                double vfov, // vertical field-of-view in degrees
-                double aspect_ratio
-            ) {
-                auto theta = degrees_to_radians(vfov);
-                auto h = tan(theta/2);
-                auto viewport_height = 2.0 * h;
-                auto viewport_width = aspect_ratio * viewport_height;
+  <Tab label="C++">
+    ```cpp filename="camera.h | Positionable and orientable camera"
+        class camera {
+            public:
+                camera(
 
-
-
-                auto w = unit_vector(lookfrom - lookat);
-                auto u = unit_vector(cross(vup, w));
-                auto v = cross(w, u);
-
-                origin = lookfrom;
-                horizontal = viewport_width * u;
-                vertical = viewport_height * v;
-                lower_left_corner = origin - horizontal/2 - vertical/2 - w;
-            }
+                    point3 lookfrom,
+                    point3 lookat,
+                    vec3   vup,
+                    double vfov, // vertical field-of-view in degrees
+                    double aspect_ratio
+                ) {
+                    auto theta = degrees_to_radians(vfov);
+                    auto h = tan(theta/2);
+                    auto viewport_height = 2.0 * h;
+                    auto viewport_width = aspect_ratio * viewport_height;
 
 
 
-            ray get_ray(double s, double t) const {
-                return ray(origin, lower_left_corner + s*horizontal + t*vertical - origin);
-            }
+                    auto w = unit_vector(lookfrom - lookat);
+                    auto u = unit_vector(cross(vup, w));
+                    auto v = cross(w, u);
 
-        private:
-            point3 origin;
-            point3 lower_left_corner;
-            vec3 horizontal;
-            vec3 vertical;
-    };
-```
+                    origin = lookfrom;
+                    horizontal = viewport_width * u;
+                    vertical = viewport_height * v;
+                    lower_left_corner = origin - horizontal/2 - vertical/2 - w;
+                }
+
+
+
+                ray get_ray(double s, double t) const {
+                    return ray(origin, lower_left_corner + s*horizontal + t*vertical - origin);
+                }
+
+            private:
+                point3 origin;
+                point3 lower_left_corner;
+                vec3 horizontal;
+                vec3 vertical;
+        };
+    ```
+  </Tab>
+</Tabs>
 
 We'll change back to the prior scene, and use the new viewpoint:
 
-```cpp filename="main.cpp | Scene with alternate viewpoint"
-    hittable_list world;
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="main.rs | Scene with alternate viewpoint"
+    ```
+  </Tab>
 
-    auto material_ground = make_shared<lambertian>(color(0.8, 0.8, 0.0));
-    auto material_center = make_shared<lambertian>(color(0.1, 0.2, 0.5));
-    auto material_left   = make_shared<dielectric>(1.5);
-    auto material_right  = make_shared<metal>(color(0.8, 0.6, 0.2), 0.0);
+  <Tab label="C++">
+    ```cpp filename="main.cpp | Scene with alternate viewpoint"
+        hittable_list world;
 
-    world.add(make_shared<sphere>(point3( 0.0, -100.5, -1.0), 100.0, material_ground));
-    world.add(make_shared<sphere>(point3( 0.0,    0.0, -1.0),   0.5, material_center));
-    world.add(make_shared<sphere>(point3(-1.0,    0.0, -1.0),   0.5, material_left));
-    world.add(make_shared<sphere>(point3(-1.0,    0.0, -1.0), -0.45, material_left));
-    world.add(make_shared<sphere>(point3( 1.0,    0.0, -1.0),   0.5, material_right));
+        auto material_ground = make_shared<lambertian>(color(0.8, 0.8, 0.0));
+        auto material_center = make_shared<lambertian>(color(0.1, 0.2, 0.5));
+        auto material_left   = make_shared<dielectric>(1.5);
+        auto material_right  = make_shared<metal>(color(0.8, 0.6, 0.2), 0.0);
 
-    camera cam(point3(-2,2,1), point3(0,0,-1), vec3(0,1,0), 90, aspect_ratio);
-```
+        world.add(make_shared<sphere>(point3( 0.0, -100.5, -1.0), 100.0, material_ground));
+        world.add(make_shared<sphere>(point3( 0.0,    0.0, -1.0),   0.5, material_center));
+        world.add(make_shared<sphere>(point3(-1.0,    0.0, -1.0),   0.5, material_left));
+        world.add(make_shared<sphere>(point3(-1.0,    0.0, -1.0), -0.45, material_left));
+        world.add(make_shared<sphere>(point3( 1.0,    0.0, -1.0),   0.5, material_right));
+
+        camera cam(point3(-2,2,1), point3(0,0,-1), vec3(0,1,0), 90, aspect_ratio);
+    ```
+  </Tab>
+</Tabs>
 
 to get:
 
@@ -174,9 +210,18 @@ to get:
 
 And we can change field of view:
 
-```cpp filename="main.cpp | Change field of view"
-    camera cam(point3(-2,2,1), point3(0,0,-1), vec3(0,1,0), 20, aspect_ratio);
-```
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="main.rs | Change field of view"
+    ```
+  </Tab>
+
+  <Tab label="C++">
+    ```cpp filename="main.cpp | Change field of view"
+        camera cam(point3(-2,2,1), point3(0,0,-1), vec3(0,1,0), 20, aspect_ratio);
+    ```
+  </Tab>
+</Tabs>
 
 to get:
 

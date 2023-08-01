@@ -64,49 +64,76 @@ $$
 
 When we combine them back together, we can write a function to calculate $\mathbf{R'}$:
 
-```cpp filename="vec3.h | Refraction function"
-    vec3 refract(const vec3& uv, const vec3& n, double etai_over_etat) {
-        auto cos_theta = fmin(dot(-uv, n), 1.0);
-        vec3 r_out_perp =  etai_over_etat * (uv + cos_theta*n);
-        vec3 r_out_parallel = -sqrt(fabs(1.0 - r_out_perp.length_squared())) * n;
-        return r_out_perp + r_out_parallel;
-    }
-```
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="vec3.rs | Refraction function"
+    ```
+  </Tab>
+
+  <Tab label="C++">
+    ```cpp filename="vec3.h | Refraction function"
+        vec3 refract(const vec3& uv, const vec3& n, double etai_over_etat) {
+            auto cos_theta = fmin(dot(-uv, n), 1.0);
+            vec3 r_out_perp =  etai_over_etat * (uv + cos_theta*n);
+            vec3 r_out_parallel = -sqrt(fabs(1.0 - r_out_perp.length_squared())) * n;
+            return r_out_perp + r_out_parallel;
+        }
+    ```
+  </Tab>
+</Tabs>
 
 And the dielectric material that always refracts is:
 
-```cpp filename="material.h | Dielectric Material class that always refracts"
-    class dielectric : public material {
-        public:
-            dielectric(double index_of_refraction) : ir(index_of_refraction) {}
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="material.rs | Dielectric Material struct that always refracts"
+    ```
+  </Tab>
 
-            virtual bool scatter(
-                const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered
-            ) const override {
-                attenuation = color(1.0, 1.0, 1.0);
-                double refraction_ratio = rec.front_face ? (1.0/ir) : ir;
+  <Tab label="C++">
+    ```cpp filename="material.h | Dielectric Material class that always refracts"
+        class dielectric : public material {
+            public:
+                dielectric(double index_of_refraction) : ir(index_of_refraction) {}
 
-                vec3 unit_direction = unit_vector(r_in.direction());
-                vec3 refracted = refract(unit_direction, rec.normal, refraction_ratio);
+                virtual bool scatter(
+                    const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered
+                ) const override {
+                    attenuation = color(1.0, 1.0, 1.0);
+                    double refraction_ratio = rec.front_face ? (1.0/ir) : ir;
 
-                scattered = ray(rec.p, refracted);
-                return true;
-            }
+                    vec3 unit_direction = unit_vector(r_in.direction());
+                    vec3 refracted = refract(unit_direction, rec.normal, refraction_ratio);
 
-        public:
-            double ir; // Index of Refraction
-    };
-```
+                    scattered = ray(rec.p, refracted);
+                    return true;
+                }
+
+            public:
+                double ir; // Index of Refraction
+        };
+    ```
+  </Tab>
+</Tabs>
 
 Now we'll update the scene to change the left and center spheres to glass:
 
-```cpp filename="main.cpp | Changing left and center spheres to glass"
-    auto material_ground = make_shared<lambertian>(color(0.8, 0.8, 0.0));
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="main.rs | Changing left and center spheres to glass"
+    ```
+  </Tab>
 
-    auto material_center = make_shared<dielectric>(1.5);
-    auto material_left   = make_shared<dielectric>(1.5);
-    auto material_right  = make_shared<metal>(color(0.8, 0.6, 0.2), 1.0);
-```
+  <Tab label="C++">
+    ```cpp filename="main.cpp | Changing left and center spheres to glass"
+        auto material_ground = make_shared<lambertian>(color(0.8, 0.8, 0.0));
+
+        auto material_center = make_shared<dielectric>(1.5);
+        auto material_left   = make_shared<dielectric>(1.5);
+        auto material_right  = make_shared<metal>(color(0.8, 0.6, 0.2), 1.0);
+    ```
+  </Tab>
+</Tabs>
 
 This gives us the following result:
 
@@ -131,7 +158,7 @@ $\frac{1.5}{1.0} \cdot \sin\theta > 1.0$,
 the equality between the two sides of the equation is broken, and a solution cannot exist. If a
 solution does not exist, the glass cannot refract, and therefore must reflect the ray:
 
-```cpp filename="material.h | Determining if the ray can refract"
+```cpp filename="Determining if the ray can refract"
     if (refraction_ratio * sin_theta > 1.0) {
         // Must Reflect
         ...
@@ -153,7 +180,7 @@ and
 
 $\cos\theta = \mathbf{R} \cdot \mathbf{n}$
 
-```cpp filename="material.h | Determining if the ray can refract"
+```cpp filename="Determining if the ray can refract"
     double cos_theta = fmin(dot(-unit_direction, rec.normal), 1.0);
     double sin_theta = sqrt(1.0 - cos_theta*cos_theta);
 
@@ -168,48 +195,66 @@ $\cos\theta = \mathbf{R} \cdot \mathbf{n}$
 
 And the dielectric material that always refracts (when possible) is:
 
-```cpp filename="material.h | Dielectric Material class with reflection"
-    class dielectric : public material {
-        public:
-            dielectric(double index_of_refraction) : ir(index_of_refraction) {}
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="material.rs | Dielectric Material struct with reflection"
+    ```
+  </Tab>
 
-            virtual bool scatter(
-                const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered
-            ) const override {
-                attenuation = color(1.0, 1.0, 1.0);
-                double refraction_ratio = rec.front_face ? (1.0/ir) : ir;
+  <Tab label="C++">
+    ```cpp filename="material.h | Dielectric Material class with reflection"
+        class dielectric : public material {
+            public:
+                dielectric(double index_of_refraction) : ir(index_of_refraction) {}
 
-                vec3 unit_direction = unit_vector(r_in.direction());
+                virtual bool scatter(
+                    const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered
+                ) const override {
+                    attenuation = color(1.0, 1.0, 1.0);
+                    double refraction_ratio = rec.front_face ? (1.0/ir) : ir;
 
-                double cos_theta = fmin(dot(-unit_direction, rec.normal), 1.0);
-                double sin_theta = sqrt(1.0 - cos_theta*cos_theta);
+                    vec3 unit_direction = unit_vector(r_in.direction());
 
-                bool cannot_refract = refraction_ratio * sin_theta > 1.0;
-                vec3 direction;
+                    double cos_theta = fmin(dot(-unit_direction, rec.normal), 1.0);
+                    double sin_theta = sqrt(1.0 - cos_theta*cos_theta);
 
-                if (cannot_refract)
-                    direction = reflect(unit_direction, rec.normal);
-                else
-                    direction = refract(unit_direction, rec.normal, refraction_ratio);
+                    bool cannot_refract = refraction_ratio * sin_theta > 1.0;
+                    vec3 direction;
 
-                scattered = ray(rec.p, direction);
-                return true;
-            }
+                    if (cannot_refract)
+                        direction = reflect(unit_direction, rec.normal);
+                    else
+                        direction = refract(unit_direction, rec.normal, refraction_ratio);
 
-        public:
-            double ir; // Index of Refraction
-    };
-```
+                    scattered = ray(rec.p, direction);
+                    return true;
+                }
+
+            public:
+                double ir; // Index of Refraction
+        };
+    ```
+  </Tab>
+</Tabs>
 
 Attenuation is always 1 -- the glass surface absorbs nothing. If we try that out with these
 parameters:
 
-```cpp filename="main.cpp | Scene with dielectric and shiny sphere"
-    auto material_ground = make_shared<lambertian>(color(0.8, 0.8, 0.0));
-    auto material_center = make_shared<lambertian>(color(0.1, 0.2, 0.5));
-    auto material_left   = make_shared<dielectric>(1.5);
-    auto material_right  = make_shared<metal>(color(0.8, 0.6, 0.2), 0.0);
-```
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="main.rs | Scene with dielectric and shiny sphere"
+    ```
+  </Tab>
+
+  <Tab label="C++">
+    ```cpp filename="main.cpp | Scene with dielectric and shiny sphere"
+        auto material_ground = make_shared<lambertian>(color(0.8, 0.8, 0.0));
+        auto material_center = make_shared<lambertian>(color(0.1, 0.2, 0.5));
+        auto material_left   = make_shared<dielectric>(1.5);
+        auto material_right  = make_shared<metal>(color(0.8, 0.6, 0.2), 0.0);
+    ```
+  </Tab>
+</Tabs>
 
 We get:
 
@@ -222,47 +267,56 @@ becomes a mirror. There is a big ugly equation for that, but almost everybody us
 surprisingly accurate polynomial approximation by Christophe Schlick. This yields our full glass
 material:
 
-```cpp filename="material.h | Full glass material"
-    class dielectric : public material {
-        public:
-            dielectric(double index_of_refraction) : ir(index_of_refraction) {}
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="material.rs | Full glass material"
+    ```
+  </Tab>
 
-            virtual bool scatter(
-                const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered
-            ) const override {
-                attenuation = color(1.0, 1.0, 1.0);
-                double refraction_ratio = rec.front_face ? (1.0/ir) : ir;
+  <Tab label="C++">
+    ```cpp filename="material.h | Full glass material"
+        class dielectric : public material {
+            public:
+                dielectric(double index_of_refraction) : ir(index_of_refraction) {}
 
-                vec3 unit_direction = unit_vector(r_in.direction());
-                double cos_theta = fmin(dot(-unit_direction, rec.normal), 1.0);
-                double sin_theta = sqrt(1.0 - cos_theta*cos_theta);
+                virtual bool scatter(
+                    const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered
+                ) const override {
+                    attenuation = color(1.0, 1.0, 1.0);
+                    double refraction_ratio = rec.front_face ? (1.0/ir) : ir;
 
-                bool cannot_refract = refraction_ratio * sin_theta > 1.0;
-                vec3 direction;
+                    vec3 unit_direction = unit_vector(r_in.direction());
+                    double cos_theta = fmin(dot(-unit_direction, rec.normal), 1.0);
+                    double sin_theta = sqrt(1.0 - cos_theta*cos_theta);
 
-
-                if (cannot_refract || reflectance(cos_theta, refraction_ratio) > random_double())
-                    direction = reflect(unit_direction, rec.normal);
-                else
-                    direction = refract(unit_direction, rec.normal, refraction_ratio);
-
-                scattered = ray(rec.p, direction);
-                return true;
-            }
-
-        public:
-            double ir; // Index of Refraction
+                    bool cannot_refract = refraction_ratio * sin_theta > 1.0;
+                    vec3 direction;
 
 
-        private:
-            static double reflectance(double cosine, double ref_idx) {
-                // Use Schlick's approximation for reflectance.
-                auto r0 = (1-ref_idx) / (1+ref_idx);
-                r0 = r0*r0;
-                return r0 + (1-r0)*pow((1 - cosine),5);
-            }
-    };
-```
+                    if (cannot_refract || reflectance(cos_theta, refraction_ratio) > random_double())
+                        direction = reflect(unit_direction, rec.normal);
+                    else
+                        direction = refract(unit_direction, rec.normal, refraction_ratio);
+
+                    scattered = ray(rec.p, direction);
+                    return true;
+                }
+
+            public:
+                double ir; // Index of Refraction
+
+
+            private:
+                static double reflectance(double cosine, double ref_idx) {
+                    // Use Schlick's approximation for reflectance.
+                    auto r0 = (1-ref_idx) / (1+ref_idx);
+                    r0 = r0*r0;
+                    return r0 + (1-r0)*pow((1 - cosine),5);
+                }
+        };
+    ```
+  </Tab>
+</Tabs>
 
 ## Modeling a Hollow Glass Sphere
 
@@ -270,14 +324,23 @@ An interesting and easy trick with dielectric spheres is to note that if you use
 the geometry is unaffected, but the surface normal points inward. This can be used as a bubble to
 make a hollow glass sphere:
 
-```cpp filename="main.cpp | Scene with hollow glass sphere"
-    world.add(make_shared<sphere>(point3( 0.0, -100.5, -1.0), 100.0, material_ground));
-    world.add(make_shared<sphere>(point3( 0.0,    0.0, -1.0),   0.5, material_center));
-    world.add(make_shared<sphere>(point3(-1.0,    0.0, -1.0),   0.5, material_left));
+<Tabs>
+  <Tab label="Rust">
+    ```rust filename="main.rs | Scene with hollow glass sphere"
+    ```
+  </Tab>
 
-    world.add(make_shared<sphere>(point3(-1.0,    0.0, -1.0),  -0.4, material_left));
-    world.add(make_shared<sphere>(point3( 1.0,    0.0, -1.0),   0.5, material_right));
-```
+  <Tab label="C++">
+    ```cpp filename="main.cpp | Scene with hollow glass sphere"
+        world.add(make_shared<sphere>(point3( 0.0, -100.5, -1.0), 100.0, material_ground));
+        world.add(make_shared<sphere>(point3( 0.0,    0.0, -1.0),   0.5, material_center));
+        world.add(make_shared<sphere>(point3(-1.0,    0.0, -1.0),   0.5, material_left));
+
+        world.add(make_shared<sphere>(point3(-1.0,    0.0, -1.0),  -0.4, material_left));
+        world.add(make_shared<sphere>(point3( 1.0,    0.0, -1.0),   0.5, material_right));
+    ```
+  </Tab>
+</Tabs>
 
 This gives:
 
