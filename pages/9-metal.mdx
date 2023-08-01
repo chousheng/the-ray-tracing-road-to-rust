@@ -8,8 +8,8 @@ parameters. This is not a bad approach. Or we could have an abstract material cl
 encapsulates behavior. I am a fan of the latter approach. For our program the material needs to do
 two things:
 
-1. Produce a scattered ray (or say it absorbed the incident ray).
-2. If scattered, say how much the ray should be attenuated.
+1.  Produce a scattered ray (or say it absorbed the incident ray).
+2.  If scattered, say how much the ray should be attenuated.
 
 This suggests the abstract class:
 
@@ -177,7 +177,7 @@ the vector is very close to zero in all dimensions.
 For smooth metals the ray won't be randomly scattered. The key math is: how does a ray get
 reflected from a metal mirror? Vector math is our friend here:
 
-![Figure [reflection]: Ray reflection](../images/fig-1.11-reflection.jpg)
+![Figure \[reflection\]: Ray reflection](../images/fig-1.11-reflection.jpg)
 
 The reflected ray direction in red is just $\mathbf{v} + 2\mathbf{b}$. In our design, $\mathbf{n}$
 is a unit vector, but $\mathbf{v}$ may not be. The length of $\mathbf{b}$ should be $\mathbf{v}
@@ -309,7 +309,7 @@ Which gives:
 We can also randomize the reflected direction by using a small sphere and choosing a new endpoint
 for the ray:
 
-![Figure [reflect-fuzzy]: Generating fuzzed reflection rays](../images/fig-1.12-reflect-fuzzy.jpg)
+![Figure \[reflect-fuzzy\]: Generating fuzzed reflection rays](../images/fig-1.12-reflect-fuzzy.jpg)
 
 The bigger the sphere, the fuzzier the reflections will be. This suggests adding a fuzziness
 parameter that is just the radius of the sphere (so zero is no perturbation). The catch is that for

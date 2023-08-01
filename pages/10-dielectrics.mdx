@@ -20,28 +20,28 @@ of the image and it was clearly wrong. That often does the job.
 
 The refraction is described by Snell's law:
 
-$$ \eta \cdot \sin\theta = \eta' \cdot \sin\theta' $$
+$\eta \cdot \sin\theta = \eta' \cdot \sin\theta'$
 
 Where $\theta$ and $\theta'$ are the angles from the normal, and $\eta$ and $\eta'$ (pronounced
 "eta" and "eta prime") are the refractive indices (typically air = 1.0, glass = 1.3–1.7, diamond =
 2.4). The geometry is:
 
-![Figure [refraction]: Ray refraction](../images/fig-1.13-refraction.jpg)
+![Figure \[refraction\]: Ray refraction](../images/fig-1.13-refraction.jpg)
 
 In order to determine the direction of the refracted ray, we have to solve for $\sin\theta'$:
 
-$$ \sin\theta' = \frac{\eta}{\eta'} \cdot \sin\theta $$
+$\sin\theta' = \frac{\eta}{\eta'} \cdot \sin\theta$
 
 On the refracted side of the surface there is a refracted ray $\mathbf{R'}$ and a normal
 $\mathbf{n'}$, and there exists an angle, $\theta'$, between them. We can split $\mathbf{R'}$ into
 the parts of the ray that are perpendicular to $\mathbf{n'}$ and parallel to $\mathbf{n'}$:
 
-$$ \mathbf{R'} = \mathbf{R'}_{\bot} + \mathbf{R'}_{\parallel} $$
+$\mathbf{R'} = \mathbf{R'}_{\bot} + \mathbf{R'}_{\parallel}$
 
 If we solve for $\mathbf{R'}_{\bot}$ and $\mathbf{R'}_{\parallel}$ we get:
 
-$$ \mathbf{R'}_{\bot} = \frac{\eta}{\eta'} (\mathbf{R} + \cos\theta \mathbf{n}) $$
-  $$ \mathbf{R'}_{\parallel} = -\sqrt{1 - |\mathbf{R'}\_{\bot}|^2} \mathbf{n} $$
+$\mathbf{R'}_{\bot} = \frac{\eta}{\eta'} (\mathbf{R} + \cos\theta \mathbf{n})$
+$\mathbf{R'}_{\parallel} = -\sqrt{1 - |\mathbf{R'}\_{\bot}|^2} \mathbf{n}$
 
 You can go ahead and prove this for yourself if you want, but we will treat it as fact and move on.
 The rest of the book will not require you to understand the proof.
@@ -49,11 +49,11 @@ The rest of the book will not require you to understand the proof.
 We still need to solve for $\cos\theta$. It is well known that the dot product of two vectors can
 be explained in terms of the cosine of the angle between them:
 
-$$ \mathbf{a} \cdot \mathbf{b} = |\mathbf{a}| |\mathbf{b}| \cos\theta $$
+$\mathbf{a} \cdot \mathbf{b} = |\mathbf{a}| |\mathbf{b}| \cos\theta$
 
 If we restrict $\mathbf{a}$ and $\mathbf{b}$ to be unit vectors:
 
-$$ \mathbf{a} \cdot \mathbf{b} = \cos\theta $$
+$\mathbf{a} \cdot \mathbf{b} = \cos\theta$
 
 We can now rewrite $\mathbf{R'}_{\bot}$ in terms of known quantities:
 
@@ -118,15 +118,15 @@ That definitely doesn't look right. One troublesome practical issue is that when
 material with the higher refractive index, there is no real solution to Snell's law, and thus there
 is no refraction possible. If we refer back to Snell's law and the derivation of $\sin\theta'$:
 
-$$ \sin\theta' = \frac{\eta}{\eta'} \cdot \sin\theta $$
+$\sin\theta' = \frac{\eta}{\eta'} \cdot \sin\theta$
 
 If the ray is inside glass and outside is air ($\eta = 1.5$ and $\eta' = 1.0$):
 
-$$ \sin\theta' = \frac{1.5}{1.0} \cdot \sin\theta $$
+$\sin\theta' = \frac{1.5}{1.0} \cdot \sin\theta$
 
 The value of $\sin\theta'$ cannot be greater than 1. So, if,
 
-$$ \frac{1.5}{1.0} \cdot \sin\theta > 1.0 $$,
+$\frac{1.5}{1.0} \cdot \sin\theta > 1.0$,
 
 the equality between the two sides of the equation is broken, and a solution cannot exist. If a
 solution does not exist, the glass cannot refract, and therefore must reflect the ray:
@@ -147,11 +147,11 @@ perfect mirror when you are submerged.
 
 We can solve for `sin_theta` using the trigonometric qualities:
 
-$$ \sin\theta = \sqrt{1 - \cos^2\theta} $$
+$\sin\theta = \sqrt{1 - \cos^2\theta}$
 
 and
 
-$$ \cos\theta = \mathbf{R} \cdot \mathbf{n} $$
+$\cos\theta = \mathbf{R} \cdot \mathbf{n}$
 
 ```cpp filename="material.h | Determining if the ray can refract"
     double cos_theta = fmin(dot(-unit_direction, rec.normal), 1.0);

@@ -9,81 +9,78 @@ Here's a nice description from Wikipedia:
 Let's make some code to output such a thing:
 
 <Tabs>
-<Tab label="Rust">
+  <Tab label="Rust">
+    ```rust filename="main.rs | Creating your first image"
+    fn main() {
+        // Image
 
-```rust filename="main.rs | Creating your first image"
-fn main() {
-    // Image
+        const IMAGE_WIDTH: i32 = 256;
+        const IMAGE_HEIGHT: i32 = 256;
 
-    const IMAGE_WIDTH: i32 = 256;
-    const IMAGE_HEIGHT: i32 = 256;
+        // Render
 
-    // Render
+        print!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT);
 
-    print!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT);
+        for j in (0..IMAGE_HEIGHT).rev() {
+            for i in 0..IMAGE_WIDTH {
+                let r = i as f64 / (IMAGE_WIDTH - 1) as f64;
+                let g = j as f64 / (IMAGE_HEIGHT - 1) as f64;
+                let b = 0.25;
 
-    for j in (0..IMAGE_HEIGHT).rev() {
-        for i in 0..IMAGE_WIDTH {
-            let r = i as f64 / (IMAGE_WIDTH - 1) as f64;
-            let g = j as f64 / (IMAGE_HEIGHT - 1) as f64;
-            let b = 0.25;
+                let ir = (255.999 * r) as i32;
+                let ig = (255.999 * g) as i32;
+                let ib = (255.999 * b) as i32;
 
-            let ir = (255.999 * r) as i32;
-            let ig = (255.999 * g) as i32;
-            let ib = (255.999 * b) as i32;
-
-            print!("{} {} {}\n", ir, ig, ib);
+                print!("{} {} {}\n", ir, ig, ib);
+            }
         }
     }
-}
-```
+    ```
+  </Tab>
 
-</Tab>
-<Tab label="C++">
+  <Tab label="C++">
+    ```cpp filename="main.cpp | Creating your first image"
+    #include <iostream>
 
-```cpp filename="main.cpp | Creating your first image"
-#include <iostream>
+    int main() {
+        // Image
 
-int main() {
-    // Image
+        const int IMAGE_WIDTH = 256;
+        const int IMAGE_HEIGHT = 256;
 
-    const int IMAGE_WIDTH = 256;
-    const int IMAGE_HEIGHT = 256;
+        // Render
 
-    // Render
+        std::cout << "P3\n" << IMAGE_WIDTH << ' ' << IMAGE_HEIGHT << "\n255\n";
 
-    std::cout << "P3\n" << IMAGE_WIDTH << ' ' << IMAGE_HEIGHT << "\n255\n";
+        for (int j = IMAGE_HEIGHT - 1; j >= 0; --j) {
+            for (int i = 0; i < IMAGE_WIDTH; ++i) {
+                auto r = static_cast<double>(i) / (IMAGE_WIDTH - 1);
+                auto g = static_cast<double>(j) / (IMAGE_HEIGHT - 1);
+                auto b = 0.25;
 
-    for (int j = IMAGE_HEIGHT - 1; j >= 0; --j) {
-        for (int i = 0; i < IMAGE_WIDTH; ++i) {
-            auto r = static_cast<double>(i) / (IMAGE_WIDTH - 1);
-            auto g = static_cast<double>(j) / (IMAGE_HEIGHT - 1);
-            auto b = 0.25;
+                int ir = static_cast<int>(255.999 * r);
+                int ig = static_cast<int>(255.999 * g);
+                int ib = static_cast<int>(255.999 * b);
 
-            int ir = static_cast<int>(255.999 * r);
-            int ig = static_cast<int>(255.999 * g);
-            int ib = static_cast<int>(255.999 * b);
-
-            std::cout << ir << ' ' << ig << ' ' << ib << '\n';
+                std::cout << ir << ' ' << ig << ' ' << ib << '\n';
+            }
         }
+
+        return 0;
     }
-
-    return 0;
-}
-```
-
-</Tab>
+    ```
+  </Tab>
 </Tabs>
 
 There are some things to note in that code:
 
-1. The pixels are written out in rows with pixels left to right.
+1.  The pixels are written out in rows with pixels left to right.
 
-2. The rows are written out from top to bottom.
+2.  The rows are written out from top to bottom.
 
-3. By convention, each of the red/green/blue components ranges from 0.0 to 1.0. We will relax that later when we internally use high dynamic range, but before output we will tone map to the zero to one range, so this code won't change.
+3.  By convention, each of the red/green/blue components ranges from 0.0 to 1.0. We will relax that later when we internally use high dynamic range, but before output we will tone map to the zero to one range, so this code won't change.
 
-4. Red goes from fully off (black) to fully on (bright red) from left to right, and green goes from black at the bottom to fully on at the top. Red and green together make yellow so we should expect the upper right corner to be yellow.
+4.  Red goes from fully off (black) to fully on (bright red) from left to right, and green goes from black at the bottom to fully on at the top. Red and green together make yellow so we should expect the upper right corner to be yellow.
 
 ## Creating an Image File
 
@@ -100,9 +97,7 @@ Opening the output file in an image viewer shows this result:
 Hooray! This is the graphics "hello world."
 
 <Callout type="info">
-
-You can try opening the PPM file in your favorite viewer. Google "ppm viewer" if your viewer doesn't support it. If you are on macOS, you can use the built-in Preview app. If you are using Visual Studio Code, you can install an extension that supports PPM and view the image within the code editor.
-
+  You can try opening the PPM file in your favorite viewer. Google "ppm viewer" if your viewer doesn't support it. If you are on macOS, you can use the built-in Preview app. If you are using Visual Studio Code, you can install an extension that supports PPM and view the image within the code editor.
 </Callout>
 
 If your image doesn't look like that, open the output file in a text editor and see what it looks like. It should start something like this:
@@ -133,74 +128,71 @@ Before we continue, let's add a progress indicator to our output. This is a hand
 Our program outputs the image to the standard output stream, so leave that alone and instead write to the error output stream:
 
 <Tabs>
-<Tab label="Rust">
+  <Tab label="Rust">
+    ```rust filename="main.rs | Main render loop with progress reporting" {12,25-26}
+    fn main() {
+        // Image
 
-```rust filename="main.rs | Main render loop with progress reporting" {12,25-26}
-fn main() {
-    // Image
+        const IMAGE_WIDTH: i32 = 256;
+        const IMAGE_HEIGHT: i32 = 256;
 
-    const IMAGE_WIDTH: i32 = 256;
-    const IMAGE_HEIGHT: i32 = 256;
+        // Render
 
-    // Render
+        print!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT);
 
-    print!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT);
+        for j in (0..IMAGE_HEIGHT).rev() {
+            eprint!("\rScanlines remaining: {} ", j);
+            for i in 0..IMAGE_WIDTH {
+                let r = i as f64 / (IMAGE_WIDTH - 1) as f64;
+                let g = j as f64 / (IMAGE_HEIGHT - 1) as f64;
+                let b = 0.25;
 
-    for j in (0..IMAGE_HEIGHT).rev() {
-        eprint!("\rScanlines remaining: {} ", j);
-        for i in 0..IMAGE_WIDTH {
-            let r = i as f64 / (IMAGE_WIDTH - 1) as f64;
-            let g = j as f64 / (IMAGE_HEIGHT - 1) as f64;
-            let b = 0.25;
+                let ir = (255.999 * r) as i32;
+                let ig = (255.999 * g) as i32;
+                let ib = (255.999 * b) as i32;
 
-            let ir = (255.999 * r) as i32;
-            let ig = (255.999 * g) as i32;
-            let ib = (255.999 * b) as i32;
-
-            print!("{} {} {}\n", ir, ig, ib);
+                print!("{} {} {}\n", ir, ig, ib);
+            }
         }
+
+        eprint!("\nDone.\n");
     }
+    ```
+  </Tab>
 
-    eprint!("\nDone.\n");
-}
-```
+  <Tab label="C++">
+    ```cpp filename="main.cpp | Main render loop with progress reporting" {14,28-29}
+    #include <iostream>
 
-</Tab>
-<Tab label="C++">
+    int main() {
+        // Image
 
-```cpp filename="main.cpp | Main render loop with progress reporting" {14,28-29}
-#include <iostream>
+        const int IMAGE_WIDTH = 256;
+        const int IMAGE_HEIGHT = 256;
 
-int main() {
-    // Image
+        // Render
 
-    const int IMAGE_WIDTH = 256;
-    const int IMAGE_HEIGHT = 256;
+        std::cout << "P3\n" << IMAGE_WIDTH << ' ' << IMAGE_HEIGHT << "\n255\n";
 
-    // Render
+        for (int j = IMAGE_HEIGHT - 1; j >= 0; --j) {
+            std::cerr << "\rScanlines remaining: " << j << ' ';
+            for (int i = 0; i < IMAGE_WIDTH; ++i) {
+                auto r = static_cast<double>(i) / (IMAGE_WIDTH - 1);
+                auto g = static_cast<double>(j) / (IMAGE_HEIGHT - 1);
+                auto b = 0.25;
 
-    std::cout << "P3\n" << IMAGE_WIDTH << ' ' << IMAGE_HEIGHT << "\n255\n";
+                int ir = static_cast<int>(255.999 * r);
+                int ig = static_cast<int>(255.999 * g);
+                int ib = static_cast<int>(255.999 * b);
 
-    for (int j = IMAGE_HEIGHT - 1; j >= 0; --j) {
-        std::cerr << "\rScanlines remaining: " << j << ' ';
-        for (int i = 0; i < IMAGE_WIDTH; ++i) {
-            auto r = static_cast<double>(i) / (IMAGE_WIDTH - 1);
-            auto g = static_cast<double>(j) / (IMAGE_HEIGHT - 1);
-            auto b = 0.25;
-
-            int ir = static_cast<int>(255.999 * r);
-            int ig = static_cast<int>(255.999 * g);
-            int ib = static_cast<int>(255.999 * b);
-
-            std::cout << ir << ' ' << ig << ' ' << ib << '\n';
+                std::cout << ir << ' ' << ig << ' ' << ib << '\n';
+            }
         }
+
+        std::cerr << "\nDone.\n";
+
+        return 0;
     }
-
-    std::cerr << "\nDone.\n";
-
-    return 0;
-}
-```
-
-</Tab>
+    ```
+  </Tab>
 </Tabs>

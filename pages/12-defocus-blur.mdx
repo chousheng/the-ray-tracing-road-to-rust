@@ -6,12 +6,12 @@ aware of only using "defocus blur" among friends.
 The reason we defocus blur in real cameras is because they need a big hole (rather than just a
 pinhole) to gather light. This would defocus everything, but if we stick a lens in the hole, there
 will be a certain distance where everything is in focus. You can think of a lens this way: all light
-rays coming _from_ a specific point at the focus distance -- and that hit the lens -- will be bent
-back _to_ a single point on the image sensor.
+rays coming *from* a specific point at the focus distance -- and that hit the lens -- will be bent
+back *to* a single point on the image sensor.
 
 We call the distance between the projection point and the plane where everything is in perfect focus
-the _focus distance_. Be aware that the focus distance is not the same as the focal length -- the
-_focal length_ is the distance between the projection point and the image plane.
+the *focus distance*. Be aware that the focus distance is not the same as the focal length -- the
+*focal length* is the distance between the projection point and the image plane.
 
 In a physical camera, the focus distance is controlled by the distance between the lens and the
 film/sensor. That is why you see the lens move relative to the camera when you change what is in
@@ -27,14 +27,14 @@ then lens, then aperture. Then we could figure out where to send the rays, and f
 it's computed (the image is projected upside down on the film). Graphics people, however, usually
 use a thin lens approximation:
 
-![Figure [cam-lens]: Camera lens model](../images/fig-1.17-cam-lens.jpg)
+![Figure \[cam-lens\]: Camera lens model](../images/fig-1.17-cam-lens.jpg)
 
 We don't need to simulate any of the inside of the camera. For the purposes of rendering an image
 outside the camera, that would be unnecessary complexity. Instead, I usually start rays from the
 lens, and send them toward the focus plane (`focus_dist` away from the lens), where everything on
 that plane is in perfect focus.
 
-![Figure [cam-film-plane]: Camera focus plane](../images/fig-1.18-cam-film-plane.jpg)
+![Figure \[cam-film-plane\]: Camera focus plane](../images/fig-1.18-cam-film-plane.jpg)
 
 ## Generating Sample Rays
 

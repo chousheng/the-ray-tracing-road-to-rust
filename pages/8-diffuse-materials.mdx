@@ -14,7 +14,7 @@ modulate that with their own intrinsic color. Light that reflects off a diffuse 
 direction randomized. So, if we send three rays into a crack between two diffuse surfaces they will
 each have different random behavior:
 
-![Figure [light-bounce]: Light ray bounces](../images/fig-1.08-light-bounce.jpg)
+![Figure \[light-bounce\]: Light ray bounces](../images/fig-1.08-light-bounce.jpg)
 
 They also might be absorbed rather than reflected. The darker the surface, the more likely
 absorption is. (That's why it is dark!) Really any algorithm that randomizes direction will produce
@@ -29,13 +29,13 @@ the chapter.)
 There are two unit radius spheres tangent to the hit point $p$ of a surface. These two spheres have
 a center of $(\mathbf{P} + \mathbf{n})$ and $(\mathbf{P} - \mathbf{n})$, where $\mathbf{n}$ is the
 normal of the surface. The sphere with a center at $(\mathbf{P} - \mathbf{n})$ is considered
-_inside_ the surface, whereas the sphere with center $(\mathbf{P} + \mathbf{n})$ is considered
-_outside_ the surface. Select the tangent unit radius sphere that is on the same side of the surface
+*inside* the surface, whereas the sphere with center $(\mathbf{P} + \mathbf{n})$ is considered
+*outside* the surface. Select the tangent unit radius sphere that is on the same side of the surface
 as the ray origin. Pick a random point $\mathbf{S}$ inside this unit radius sphere and send a ray
 from the hit point $\mathbf{P}$ to the random point $\mathbf{S}$ (this is the vector
 $(\mathbf{S}-\mathbf{P})$):
 
-![Figure [rand-vec]: Generating a random diffuse bounce ray](../images/fig-1.09-rand-vec.jpg)
+![Figure \[rand-vec\]: Generating a random diffuse bounce ray](../images/fig-1.09-rand-vec.jpg)
 
 We need a way to pick a random point in a unit radius sphere. We'll use what is usually the easiest
 algorithm: a rejection method. First, pick a random point in the unit cube where x, y, and z all
@@ -210,7 +210,7 @@ However, we are interested in a Lambertian distribution, which has a distributio
 True Lambertian has the probability higher for ray scattering close to the normal, but the
 distribution is more uniform. This is achieved by picking random points on the surface of the unit
 sphere, offset along the surface normal. Picking random points on the unit sphere can be achieved by
-picking random points _in_ the unit sphere, and then normalizing those.
+picking random points *in* the unit sphere, and then normalizing those.
 
 ```cpp filename="vec3.h | The random_unit_vector() function"
 inline vec3 random_in_unit_sphere() {
@@ -223,7 +223,7 @@ vec3 random_unit_vector() {
 }
 ```
 
-![Figure [rand-unitvec]: Generating a random unit vector](../images/fig-1.10-rand-unitvec.png)
+![Figure \[rand-unitvec\]: Generating a random unit vector](../images/fig-1.10-rand-unitvec.png)
 
 This `random_unit_vector()` is a drop-in replacement for the existing `random_in_unit_sphere()`
 function.
@@ -255,11 +255,11 @@ After rendering we get a similar image:
 It's hard to tell the difference between these two diffuse methods, given that our scene of two
 spheres is so simple, but you should be able to notice two important visual differences:
 
-1. The shadows are less pronounced after the change
-2. Both spheres are lighter in appearance after the change
+1.  The shadows are less pronounced after the change
+2.  Both spheres are lighter in appearance after the change
 
 Both of these changes are due to the more uniform scattering of the light rays, fewer rays are
-scattering toward the normal. This means that for diffuse objects, they will appear _lighter_
+scattering toward the normal. This means that for diffuse objects, they will appear *lighter*
 because more light bounces toward the camera. For the shadows, less light bounces straight-up, so
 the parts of the larger sphere directly underneath the smaller sphere are brighter.
 
@@ -269,8 +269,8 @@ The initial hack presented in this book lasted a long time before it was proven 
 approximation of ideal Lambertian diffuse. A big reason that the error persisted for so long is
 that it can be difficult to:
 
-1. Mathematically prove that the probability distribution is incorrect
-2. Intuitively explain why a $\cos (\phi)$ distribution is desirable (and what it would look like)
+1.  Mathematically prove that the probability distribution is incorrect
+2.  Intuitively explain why a $\cos (\phi)$ distribution is desirable (and what it would look like)
 
 Not a lot of common, everyday objects are perfectly diffuse, so our visual intuition of how these
 objects behave under light can be poorly formed.
@@ -320,8 +320,8 @@ Gives us the following image:
 
 ![Image 10: Rendering of diffuse spheres with hemispherical scattering](../images/img-1.10-rand-hemispherical.png)
 
-    Scenes will become more complicated over the course of the book. You are
-    encouraged to switch between the different diffuse renderers presented here.
-    Most scenes of interest will contain a disproportionate amount of diffuse
-    materials. You can gain valuable insight by understanding the effect of
-    different diffuse methods on the lighting of the scene.
+Scenes will become more complicated over the course of the book. You are
+encouraged to switch between the different diffuse renderers presented here.
+Most scenes of interest will contain a disproportionate amount of diffuse
+materials. You can gain valuable insight by understanding the effect of
+different diffuse methods on the lighting of the scene.

@@ -11,72 +11,69 @@ We're going to declare two aliases for `Vec3`: `Point3` and `Color`. Since these
 Here's the basic part of the `Vec3` struct:
 
 <Tabs>
-<Tab label="Rust">
-
-```rust filename="vec3.rs | Vec3 struct"
-#[derive(Copy, Clone, Default)]
-pub struct Vec3 {
-    e: [f64; 3],
-}
-
-impl Vec3 {
-    pub fn new(x: f64, y: f64, z: f64) -> Self {
-        Vec3 { e: [x, y, z] }
+  <Tab label="Rust">
+    ```rust filename="vec3.rs | Vec3 struct"
+    #[derive(Copy, Clone, Default)]
+    pub struct Vec3 {
+        e: [f64; 3],
     }
 
-    pub fn x(&self) -> f64 {
-        self.e[0]
+    impl Vec3 {
+        pub fn new(x: f64, y: f64, z: f64) -> Self {
+            Vec3 { e: [x, y, z] }
+        }
+
+        pub fn x(&self) -> f64 {
+            self.e[0]
+        }
+
+        pub fn y(&self) -> f64 {
+            self.e[1]
+        }
+
+        pub fn z(&self) -> f64 {
+            self.e[2]
+        }
     }
 
-    pub fn y(&self) -> f64 {
-        self.e[1]
-    }
+    // Type alias
+    pub type Point3 = Vec3; // 3D point
+    ```
+  </Tab>
 
-    pub fn z(&self) -> f64 {
-        self.e[2]
-    }
-}
+  <Tab label="C++">
+    ```cpp filename="vec3.h | Vec3 class"
+    #ifndef VEC3_H
+    #define VEC3_H
 
-// Type alias
-pub type Point3 = Vec3; // 3D point
-```
+    class Vec3 {
+    public:
+        Vec3() : e{0, 0, 0} {}
 
-</Tab>
-<Tab label="C++">
+        Vec3(double e0, double e1, double e2) : e{e0, e1, e2} {}
 
-```cpp filename="vec3.h | Vec3 class"
-#ifndef VEC3_H
-#define VEC3_H
+        double x() const {
+            return e[0];
+        }
 
-class Vec3 {
-public:
-    Vec3() : e{0, 0, 0} {}
+        double y() const {
+            return e[1];
+        }
 
-    Vec3(double e0, double e1, double e2) : e{e0, e1, e2} {}
+        double z() const {
+            return e[2];
+        }
 
-    double x() const {
-        return e[0];
-    }
+    public:
+        double e[3];
+    };
 
-    double y() const {
-        return e[1];
-    }
+    // Type alias
+    using Point3 = Vec3; // 3D point
 
-    double z() const {
-        return e[2];
-    }
-
-public:
-    double e[3];
-};
-
-// Type alias
-using Point3 = Vec3; // 3D point
-
-#endif
-```
-
-</Tab>
+    #endif
+    ```
+  </Tab>
 </Tabs>
 
 We use `f64` here, but some ray tracers use single-precision. Either one is fine -- follow your own tastes.
@@ -86,278 +83,275 @@ We use `f64` here, but some ray tracers use single-precision. Either one is fine
 The other part of `Vec3` contains vector utility functions:
 
 <Tabs>
-<Tab label="Rust">
+  <Tab label="Rust">
+    ```rust filename="vec3.rs | Vec3 utility functions" {1-3,25-32,37-143}
+    use std::fmt::{Display, Formatter, Result};
+    use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub};
 
-```rust filename="vec3.rs | Vec3 utility functions" {1-3,25-32,37-143}
-use std::fmt::{Display, Formatter, Result};
-use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub};
-
-#[derive(Copy, Clone, Default)]
-pub struct Vec3 {
-    e: [f64; 3],
-}
-
-impl Vec3 {
-    pub fn new(x: f64, y: f64, z: f64) -> Self {
-        Vec3 { e: [x, y, z] }
+    #[derive(Copy, Clone, Default)]
+    pub struct Vec3 {
+        e: [f64; 3],
     }
 
-    pub fn x(&self) -> f64 {
-        self.e[0]
+    impl Vec3 {
+        pub fn new(x: f64, y: f64, z: f64) -> Self {
+            Vec3 { e: [x, y, z] }
+        }
+
+        pub fn x(&self) -> f64 {
+            self.e[0]
+        }
+
+        pub fn y(&self) -> f64 {
+            self.e[1]
+        }
+
+        pub fn z(&self) -> f64 {
+            self.e[2]
+        }
+
+        pub fn length(&self) -> f64 {
+            f64::sqrt(self.length_squared())
+        }
+
+        pub fn length_squared(&self) -> f64 {
+            self.e[0] * self.e[0] + self.e[1] * self.e[1] + self.e[2] * self.e[2]
+        }
     }
 
-    pub fn y(&self) -> f64 {
-        self.e[1]
-    }
+    // Type alias
+    pub type Point3 = Vec3; // 3D point
 
-    pub fn z(&self) -> f64 {
-        self.e[2]
-    }
-
-    pub fn length(&self) -> f64 {
-        f64::sqrt(self.length_squared())
-    }
-
-    pub fn length_squared(&self) -> f64 {
-        self.e[0] * self.e[0] + self.e[1] * self.e[1] + self.e[2] * self.e[2]
-    }
-}
-
-// Type alias
-pub type Point3 = Vec3; // 3D point
-
-// Output formatting
-impl Display for Vec3 {
-    fn fmt(&self, f: &mut Formatter) -> Result {
-        write!(f, "{} {} {}", self.e[0], self.e[1], self.e[2])
-    }
-}
-
-// -Vec3
-impl Neg for Vec3 {
-    type Output = Vec3;
-
-    fn neg(self) -> Self::Output {
-        Vec3::new(-self.x(), -self.y(), -self.z())
-    }
-}
-
-// Vec3 += Vec3
-impl AddAssign for Vec3 {
-    fn add_assign(&mut self, v: Self) {
-        *self = *self + v;
-    }
-}
-
-// Vec3 *= f64
-impl MulAssign<f64> for Vec3 {
-    fn mul_assign(&mut self, t: f64) {
-        *self = *self * t;
-    }
-}
-
-// Vec3 /= f64
-impl DivAssign<f64> for Vec3 {
-    fn div_assign(&mut self, t: f64) {
-        *self = *self / t;
-    }
-}
-
-// Vec3 + Vec3
-impl Add for Vec3 {
-    type Output = Vec3;
-
-    fn add(self, v: Self) -> Self::Output {
-        Vec3::new(self.x() + v.x(), self.y() + v.y(), self.z() + v.z())
-    }
-}
-
-// Vec3 - Vec3
-impl Sub for Vec3 {
-    type Output = Vec3;
-
-    fn sub(self, v: Self) -> Self::Output {
-        Vec3::new(self.x() - v.x(), self.y() - v.y(), self.z() - v.z())
-    }
-}
-
-// Vec3 * Vec3
-impl Mul for Vec3 {
-    type Output = Vec3;
-
-    fn mul(self, v: Vec3) -> Self::Output {
-        Vec3::new(self.x() * v.x(), self.y() * v.y(), self.z() * v.z())
-    }
-}
-
-// f64 * Vec3
-impl Mul<Vec3> for f64 {
-    type Output = Vec3;
-
-    fn mul(self, v: Vec3) -> Self::Output {
-        Vec3::new(self * v.x(), self * v.y(), self * v.z())
-    }
-}
-
-// Vec3 * f64
-impl Mul<f64> for Vec3 {
-    type Output = Vec3;
-
-    fn mul(self, t: f64) -> Self::Output {
-        Vec3::new(self.x() * t, self.y() * t, self.z() * t)
-    }
-}
-
-// Vec3 / f64
-impl Div<f64> for Vec3 {
-    type Output = Vec3;
-
-    fn div(self, t: f64) -> Self::Output {
-        Vec3::new(self.x() / t, self.y() / t, self.z() / t)
-    }
-}
-
-pub fn dot(u: Vec3, v: Vec3) -> f64 {
-    u.e[0] * v.e[0] + u.e[1] * v.e[1] + u.e[2] * v.e[2]
-}
-
-pub fn cross(u: Vec3, v: Vec3) -> Vec3 {
-    Vec3::new(
-        u.e[1] * v.e[2] - u.e[2] * v.e[1],
-        u.e[2] * v.e[0] - u.e[0] * v.e[2],
-        u.e[0] * v.e[1] - u.e[1] * v.e[0],
-    )
-}
-
-pub fn unit_vector(v: Vec3) -> Vec3 {
-    v / v.length()
-}
-```
-
-</Tab>
-<Tab label="C++">
-
-```cpp filename="vec3.h | Vec3 utility functions" {4-6,25-58,66-116}
-#ifndef VEC3_H
-#define VEC3_H
-
-#include <cmath>
-#include <ostream>
-
-class Vec3 {
-public:
-    Vec3() : e{0, 0, 0} {}
-
-    Vec3(double e0, double e1, double e2) : e{e0, e1, e2} {}
-
-    double x() const {
-        return e[0];
-    }
-
-    double y() const {
-        return e[1];
-    }
-
-    double z() const {
-        return e[2];
+    // Output formatting
+    impl Display for Vec3 {
+        fn fmt(&self, f: &mut Formatter) -> Result {
+            write!(f, "{} {} {}", self.e[0], self.e[1], self.e[2])
+        }
     }
 
     // -Vec3
-    Vec3 operator-() const {
-        return Vec3(-e[0], -e[1], -e[2]);
+    impl Neg for Vec3 {
+        type Output = Vec3;
+
+        fn neg(self) -> Self::Output {
+            Vec3::new(-self.x(), -self.y(), -self.z())
+        }
     }
 
     // Vec3 += Vec3
-    Vec3 &operator+=(Vec3 v) {
-        e[0] += v.e[0];
-        e[1] += v.e[1];
-        e[2] += v.e[2];
-        return *this;
+    impl AddAssign for Vec3 {
+        fn add_assign(&mut self, v: Self) {
+            *self = *self + v;
+        }
     }
 
-    // Vec3 *= double
-    Vec3 &operator*=(double t) {
-        e[0] *= t;
-        e[1] *= t;
-        e[2] *= t;
-        return *this;
+    // Vec3 *= f64
+    impl MulAssign<f64> for Vec3 {
+        fn mul_assign(&mut self, t: f64) {
+            *self = *self * t;
+        }
     }
 
-    // Vec3 /= double
-    Vec3 &operator/=(double t) {
-        return *this *= 1.0 / t;
+    // Vec3 /= f64
+    impl DivAssign<f64> for Vec3 {
+        fn div_assign(&mut self, t: f64) {
+            *self = *self / t;
+        }
     }
 
-    double length() const {
-        return std::sqrt(length_squared());
+    // Vec3 + Vec3
+    impl Add for Vec3 {
+        type Output = Vec3;
+
+        fn add(self, v: Self) -> Self::Output {
+            Vec3::new(self.x() + v.x(), self.y() + v.y(), self.z() + v.z())
+        }
     }
 
-    double length_squared() const {
-        return e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
+    // Vec3 - Vec3
+    impl Sub for Vec3 {
+        type Output = Vec3;
+
+        fn sub(self, v: Self) -> Self::Output {
+            Vec3::new(self.x() - v.x(), self.y() - v.y(), self.z() - v.z())
+        }
     }
 
-public:
-    double e[3];
-};
+    // Vec3 * Vec3
+    impl Mul for Vec3 {
+        type Output = Vec3;
 
-// Type alias
-using Point3 = Vec3; // 3D point
+        fn mul(self, v: Vec3) -> Self::Output {
+            Vec3::new(self.x() * v.x(), self.y() * v.y(), self.z() * v.z())
+        }
+    }
 
-// Output formatting
-inline std::ostream &operator<<(std::ostream &out, Vec3 v) {
-    return out << v.e[0] << ' ' << v.e[1] << ' ' << v.e[2];
-}
+    // f64 * Vec3
+    impl Mul<Vec3> for f64 {
+        type Output = Vec3;
 
-// Vec3 + Vec3
-inline Vec3 operator+(Vec3 u, Vec3 v) {
-    return Vec3(u.e[0] + v.e[0], u.e[1] + v.e[1], u.e[2] + v.e[2]);
-}
+        fn mul(self, v: Vec3) -> Self::Output {
+            Vec3::new(self * v.x(), self * v.y(), self * v.z())
+        }
+    }
 
-// Vec3 - Vec3
-inline Vec3 operator-(Vec3 u, Vec3 v) {
-    return Vec3(u.e[0] - v.e[0], u.e[1] - v.e[1], u.e[2] - v.e[2]);
-}
+    // Vec3 * f64
+    impl Mul<f64> for Vec3 {
+        type Output = Vec3;
 
-// Vec3 * Vec3
-inline Vec3 operator*(Vec3 u, Vec3 v) {
-    return Vec3(u.e[0] * v.e[0], u.e[1] * v.e[1], u.e[2] * v.e[2]);
-}
+        fn mul(self, t: f64) -> Self::Output {
+            Vec3::new(self.x() * t, self.y() * t, self.z() * t)
+        }
+    }
 
-// double * Vec3
-inline Vec3 operator*(double t, Vec3 v) {
-    return Vec3(t * v.e[0], t * v.e[1], t * v.e[2]);
-}
+    // Vec3 / f64
+    impl Div<f64> for Vec3 {
+        type Output = Vec3;
 
-// Vec3 * double
-inline Vec3 operator*(Vec3 v, double t) {
-    return t * v;
-}
+        fn div(self, t: f64) -> Self::Output {
+            Vec3::new(self.x() / t, self.y() / t, self.z() / t)
+        }
+    }
 
-// Vec3 / double
-inline Vec3 operator/(Vec3 v, double t) {
-    return (1 / t) * v;
-}
+    pub fn dot(u: Vec3, v: Vec3) -> f64 {
+        u.e[0] * v.e[0] + u.e[1] * v.e[1] + u.e[2] * v.e[2]
+    }
 
-inline double dot(Vec3 u, Vec3 v) {
-    return u.e[0] * v.e[0] + u.e[1] * v.e[1] + u.e[2] * v.e[2];
-}
+    pub fn cross(u: Vec3, v: Vec3) -> Vec3 {
+        Vec3::new(
+            u.e[1] * v.e[2] - u.e[2] * v.e[1],
+            u.e[2] * v.e[0] - u.e[0] * v.e[2],
+            u.e[0] * v.e[1] - u.e[1] * v.e[0],
+        )
+    }
 
-inline Vec3 cross(Vec3 u, Vec3 v) {
-    return Vec3(
-        u.e[1] * v.e[2] - u.e[2] * v.e[1],
-        u.e[2] * v.e[0] - u.e[0] * v.e[2],
-        u.e[0] * v.e[1] - u.e[1] * v.e[0]
-    );
-}
+    pub fn unit_vector(v: Vec3) -> Vec3 {
+        v / v.length()
+    }
+    ```
+  </Tab>
 
-inline Vec3 unit_vector(Vec3 v) {
-    return v / v.length();
-}
+  <Tab label="C++">
+    ```cpp filename="vec3.h | Vec3 utility functions" {4-6,25-58,66-116}
+    #ifndef VEC3_H
+    #define VEC3_H
 
-#endif
-```
+    #include <cmath>
+    #include <ostream>
 
-</Tab>
+    class Vec3 {
+    public:
+        Vec3() : e{0, 0, 0} {}
+
+        Vec3(double e0, double e1, double e2) : e{e0, e1, e2} {}
+
+        double x() const {
+            return e[0];
+        }
+
+        double y() const {
+            return e[1];
+        }
+
+        double z() const {
+            return e[2];
+        }
+
+        // -Vec3
+        Vec3 operator-() const {
+            return Vec3(-e[0], -e[1], -e[2]);
+        }
+
+        // Vec3 += Vec3
+        Vec3 &operator+=(Vec3 v) {
+            e[0] += v.e[0];
+            e[1] += v.e[1];
+            e[2] += v.e[2];
+            return *this;
+        }
+
+        // Vec3 *= double
+        Vec3 &operator*=(double t) {
+            e[0] *= t;
+            e[1] *= t;
+            e[2] *= t;
+            return *this;
+        }
+
+        // Vec3 /= double
+        Vec3 &operator/=(double t) {
+            return *this *= 1.0 / t;
+        }
+
+        double length() const {
+            return std::sqrt(length_squared());
+        }
+
+        double length_squared() const {
+            return e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
+        }
+
+    public:
+        double e[3];
+    };
+
+    // Type alias
+    using Point3 = Vec3; // 3D point
+
+    // Output formatting
+    inline std::ostream &operator<<(std::ostream &out, Vec3 v) {
+        return out << v.e[0] << ' ' << v.e[1] << ' ' << v.e[2];
+    }
+
+    // Vec3 + Vec3
+    inline Vec3 operator+(Vec3 u, Vec3 v) {
+        return Vec3(u.e[0] + v.e[0], u.e[1] + v.e[1], u.e[2] + v.e[2]);
+    }
+
+    // Vec3 - Vec3
+    inline Vec3 operator-(Vec3 u, Vec3 v) {
+        return Vec3(u.e[0] - v.e[0], u.e[1] - v.e[1], u.e[2] - v.e[2]);
+    }
+
+    // Vec3 * Vec3
+    inline Vec3 operator*(Vec3 u, Vec3 v) {
+        return Vec3(u.e[0] * v.e[0], u.e[1] * v.e[1], u.e[2] * v.e[2]);
+    }
+
+    // double * Vec3
+    inline Vec3 operator*(double t, Vec3 v) {
+        return Vec3(t * v.e[0], t * v.e[1], t * v.e[2]);
+    }
+
+    // Vec3 * double
+    inline Vec3 operator*(Vec3 v, double t) {
+        return t * v;
+    }
+
+    // Vec3 / double
+    inline Vec3 operator/(Vec3 v, double t) {
+        return (1 / t) * v;
+    }
+
+    inline double dot(Vec3 u, Vec3 v) {
+        return u.e[0] * v.e[0] + u.e[1] * v.e[1] + u.e[2] * v.e[2];
+    }
+
+    inline Vec3 cross(Vec3 u, Vec3 v) {
+        return Vec3(
+            u.e[1] * v.e[2] - u.e[2] * v.e[1],
+            u.e[2] * v.e[0] - u.e[0] * v.e[2],
+            u.e[0] * v.e[1] - u.e[1] * v.e[0]
+        );
+    }
+
+    inline Vec3 unit_vector(Vec3 v) {
+        return v / v.length();
+    }
+
+    #endif
+    ```
+  </Tab>
 </Tabs>
 
 ## Color Utility Functions
@@ -365,125 +359,119 @@ inline Vec3 unit_vector(Vec3 v) {
 Using our new `Color` (alias `Vec3`), we'll create a utility function to write a single pixel's color out to the output stream.
 
 <Tabs>
-<Tab label="Rust">
+  <Tab label="Rust">
+    ```rust filename="color.rs | Color utility functions"
+    use std::io::Write;
 
-```rust filename="color.rs | Color utility functions"
-use std::io::Write;
+    use crate::vec3::Vec3;
 
-use crate::vec3::Vec3;
+    // Type alias
+    pub type Color = Vec3; // RGB color
 
-// Type alias
-pub type Color = Vec3; // RGB color
+    pub fn write_color(out: &mut impl Write, pixel_color: Color) {
+        // Write the translated [0,255] value of each color component.
+        let r = (255.999 * pixel_color.x()) as i32;
+        let g = (255.999 * pixel_color.y()) as i32;
+        let b = (255.999 * pixel_color.z()) as i32;
+        writeln!(out, "{} {} {}", r, g, b).expect("writing color");
+    }
+    ```
+  </Tab>
 
-pub fn write_color(out: &mut impl Write, pixel_color: Color) {
-    // Write the translated [0,255] value of each color component.
-    let r = (255.999 * pixel_color.x()) as i32;
-    let g = (255.999 * pixel_color.y()) as i32;
-    let b = (255.999 * pixel_color.z()) as i32;
-    writeln!(out, "{} {} {}", r, g, b).expect("writing color");
-}
-```
+  <Tab label="C++">
+    ```cpp filename="color.h | Color utility functions"
+    #ifndef COLOR_H
+    #define COLOR_H
 
-</Tab>
-<Tab label="C++">
+    #include <ostream>
 
-```cpp filename="color.h | Color utility functions"
-#ifndef COLOR_H
-#define COLOR_H
+    #include "vec3.h"
 
-#include <ostream>
+    // Type alias
+    using Color = Vec3; // RGB color
 
-#include "vec3.h"
+    inline void write_color(std::ostream &out, Color pixel_color) {
+        // Write the translated [0,255] value of each color component.
+        auto r = static_cast<int>(255.999 * pixel_color.x());
+        auto g = static_cast<int>(255.999 * pixel_color.y());
+        auto b = static_cast<int>(255.999 * pixel_color.z());
+        out << r << ' ' << g << ' ' << b << '\n';
+    }
 
-// Type alias
-using Color = Vec3; // RGB color
-
-inline void write_color(std::ostream &out, Color pixel_color) {
-    // Write the translated [0,255] value of each color component.
-    auto r = static_cast<int>(255.999 * pixel_color.x());
-    auto g = static_cast<int>(255.999 * pixel_color.y());
-    auto b = static_cast<int>(255.999 * pixel_color.z());
-    out << r << ' ' << g << ' ' << b << '\n';
-}
-
-#endif
-```
-
-</Tab>
+    #endif
+    ```
+  </Tab>
 </Tabs>
 
 Now we can change our main to use this:
 
 <Tabs>
-<Tab label="Rust">
+  <Tab label="Rust">
+    ```rust filename="main.rs | Final code for the first PPM image" {1-7,24-25}
+    mod color;
+    mod vec3;
 
-```rust filename="main.rs | Final code for the first PPM image" {1-7,24-25}
-mod color;
-mod vec3;
+    use std::io;
 
-use std::io;
+    use color::Color;
 
-use color::Color;
+    fn main() {
+        // Image
 
-fn main() {
-    // Image
+        const IMAGE_WIDTH: i32 = 256;
+        const IMAGE_HEIGHT: i32 = 256;
 
-    const IMAGE_WIDTH: i32 = 256;
-    const IMAGE_HEIGHT: i32 = 256;
+        // Render
 
-    // Render
+        print!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT);
 
-    print!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT);
-
-    for j in (0..IMAGE_HEIGHT).rev() {
-        eprint!("\rScanlines remaining: {} ", j);
-        for i in 0..IMAGE_WIDTH {
-            let r = i as f64 / (IMAGE_WIDTH - 1) as f64;
-            let g = j as f64 / (IMAGE_HEIGHT - 1) as f64;
-            let b = 0.25;
-            let pixel_color = Color::new(r, g, b);
-            color::write_color(&mut io::stdout(), pixel_color);
+        for j in (0..IMAGE_HEIGHT).rev() {
+            eprint!("\rScanlines remaining: {} ", j);
+            for i in 0..IMAGE_WIDTH {
+                let r = i as f64 / (IMAGE_WIDTH - 1) as f64;
+                let g = j as f64 / (IMAGE_HEIGHT - 1) as f64;
+                let b = 0.25;
+                let pixel_color = Color::new(r, g, b);
+                color::write_color(&mut io::stdout(), pixel_color);
+            }
         }
+
+        eprint!("\nDone.\n");
     }
+    ```
+  </Tab>
 
-    eprint!("\nDone.\n");
-}
-```
+  <Tab label="C++">
+    ```cpp filename="main.cpp | Final code for the first PPM image" {3-4,21-22}
+    #include <iostream>
 
-</Tab>
-<Tab label="C++">
+    #include "color.h"
 
-```cpp filename="main.cpp | Final code for the first PPM image" {3-4,21-22}
-#include <iostream>
+    int main() {
+        // Image
 
-#include "color.h"
+        const int IMAGE_WIDTH = 256;
+        const int IMAGE_HEIGHT = 256;
 
-int main() {
-    // Image
+        // Render
 
-    const int IMAGE_WIDTH = 256;
-    const int IMAGE_HEIGHT = 256;
+        std::cout << "P3\n" << IMAGE_WIDTH << ' ' << IMAGE_HEIGHT << "\n255\n";
 
-    // Render
-
-    std::cout << "P3\n" << IMAGE_WIDTH << ' ' << IMAGE_HEIGHT << "\n255\n";
-
-    for (int j = IMAGE_HEIGHT - 1; j >= 0; --j) {
-        std::cerr << "\rScanlines remaining: " << j << ' ';
-        for (int i = 0; i < IMAGE_WIDTH; ++i) {
-            auto r = static_cast<double>(i) / (IMAGE_WIDTH - 1);
-            auto g = static_cast<double>(j) / (IMAGE_HEIGHT - 1);
-            auto b = 0.25;
-            Color pixel_color(r, g, b);
-            write_color(std::cout, pixel_color);
+        for (int j = IMAGE_HEIGHT - 1; j >= 0; --j) {
+            std::cerr << "\rScanlines remaining: " << j << ' ';
+            for (int i = 0; i < IMAGE_WIDTH; ++i) {
+                auto r = static_cast<double>(i) / (IMAGE_WIDTH - 1);
+                auto g = static_cast<double>(j) / (IMAGE_HEIGHT - 1);
+                auto b = 0.25;
+                Color pixel_color(r, g, b);
+                write_color(std::cout, pixel_color);
+            }
         }
+
+        std::cerr << "\nDone.\n";
+
+        return 0;
     }
-
-    std::cerr << "\nDone.\n";
-
-    return 0;
-}
-```
-
-</Tab>
+    ```
+  </Tab>
 </Tabs>

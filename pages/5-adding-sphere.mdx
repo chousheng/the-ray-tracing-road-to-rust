@@ -6,7 +6,7 @@ Let's add a single object to our ray tracer. People often use spheres in ray tra
 
 ## Ray-Sphere Intersection
 
-Recall that the equation for a sphere centered at the origin of radius $R$ is $x^2 + y^2 + z^2 = R^2$. Put another way, if a given point $(x,y,z)$ is on the sphere, then $x^2 + y^2 + z^2 = R^2$. If the given point $(x,y,z)$ is _inside_ the sphere, then $x^2 + y^2 + z^2 < R^2$, and if a given point $(x,y,z)$ is _outside_ the sphere, then $x^2 + y^2 + z^2 > R^2$.
+Recall that the equation for a sphere centered at the origin of radius $R$ is $x^2 + y^2 + z^2 = R^2$. Put another way, if a given point $(x,y,z)$ is on the sphere, then $x^2 + y^2 + z^2 = R^2$. If the given point $(x,y,z)$ is *inside* the sphere, then $x^2 + y^2 + z^2 < R^2$, and if a given point $(x,y,z)$ is *outside* the sphere, then $x^2 + y^2 + z^2 > R^2$.
 
 It gets uglier if the sphere center is at $(C_x, C_y, C_z)$:
 
@@ -52,159 +52,156 @@ The vectors and $r$ in that equation are all constant and known. The unknown is 
 and there is a square root part that is either positive (meaning two real solutions), negative (meaning no real solutions), or zero (meaning one real solution). In graphics, the algebra almost
 always relates very directly to the geometry. What we have is:
 
-![Figure [ray-sphere]: Ray-sphere intersection results](../images/fig-1.04-ray-sphere.jpg)
+![Figure \[ray-sphere\]: Ray-sphere intersection results](../images/fig-1.04-ray-sphere.jpg)
 
 ## Creating Our First Raytraced Image
 
 If we take that math and hard-code it into our program, we can test it by coloring red any pixel that hits a small sphere we place at -1 on the z-axis:
 
 <Tabs>
-<Tab label="Rust">
+  <Tab label="Rust">
+    ```rust filename="main.rs | Rendering a red sphere" {11-19,21-23}
+    mod color;
+    mod ray;
+    mod vec3;
 
-```rust filename="main.rs | Rendering a red sphere" {11-19,21-23}
-mod color;
-mod ray;
-mod vec3;
+    use std::io;
 
-use std::io;
+    use color::Color;
+    use ray::Ray;
+    use vec3::{Point3, Vec3};
 
-use color::Color;
-use ray::Ray;
-use vec3::{Point3, Vec3};
-
-fn hit_sphere(center: Point3, radius: f64, r: &Ray) -> bool {
-    let oc = r.origin() - center;
-    let a = vec3::dot(r.direction(), r.direction());
-    let b = 2.0 * vec3::dot(oc, r.direction());
-    let c = vec3::dot(oc, oc) - radius * radius;
-    let discriminant = b * b - 4.0 * a * c;
-    discriminant > 0.0
-}
-
-fn ray_color(r: &Ray) -> Color {
-    if hit_sphere(Point3::new(0.0, 0.0, -1.0), 0.5, r) {
-        return Color::new(1.0, 0.0, 0.0);
+    fn hit_sphere(center: Point3, radius: f64, r: &Ray) -> bool {
+        let oc = r.origin() - center;
+        let a = vec3::dot(r.direction(), r.direction());
+        let b = 2.0 * vec3::dot(oc, r.direction());
+        let c = vec3::dot(oc, oc) - radius * radius;
+        let discriminant = b * b - 4.0 * a * c;
+        discriminant > 0.0
     }
-    let unit_direction = vec3::unit_vector(r.direction());
-    let t = 0.5 * (unit_direction.y() + 1.0);
-    (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
-}
 
-fn main() {
-    // Image
-
-    const ASPECT_RATIO: f64 = 16.0 / 9.0;
-    const IMAGE_WIDTH: i32 = 400;
-    const IMAGE_HEIGHT: i32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as i32;
-
-    // Camera
-
-    let viewport_height = 2.0;
-    let viewport_width = ASPECT_RATIO * viewport_height;
-    let focal_length = 1.0;
-
-    let origin = Point3::new(0.0, 0.0, 0.0);
-    let horizontal = Vec3::new(viewport_width, 0.0, 0.0);
-    let vertical = Vec3::new(0.0, viewport_height, 0.0);
-    let lower_left_corner = origin
-        - horizontal / 2.0
-        - vertical / 2.0
-        - Vec3::new(0.0, 0.0, focal_length);
-
-    // Render
-
-    print!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT);
-
-    for j in (0..IMAGE_HEIGHT).rev() {
-        eprint!("\rScanlines remaining: {} ", j);
-        for i in 0..IMAGE_WIDTH {
-            let u = i as f64 / (IMAGE_WIDTH - 1) as f64;
-            let v = j as f64 / (IMAGE_HEIGHT - 1) as f64;
-            let r = Ray::new(
-                origin,
-                lower_left_corner + u * horizontal + v * vertical - origin,
-            );
-            let pixel_color = ray_color(&r);
-            color::write_color(&mut io::stdout(), pixel_color);
+    fn ray_color(r: &Ray) -> Color {
+        if hit_sphere(Point3::new(0.0, 0.0, -1.0), 0.5, r) {
+            return Color::new(1.0, 0.0, 0.0);
         }
+        let unit_direction = vec3::unit_vector(r.direction());
+        let t = 0.5 * (unit_direction.y() + 1.0);
+        (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
     }
 
-    eprint!("\nDone.\n");
-}
-```
+    fn main() {
+        // Image
 
-</Tab>
-<Tab label="C++">
+        const ASPECT_RATIO: f64 = 16.0 / 9.0;
+        const IMAGE_WIDTH: i32 = 400;
+        const IMAGE_HEIGHT: i32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as i32;
 
-```cpp filename="main.cpp | Rendering a red sphere" {7-15,17-19}
-#include <iostream>
+        // Camera
 
-#include "color.h"
-#include "ray.h"
-#include "vec3.h"
+        let viewport_height = 2.0;
+        let viewport_width = ASPECT_RATIO * viewport_height;
+        let focal_length = 1.0;
 
-bool hit_sphere(Point3 center, double radius, const Ray &r) {
-    Vec3 oc = r.origin() - center;
-    auto a = dot(r.direction(), r.direction());
-    auto b = 2.0 * dot(oc, r.direction());
-    auto c = dot(oc, oc) - radius * radius;
-    auto discriminant = b * b - 4.0 * a * c;
-    return discriminant > 0.0;
-}
+        let origin = Point3::new(0.0, 0.0, 0.0);
+        let horizontal = Vec3::new(viewport_width, 0.0, 0.0);
+        let vertical = Vec3::new(0.0, viewport_height, 0.0);
+        let lower_left_corner = origin
+            - horizontal / 2.0
+            - vertical / 2.0
+            - Vec3::new(0.0, 0.0, focal_length);
 
-Color ray_color(const Ray &r) {
-    if (hit_sphere(Point3(0.0, 0.0, -1.0), 0.5, r)) {
-        return Color(1.0, 0.0, 0.0);
-    }
-    Vec3 unit_direction = unit_vector(r.direction());
-    auto t = 0.5 * (unit_direction.y() + 1.0);
-    return (1.0 - t) * Color(1.0, 1.0, 1.0) + t * Color(0.5, 0.7, 1.0);
-}
+        // Render
 
-int main() {
-    // Image
+        print!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT);
 
-    const double ASPECT_RATIO = 16.0 / 9.0;
-    const int IMAGE_WIDTH = 400;
-    const int IMAGE_HEIGHT = static_cast<int>(IMAGE_WIDTH / ASPECT_RATIO);
-
-    // Camera
-
-    auto viewport_height = 2.0;
-    auto viewport_width = ASPECT_RATIO * viewport_height;
-    auto focal_length = 1.0;
-
-    auto origin = Point3(0.0, 0.0, 0.0);
-    auto horizontal = Vec3(viewport_width, 0.0, 0.0);
-    auto vertical = Vec3(0.0, viewport_height, 0.0);
-    auto lower_left_corner = origin - horizontal / 2.0 - vertical / 2.0
-        - Vec3(0.0, 0.0, focal_length);
-
-    // Render
-
-    std::cout << "P3\n" << IMAGE_WIDTH << ' ' << IMAGE_HEIGHT << "\n255\n";
-
-    for (int j = IMAGE_HEIGHT - 1; j >= 0; --j) {
-        std::cerr << "\rScanlines remaining: " << j << ' ';
-        for (int i = 0; i < IMAGE_WIDTH; ++i) {
-            auto u = static_cast<double>(i) / (IMAGE_WIDTH - 1);
-            auto v = static_cast<double>(j) / (IMAGE_HEIGHT - 1);
-            Ray r(
-                origin,
-                lower_left_corner + u * horizontal + v * vertical - origin
-            );
-            Color pixel_color = ray_color(r);
-            write_color(std::cout, pixel_color);
+        for j in (0..IMAGE_HEIGHT).rev() {
+            eprint!("\rScanlines remaining: {} ", j);
+            for i in 0..IMAGE_WIDTH {
+                let u = i as f64 / (IMAGE_WIDTH - 1) as f64;
+                let v = j as f64 / (IMAGE_HEIGHT - 1) as f64;
+                let r = Ray::new(
+                    origin,
+                    lower_left_corner + u * horizontal + v * vertical - origin,
+                );
+                let pixel_color = ray_color(&r);
+                color::write_color(&mut io::stdout(), pixel_color);
+            }
         }
+
+        eprint!("\nDone.\n");
+    }
+    ```
+  </Tab>
+
+  <Tab label="C++">
+    ```cpp filename="main.cpp | Rendering a red sphere" {7-15,17-19}
+    #include <iostream>
+
+    #include "color.h"
+    #include "ray.h"
+    #include "vec3.h"
+
+    bool hit_sphere(Point3 center, double radius, const Ray &r) {
+        Vec3 oc = r.origin() - center;
+        auto a = dot(r.direction(), r.direction());
+        auto b = 2.0 * dot(oc, r.direction());
+        auto c = dot(oc, oc) - radius * radius;
+        auto discriminant = b * b - 4.0 * a * c;
+        return discriminant > 0.0;
     }
 
-    std::cerr << "\nDone.\n";
+    Color ray_color(const Ray &r) {
+        if (hit_sphere(Point3(0.0, 0.0, -1.0), 0.5, r)) {
+            return Color(1.0, 0.0, 0.0);
+        }
+        Vec3 unit_direction = unit_vector(r.direction());
+        auto t = 0.5 * (unit_direction.y() + 1.0);
+        return (1.0 - t) * Color(1.0, 1.0, 1.0) + t * Color(0.5, 0.7, 1.0);
+    }
 
-    return 0;
-}
-```
+    int main() {
+        // Image
 
-</Tab>
+        const double ASPECT_RATIO = 16.0 / 9.0;
+        const int IMAGE_WIDTH = 400;
+        const int IMAGE_HEIGHT = static_cast<int>(IMAGE_WIDTH / ASPECT_RATIO);
+
+        // Camera
+
+        auto viewport_height = 2.0;
+        auto viewport_width = ASPECT_RATIO * viewport_height;
+        auto focal_length = 1.0;
+
+        auto origin = Point3(0.0, 0.0, 0.0);
+        auto horizontal = Vec3(viewport_width, 0.0, 0.0);
+        auto vertical = Vec3(0.0, viewport_height, 0.0);
+        auto lower_left_corner = origin - horizontal / 2.0 - vertical / 2.0
+            - Vec3(0.0, 0.0, focal_length);
+
+        // Render
+
+        std::cout << "P3\n" << IMAGE_WIDTH << ' ' << IMAGE_HEIGHT << "\n255\n";
+
+        for (int j = IMAGE_HEIGHT - 1; j >= 0; --j) {
+            std::cerr << "\rScanlines remaining: " << j << ' ';
+            for (int i = 0; i < IMAGE_WIDTH; ++i) {
+                auto u = static_cast<double>(i) / (IMAGE_WIDTH - 1);
+                auto v = static_cast<double>(j) / (IMAGE_HEIGHT - 1);
+                Ray r(
+                    origin,
+                    lower_left_corner + u * horizontal + v * vertical - origin
+                );
+                Color pixel_color = ray_color(r);
+                write_color(std::cout, pixel_color);
+            }
+        }
+
+        std::cerr << "\nDone.\n";
+
+        return 0;
+    }
+    ```
+  </Tab>
 </Tabs>
 
 What we get is this:

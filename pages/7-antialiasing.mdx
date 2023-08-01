@@ -51,7 +51,7 @@ If you want to use this, you can obtain a random number with the conditions we n
 For a given pixel we have several samples within that pixel and send rays through each of the
 samples. The colors of these rays are then averaged:
 
-![Figure [pixel-samples]: Pixel samples](../images/fig-1.07-pixel-samples.jpg)
+![Figure \[pixel-samples\]: Pixel samples](../images/fig-1.07-pixel-samples.jpg)
 
 Now's a good time to create a `camera` class to manage our virtual camera and the related tasks of
 scene scampling. The following class implements a simple camera using the axis-aligned camera from
@@ -94,7 +94,7 @@ To handle the multi-sampled color computation, we'll update the `write_color()` 
 than adding in a fractional contribution each time we accumulate more light to the color, just add
 the full color each iteration, and then perform a single divide at the end (by the number of
 samples) when writing out the color. In addition, we'll add a handy utility function to the
-`rtweekend.h` utility header: `clamp(x,min,max)`, which clamps the value `x` to the range [min,max]:
+`rtweekend.h` utility header: `clamp(x,min,max)`, which clamps the value `x` to the range \[min,max]:
 
 ```cpp filename="rtweekend.h | The clamp() utility function"
     inline double clamp(double x, double min, double max) {

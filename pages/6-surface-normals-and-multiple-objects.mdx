@@ -7,7 +7,7 @@ yes, but I won't enforce that in the code. This could allow subtle bugs, so be a
 personal preference as are most design decisions like that. For a sphere, the outward normal is in
 the direction of the hit point minus the center:
 
-![Figure [sphere-normal]: Sphere surface-normal geometry](../images/fig-1.05-sphere-normal.jpg)
+![Figure \[sphere-normal\]: Sphere surface-normal geometry](../images/fig-1.05-sphere-normal.jpg)
 
 On the earth, this implies that the vector from the earth's center to you points straight up. Let's
 throw that into the code now, and shade it. We don't have any lights or anything yet, so let's just
@@ -207,7 +207,7 @@ the ray. Alternatively, we can have the normal always point against the ray. If 
 the sphere, the normal will point outward, but if the ray is inside the sphere, the normal will
 point inward.
 
-![Figure [normal-sides]: Possible directions for sphere surface-normal geometry](../images/fig-1.06-normal-sides.jpg)
+![Figure \[normal-sides\]: Possible directions for sphere surface-normal geometry](../images/fig-1.06-normal-sides.jpg)
 
 We need to choose one of these possibilities because we will eventually want to determine which
 side of the surface that the ray is coming from. This is important for objects that are rendered
@@ -381,7 +381,7 @@ the `std::vector` member variable `objects`.
 
 `std::vector` is included with the `<vector>` header.
 
-Finally, the `using` statements in listing [hittable-list-initial] tell the compiler that we'll be
+Finally, the `using` statements in listing \[hittable-list-initial] tell the compiler that we'll be
 getting `shared_ptr` and `make_shared` from the `std` library, so we don't need to prefex these with
 `std::` every time we reference them.
 
