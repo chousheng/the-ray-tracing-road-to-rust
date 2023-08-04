@@ -128,15 +128,19 @@ const importCodeFromGitToMdx = async (importSpecs) => {
     // Checking missing code
     //
 
+    let hasError = false;
+
     for (const title in titleToGitCommit) {
       if (!(title in titleToMdxListing)) {
-        console.log("mdx missing: ", title);
+        console.log("Error: mdx missing:", title);
+        hasError = true;
       }
     }
 
     for (const title in titleToMdxListing) {
       if (!(title in titleToGitCommit)) {
-        console.log("git missing: ", title);
+        console.log("Error: git missing:", title);
+        hasError = true;
       }
     }
 
@@ -151,47 +155,51 @@ const importCodeFromGitToMdx = async (importSpecs) => {
 
         if (gitCommit.filename != "src/" + mdxListing.filename) {
           console.log(
-            "inconsistent filename:",
+            "Error: inconsistent filename:",
             "git=" + gitCommit.filename,
             "mdx=" + mdxListing.filename,
           );
+          hasError = true;
         }
       }
+    }
+
+    if (hasError) {
+      console.log("Error: aborting because of errors");
+      return;
     }
 
     //
     // Import code and write files
     //
-    if (true) {
-      const mdxFilenames = getSortedMdxFilenames();
+    const mdxFilenames = getSortedMdxFilenames();
 
-      for (const filename of mdxFilenames) {
-        const doc = fs.readFileSync(filename);
+    for (const filename of mdxFilenames) {
+      const doc = fs.readFileSync(filename);
 
-        const plugin = () => (mdast) => {
-          visit(mdast, "code", (node) => {
-            const meta = parseMdAstNodeMeta(node);
-            if (meta?.title in titleToGitCommit && meta.lang == lang) {
-              const commit = titleToGitCommit[meta.title];
-              console.log(
-                "Found gitCommit to replace with mdxListing " + commit.message,
-              );
-              node.value = commit.code;
-            }
-          });
-        };
+      const plugin = () => (mdast) => {
+        visit(mdast, "code", (node) => {
+          const meta = parseMdAstNodeMeta(node);
+          if (meta?.title in titleToGitCommit && meta.lang == lang) {
+            const commit = titleToGitCommit[meta.title];
+            console.log("Replacing: " + commit.message);
+            node.value = commit.code;
+          }
+        });
+      };
 
-        const file = unified()
-          .use(remarkParse)
-          .use(remarkConfig)
-          .use(plugin)
-          .use(remarkStringify)
-          .processSync(doc);
+      const file = unified()
+        .use(remarkParse)
+        .use(remarkConfig)
+        .use(plugin)
+        .use(remarkStringify)
+        .processSync(doc);
 
-        //console.log(String(file));
-        fs.writeFileSync(filename, String(file));
-      }
+      //console.log(String(file));
+      fs.writeFileSync(filename, String(file));
     }
+
+    console.log("Done!");
   }
 };
 
