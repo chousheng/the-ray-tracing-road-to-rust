@@ -85,7 +85,10 @@ const getGitCommits = async (gitRepoPath) => {
     }
 
     // Parse code
-    const code = await git.show(log.hash + ":" + commit.filename);
+    let code = await git.show(log.hash + ":" + commit.filename);
+    if (code.slice(-1) == "\n") {
+      code = code.slice(0, -1); // Trim the last newline
+    }
     commit.code = code;
 
     // Add parsed commit
