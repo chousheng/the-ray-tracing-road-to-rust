@@ -10,7 +10,7 @@ import { simpleGit } from "simple-git";
 
 import remarkConfig from "../.remarkrc.mjs";
 
-const getSortedMdxFilenames = () => {
+export const getSortedMdxFilenames = () => {
   let mdxFilenames = globSync("pages/*-*.mdx");
 
   const parseChapterNo = (str) => {

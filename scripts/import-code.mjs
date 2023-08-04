@@ -9,9 +9,12 @@ import { visit } from "unist-util-visit";
 
 import { simpleGit } from "simple-git";
 
-import { getMdxListingsByLang, parseMdAstNodeMeta } from "./export-code.mjs";
-
 import remarkConfig from "../.remarkrc.mjs";
+import {
+  getMdxListingsByLang,
+  getSortedMdxFilenames,
+  parseMdAstNodeMeta,
+} from "./export-code.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -138,7 +141,7 @@ const importCodeFromGitToMdx = async (importSpecs) => {
     }
 
     //
-    // Find inconsistent file name
+    // Find inconsistent filenames
     //
 
     for (const title in titleToGitCommit) {
@@ -156,31 +159,38 @@ const importCodeFromGitToMdx = async (importSpecs) => {
       }
     }
 
-    // testing
+    //
+    // Import code and write files
+    //
     if (true) {
-      const filename = "pages/2-generating-image.mdx";
-      const doc = fs.readFileSync(filename);
+      const mdxFilenames = getSortedMdxFilenames();
 
-      const plugin = () => (mdast) => {
-        visit(mdast, "code", (node) => {
-          const meta = parseMdAstNodeMeta(node);
-          if (meta?.title in titleToGitCommit && meta.lang == lang) {
-            const commit = titleToGitCommit[meta.title];
-            console.log("found listing in git to replace: " + commit.message);
-            node.value = commit.code;
-          }
-        });
-      };
+      for (const filename of mdxFilenames) {
+        const doc = fs.readFileSync(filename);
 
-      const file = unified()
-        .use(remarkParse)
-        .use(remarkConfig)
-        .use(plugin)
-        .use(remarkStringify)
-        .processSync(doc);
+        const plugin = () => (mdast) => {
+          visit(mdast, "code", (node) => {
+            const meta = parseMdAstNodeMeta(node);
+            if (meta?.title in titleToGitCommit && meta.lang == lang) {
+              const commit = titleToGitCommit[meta.title];
+              console.log(
+                "Found gitCommit to replace with mdxListing " + commit.message,
+              );
+              node.value = commit.code;
+            }
+          });
+        };
 
-      // Todo: writing to file
-      // console.log(String(file));
+        const file = unified()
+          .use(remarkParse)
+          .use(remarkConfig)
+          .use(plugin)
+          .use(remarkStringify)
+          .processSync(doc);
+
+        //console.log(String(file));
+        fs.writeFileSync(filename, String(file));
+      }
     }
   }
 };
