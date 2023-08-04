@@ -62,7 +62,7 @@ const getGitCommits = async (gitRepoPath) => {
       // Parse diffRanges
       m = line.match(/\@\@\s\-(\S+)\s+\+(\S+)\s+\@\@/);
       if (m) {
-        let diffRange = { start1: 0, count1: 1, start2: 0, start2: 1 };
+        let diffRange = { start1: 0, count1: 1, start2: 0, count2: 1 };
 
         if (m[1].includes(",")) {
           let tokens = m[1].split(",");
@@ -185,8 +185,65 @@ const importCodeFromGitToMdx = async (importSpecs) => {
           const meta = parseMdAstNodeMeta(node);
           if (meta?.title in titleToGitCommit && meta.lang == lang) {
             const commit = titleToGitCommit[meta.title];
-            console.log("Replacing: " + commit.message);
-            node.value = commit.code;
+
+            // Replace code
+            if (node.value != commit.code) {
+              console.log("Replacing code: " + commit.message);
+              node.value = commit.code;
+            }
+
+            // Modify meta
+            //console.log(commit.diffRanges);
+            const MODIFY_HIGHLIGHT = true;
+            if (MODIFY_HIGHLIGHT) {
+              // Build highlight string
+              let hiStr = "{";
+
+              let first = true;
+              for (const diffRange of commit.diffRanges) {
+                if (diffRange.count == 0) {
+                  continue;
+                }
+
+                if (first) {
+                  first = false;
+                } else {
+                  hiStr += ",";
+                }
+
+                if (diffRange.count2 == 1) {
+                  hiStr += diffRange.start2.toString();
+                } else {
+                  hiStr += diffRange.start2.toString();
+                  hiStr += "-";
+                  hiStr += (diffRange.start2 + diffRange.count2 - 1).toString();
+                }
+              }
+
+              hiStr += "}";
+
+              //console.log(hiStr);
+
+              // Replace the original string
+              const updateHiStrInMdxNodeMeta = (hiStr, node) => {
+                let regex = /{.*}/;
+                let meta = node.meta;
+                if (meta.match(regex)) {
+                  meta = meta.replace(regex, hiStr);
+                } else {
+                  meta = meta.trimEnd();
+                  meta += " " + hiStr;
+                  console.log(meta);
+                }
+
+                if (meta != node.meta) {
+                  console.log("old meta: ", node.meta);
+                  console.log("new meta: ", meta);
+                  node.meta = meta;
+                }
+              };
+              updateHiStrInMdxNodeMeta(hiStr, node);
+            }
           }
         });
       };
