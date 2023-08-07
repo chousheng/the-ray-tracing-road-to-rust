@@ -30,5 +30,10 @@
     "unified": "^10.1.2",
     "unist-util-inspect": "^8.0.0",
     "unist-util-visit": "^5.0.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "rehype-pretty-code": "workspace:*"
+    }
   }
 }
