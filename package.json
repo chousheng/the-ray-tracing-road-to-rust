@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "dev": "nodemon",
     "export-code": "node scripts/export-code.mjs",
     "import-code": "node scripts/import-code.mjs"
   },
@@ -18,6 +19,7 @@
     "eslint-config-next": "^13.4.12",
     "eslint-config-prettier": "^8.9.0",
     "glob": "^10.3.3",
+    "nodemon": "^3.0.1",
     "prettier": "^3.0.0",
     "remark": "^14.0.3",
     "remark-cli": "^11.0.0",
