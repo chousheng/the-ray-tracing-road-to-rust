@@ -2,5 +2,5 @@
   "ignore": ["node_modules", ".next", ".git"],
   "watch": ["packages/rehype-pretty-code/**/*"],
   "ext": "js cjs",
-  "exec": "next dev"
+  "exec": "rm -rf .next/cache/webpack && next dev"
 }
