@@ -41,7 +41,7 @@ const getGitCommits = async (gitRepoPath) => {
     }
     commit.message = m[1];
 
-    const show = await git.show(log.hash, ["--unified=0"]);
+    const show = await git.show(log.hash, ["--unified=0", "--patience"]);
     let lines = show.split("\n");
     for (let line of lines) {
       // Parse filename
@@ -201,7 +201,7 @@ const importCodeFromGitToMdx = async (importSpecs) => {
 
               let first = true;
               for (const diffRange of commit.diffRanges) {
-                if (diffRange.count == 0) {
+                if (diffRange.count2 == 0) {
                   continue;
                 }
 
