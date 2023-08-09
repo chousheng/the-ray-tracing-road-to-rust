@@ -192,10 +192,14 @@ const importCodeFromGitToMdx = async (importSpecs) => {
               node.value = commit.code;
             }
 
-            // Modify meta
+            let l = 1;
+            let lineMap = new Map(commit.code.split("\n").map((e) => [l++, e]));
+
+            // Modify the highlight string in mdx node meta
             //console.log(commit.diffRanges);
-            const MODIFY_HIGHLIGHT = true;
-            if (MODIFY_HIGHLIGHT) {
+            const MODIFY_HIGHLIGHT_META = true;
+            const PREFER_NEWLINE_UPFRONT = true;
+            if (MODIFY_HIGHLIGHT_META) {
               // Build highlight string
               let hiStr = "{";
 
@@ -214,9 +218,22 @@ const importCodeFromGitToMdx = async (importSpecs) => {
                 if (diffRange.count2 == 1) {
                   hiStr += diffRange.start2.toString();
                 } else {
-                  hiStr += diffRange.start2.toString();
+                  let hiStart = diffRange.start2;
+                  let hiEnd = diffRange.start2 + diffRange.count2 - 1;
+                  if (PREFER_NEWLINE_UPFRONT) {
+                    // Check if possible to shift the range
+                    if (
+                      lineMap.get(hiEnd) == "" &&
+                      hiStart != 1 &&
+                      lineMap.get(hiStart - 1) == ""
+                    ) {
+                      hiStart -= 1;
+                      hiEnd -= 1;
+                    }
+                  }
+                  hiStr += hiStart.toString();
                   hiStr += "-";
-                  hiStr += (diffRange.start2 + diffRange.count2 - 1).toString();
+                  hiStr += hiEnd.toString();
                 }
               }
 
@@ -242,6 +259,7 @@ const importCodeFromGitToMdx = async (importSpecs) => {
                   node.meta = meta;
                 }
               };
+
               updateHiStrInMdxNodeMeta(hiStr, node);
             }
           }
