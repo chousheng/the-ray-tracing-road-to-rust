@@ -205,19 +205,42 @@ const importCodeFromGitToMdx = async (importSpecs) => {
 
               let first = true;
               for (const diffRange of commit.diffRanges) {
-                if (diffRange.count2 == 0) {
-                  continue;
-                }
-
                 if (first) {
                   first = false;
                 } else {
                   hiStr += ",";
                 }
 
-                if (diffRange.count2 == 1) {
+                if (diffRange.count2 == 0) {
+                  // No insert, remove only (not very common)
+                  //console.log(
+                  //  "remove only: ",
+                  //  commit.filename,
+                  //  commit.message,
+                  //  diffRange.start2,
+                  //  diffRange.count1,
+                  //);
+                  let lineAbove = diffRange.start2; // Line above the remove block
+                  let lineBelow = diffRange.start2 + 1; // Line below the remove block
+
+                  let lineAboveStr = lineMap.get(lineAbove);
+                  let lineBelowStr = lineMap.get(lineBelow);
+
+                  if (lineAboveStr == "" && lineBelowStr != "") {
+                    hiStr += lineAbove.toString();
+                  } else if (lineAboveStr != "" && lineBelowStr == "") {
+                    hiStr += lineBelow.toString();
+                  } else {
+                    console.log(
+                      "Warning: remove only block with a rare less-than-ideal case!",
+                    );
+                    hiStr += lineAbove.toString() + "-" + lineBelow.toString();
+                  }
+                } else if (diffRange.count2 == 1) {
+                  // Insert one line
                   hiStr += diffRange.start2.toString();
                 } else {
+                  // Insert multiple lines
                   let hiStart = diffRange.start2;
                   let hiEnd = diffRange.start2 + diffRange.count2 - 1;
                   if (PREFER_NEWLINE_UPFRONT) {
