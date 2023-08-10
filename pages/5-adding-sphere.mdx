@@ -60,7 +60,7 @@ If we take that math and hard-code it into our program, we can test it by colori
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="main.rs | Rendering a red sphere" {11-19,21-23}
+    ```rust filename="main.rs | Rendering a red sphere" {10-18,21-24}
     mod color;
     mod ray;
     mod vec3;
@@ -84,6 +84,7 @@ If we take that math and hard-code it into our program, we can test it by colori
         if hit_sphere(Point3::new(0.0, 0.0, -1.0), 0.5, r) {
             return Color::new(1.0, 0.0, 0.0);
         }
+
         let unit_direction = vec3::unit_vector(r.direction());
         let t = 0.5 * (unit_direction.y() + 1.0);
         (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
@@ -105,10 +106,8 @@ If we take that math and hard-code it into our program, we can test it by colori
         let origin = Point3::new(0.0, 0.0, 0.0);
         let horizontal = Vec3::new(viewport_width, 0.0, 0.0);
         let vertical = Vec3::new(0.0, viewport_height, 0.0);
-        let lower_left_corner = origin
-            - horizontal / 2.0
-            - vertical / 2.0
-            - Vec3::new(0.0, 0.0, focal_length);
+        let lower_left_corner =
+            origin - horizontal / 2.0 - vertical / 2.0 - Vec3::new(0.0, 0.0, focal_length);
 
         // Render
 
@@ -134,7 +133,7 @@ If we take that math and hard-code it into our program, we can test it by colori
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="main.cpp | Rendering a red sphere" {7-15,17-19}
+    ```cpp filename="main.cpp | Rendering a red sphere" {6-14,17-20}
     #include <iostream>
 
     #include "color.h"
@@ -154,6 +153,7 @@ If we take that math and hard-code it into our program, we can test it by colori
         if (hit_sphere(Point3(0.0, 0.0, -1.0), 0.5, r)) {
             return Color(1.0, 0.0, 0.0);
         }
+
         Vec3 unit_direction = unit_vector(r.direction());
         auto t = 0.5 * (unit_direction.y() + 1.0);
         return (1.0 - t) * Color(1.0, 1.0, 1.0) + t * Color(0.5, 0.7, 1.0);
@@ -175,8 +175,8 @@ If we take that math and hard-code it into our program, we can test it by colori
         auto origin = Point3(0.0, 0.0, 0.0);
         auto horizontal = Vec3(viewport_width, 0.0, 0.0);
         auto vertical = Vec3(0.0, viewport_height, 0.0);
-        auto lower_left_corner = origin - horizontal / 2.0 - vertical / 2.0
-            - Vec3(0.0, 0.0, focal_length);
+        auto lower_left_corner =
+            origin - horizontal / 2.0 - vertical / 2.0 - Vec3(0.0, 0.0, focal_length);
 
         // Render
 
@@ -187,10 +187,7 @@ If we take that math and hard-code it into our program, we can test it by colori
             for (int i = 0; i < IMAGE_WIDTH; ++i) {
                 auto u = static_cast<double>(i) / (IMAGE_WIDTH - 1);
                 auto v = static_cast<double>(j) / (IMAGE_HEIGHT - 1);
-                Ray r(
-                    origin,
-                    lower_left_corner + u * horizontal + v * vertical - origin
-                );
+                Ray r(origin, lower_left_corner + u * horizontal + v * vertical - origin);
                 Color pixel_color = ray_color(r);
                 write_color(std::cout, pixel_color);
             }

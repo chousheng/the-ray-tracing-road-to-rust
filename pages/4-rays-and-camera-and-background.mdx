@@ -8,7 +8,7 @@ The function $\mathbf{P}(t)$ in more verbose code form we call `ray::at(t)`:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="ray.rs | The Ray struct"
+    ```rust filename="ray.rs | The Ray struct" {1-28}
     use crate::vec3::{Point3, Vec3};
 
     #[derive(Default)]
@@ -18,7 +18,7 @@ The function $\mathbf{P}(t)$ in more verbose code form we call `ray::at(t)`:
     }
 
     impl Ray {
-        pub fn new(origin: Point3, direction: Vec3) -> Self {
+        pub fn new(origin: Point3, direction: Vec3) -> Ray {
             Ray {
                 orig: origin,
                 dir: direction,
@@ -41,7 +41,7 @@ The function $\mathbf{P}(t)$ in more verbose code form we call `ray::at(t)`:
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="ray.h | The Ray class"
+    ```cpp filename="ray.h | The Ray class" {1-29}
     #ifndef RAY_H
     #define RAY_H
 
@@ -49,9 +49,9 @@ The function $\mathbf{P}(t)$ in more verbose code form we call `ray::at(t)`:
 
     class Ray {
     public:
-        Ray() {}
+        Ray() = default;
 
-        Ray(Point3 origin, Vec3 direction) : orig(origin), dir(direction) {}
+        Ray(Point3 origin, Vec3 direction) : orig{origin}, dir{direction} {}
 
         Point3 origin() const {
             return orig;
@@ -65,7 +65,7 @@ The function $\mathbf{P}(t)$ in more verbose code form we call `ray::at(t)`:
             return orig + t * dir;
         }
 
-    public:
+    private:
         Point3 orig;
         Vec3 dir;
     };
@@ -91,7 +91,7 @@ Below in code, the ray `r` goes to approximately the pixel centers (We won't wor
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="main.rs | Rendering a blue-to-white gradient" {2,8-15,20-36,45-51}
+    ```rust filename="main.rs | Rendering a blue-to-white gradient" {2,8-15,20-34,43-49}
     mod color;
     mod ray;
     mod vec3;
@@ -124,10 +124,8 @@ Below in code, the ray `r` goes to approximately the pixel centers (We won't wor
         let origin = Point3::new(0.0, 0.0, 0.0);
         let horizontal = Vec3::new(viewport_width, 0.0, 0.0);
         let vertical = Vec3::new(0.0, viewport_height, 0.0);
-        let lower_left_corner = origin
-            - horizontal / 2.0
-            - vertical / 2.0
-            - Vec3::new(0.0, 0.0, focal_length);
+        let lower_left_corner =
+            origin - horizontal / 2.0 - vertical / 2.0 - Vec3::new(0.0, 0.0, focal_length);
 
         // Render
 
@@ -153,7 +151,7 @@ Below in code, the ray `r` goes to approximately the pixel centers (We won't wor
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="main.cpp | Rendering a blue-to-white gradient" {4-11,16-30,39-45}
+    ```cpp filename="main.cpp | Rendering a blue-to-white gradient" {4-11,16-30,39-42}
     #include <iostream>
 
     #include "color.h"
@@ -182,8 +180,8 @@ Below in code, the ray `r` goes to approximately the pixel centers (We won't wor
         auto origin = Point3(0.0, 0.0, 0.0);
         auto horizontal = Vec3(viewport_width, 0.0, 0.0);
         auto vertical = Vec3(0.0, viewport_height, 0.0);
-        auto lower_left_corner = origin - horizontal / 2.0 - vertical / 2.0
-            - Vec3(0.0, 0.0, focal_length);
+        auto lower_left_corner =
+            origin - horizontal / 2.0 - vertical / 2.0 - Vec3(0.0, 0.0, focal_length);
 
         // Render
 
@@ -194,10 +192,7 @@ Below in code, the ray `r` goes to approximately the pixel centers (We won't wor
             for (int i = 0; i < IMAGE_WIDTH; ++i) {
                 auto u = static_cast<double>(i) / (IMAGE_WIDTH - 1);
                 auto v = static_cast<double>(j) / (IMAGE_HEIGHT - 1);
-                Ray r(
-                    origin,
-                    lower_left_corner + u * horizontal + v * vertical - origin
-                );
+                Ray r(origin, lower_left_corner + u * horizontal + v * vertical - origin);
                 Color pixel_color = ray_color(r);
                 write_color(std::cout, pixel_color);
             }

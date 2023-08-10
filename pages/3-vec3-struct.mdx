@@ -12,14 +12,14 @@ Here's the basic part of the `Vec3` struct:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="vec3.rs | The Vec3 struct"
+    ```rust filename="vec3.rs | The Vec3 struct" {1-25}
     #[derive(Copy, Clone, Default)]
     pub struct Vec3 {
         e: [f64; 3],
     }
 
     impl Vec3 {
-        pub fn new(x: f64, y: f64, z: f64) -> Self {
+        pub fn new(x: f64, y: f64, z: f64) -> Vec3 {
             Vec3 { e: [x, y, z] }
         }
 
@@ -42,13 +42,15 @@ Here's the basic part of the `Vec3` struct:
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="vec3.h | The Vec3 class"
+    ```cpp filename="vec3.h | The Vec3 class" {1-31}
     #ifndef VEC3_H
     #define VEC3_H
 
+    #include <array>
+
     class Vec3 {
     public:
-        Vec3() : e{0, 0, 0} {}
+        Vec3() = default;
 
         Vec3(double e0, double e1, double e2) : e{e0, e1, e2} {}
 
@@ -64,8 +66,8 @@ Here's the basic part of the `Vec3` struct:
             return e[2];
         }
 
-    public:
-        double e[3];
+    private:
+        std::array<double, 3> e = {0.0, 0.0, 0.0};
     };
 
     // Type alias
@@ -94,7 +96,7 @@ The other part of `Vec3` contains vector utility functions:
     }
 
     impl Vec3 {
-        pub fn new(x: f64, y: f64, z: f64) -> Self {
+        pub fn new(x: f64, y: f64, z: f64) -> Vec3 {
             Vec3 { e: [x, y, z] }
         }
 
@@ -133,14 +135,14 @@ The other part of `Vec3` contains vector utility functions:
     impl Neg for Vec3 {
         type Output = Vec3;
 
-        fn neg(self) -> Self::Output {
+        fn neg(self) -> Vec3 {
             Vec3::new(-self.x(), -self.y(), -self.z())
         }
     }
 
     // Vec3 += Vec3
     impl AddAssign for Vec3 {
-        fn add_assign(&mut self, v: Self) {
+        fn add_assign(&mut self, v: Vec3) {
             *self = *self + v;
         }
     }
@@ -163,7 +165,7 @@ The other part of `Vec3` contains vector utility functions:
     impl Add for Vec3 {
         type Output = Vec3;
 
-        fn add(self, v: Self) -> Self::Output {
+        fn add(self, v: Vec3) -> Vec3 {
             Vec3::new(self.x() + v.x(), self.y() + v.y(), self.z() + v.z())
         }
     }
@@ -172,7 +174,7 @@ The other part of `Vec3` contains vector utility functions:
     impl Sub for Vec3 {
         type Output = Vec3;
 
-        fn sub(self, v: Self) -> Self::Output {
+        fn sub(self, v: Vec3) -> Vec3 {
             Vec3::new(self.x() - v.x(), self.y() - v.y(), self.z() - v.z())
         }
     }
@@ -181,7 +183,7 @@ The other part of `Vec3` contains vector utility functions:
     impl Mul for Vec3 {
         type Output = Vec3;
 
-        fn mul(self, v: Vec3) -> Self::Output {
+        fn mul(self, v: Vec3) -> Vec3 {
             Vec3::new(self.x() * v.x(), self.y() * v.y(), self.z() * v.z())
         }
     }
@@ -190,7 +192,7 @@ The other part of `Vec3` contains vector utility functions:
     impl Mul<Vec3> for f64 {
         type Output = Vec3;
 
-        fn mul(self, v: Vec3) -> Self::Output {
+        fn mul(self, v: Vec3) -> Vec3 {
             Vec3::new(self * v.x(), self * v.y(), self * v.z())
         }
     }
@@ -199,7 +201,7 @@ The other part of `Vec3` contains vector utility functions:
     impl Mul<f64> for Vec3 {
         type Output = Vec3;
 
-        fn mul(self, t: f64) -> Self::Output {
+        fn mul(self, t: f64) -> Vec3 {
             Vec3::new(self.x() * t, self.y() * t, self.z() * t)
         }
     }
@@ -208,7 +210,7 @@ The other part of `Vec3` contains vector utility functions:
     impl Div<f64> for Vec3 {
         type Output = Vec3;
 
-        fn div(self, t: f64) -> Self::Output {
+        fn div(self, t: f64) -> Vec3 {
             Vec3::new(self.x() / t, self.y() / t, self.z() / t)
         }
     }
@@ -232,16 +234,17 @@ The other part of `Vec3` contains vector utility functions:
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="vec3.h | Vec3 utility functions" {4-6,25-58,66-116}
+    ```cpp filename="vec3.h | Vec3 utility functions" {5-6,25-58,66-116}
     #ifndef VEC3_H
     #define VEC3_H
 
+    #include <array>
     #include <cmath>
     #include <ostream>
 
     class Vec3 {
     public:
-        Vec3() : e{0, 0, 0} {}
+        Vec3() = default;
 
         Vec3(double e0, double e1, double e2) : e{e0, e1, e2} {}
 
@@ -264,9 +267,9 @@ The other part of `Vec3` contains vector utility functions:
 
         // Vec3 += Vec3
         Vec3 &operator+=(Vec3 v) {
-            e[0] += v.e[0];
-            e[1] += v.e[1];
-            e[2] += v.e[2];
+            e[0] += v.x();
+            e[1] += v.y();
+            e[2] += v.z();
             return *this;
         }
 
@@ -291,8 +294,8 @@ The other part of `Vec3` contains vector utility functions:
             return e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
         }
 
-    public:
-        double e[3];
+    private:
+        std::array<double, 3> e = {0.0, 0.0, 0.0};
     };
 
     // Type alias
@@ -300,27 +303,27 @@ The other part of `Vec3` contains vector utility functions:
 
     // Output formatting
     inline std::ostream &operator<<(std::ostream &out, Vec3 v) {
-        return out << v.e[0] << ' ' << v.e[1] << ' ' << v.e[2];
+        return out << v.x() << ' ' << v.y() << ' ' << v.z();
     }
 
     // Vec3 + Vec3
     inline Vec3 operator+(Vec3 u, Vec3 v) {
-        return Vec3(u.e[0] + v.e[0], u.e[1] + v.e[1], u.e[2] + v.e[2]);
+        return Vec3(u.x() + v.x(), u.y() + v.y(), u.z() + v.z());
     }
 
     // Vec3 - Vec3
     inline Vec3 operator-(Vec3 u, Vec3 v) {
-        return Vec3(u.e[0] - v.e[0], u.e[1] - v.e[1], u.e[2] - v.e[2]);
+        return Vec3(u.x() - v.x(), u.y() - v.y(), u.z() - v.z());
     }
 
     // Vec3 * Vec3
     inline Vec3 operator*(Vec3 u, Vec3 v) {
-        return Vec3(u.e[0] * v.e[0], u.e[1] * v.e[1], u.e[2] * v.e[2]);
+        return Vec3(u.x() * v.x(), u.y() * v.y(), u.z() * v.z());
     }
 
     // double * Vec3
     inline Vec3 operator*(double t, Vec3 v) {
-        return Vec3(t * v.e[0], t * v.e[1], t * v.e[2]);
+        return Vec3(t * v.x(), t * v.y(), t * v.z());
     }
 
     // Vec3 * double
@@ -330,18 +333,18 @@ The other part of `Vec3` contains vector utility functions:
 
     // Vec3 / double
     inline Vec3 operator/(Vec3 v, double t) {
-        return (1 / t) * v;
+        return (1.0 / t) * v;
     }
 
     inline double dot(Vec3 u, Vec3 v) {
-        return u.e[0] * v.e[0] + u.e[1] * v.e[1] + u.e[2] * v.e[2];
+        return u.x() * v.x() + u.y() * v.y() + u.z() * v.z();
     }
 
     inline Vec3 cross(Vec3 u, Vec3 v) {
         return Vec3(
-            u.e[1] * v.e[2] - u.e[2] * v.e[1],
-            u.e[2] * v.e[0] - u.e[0] * v.e[2],
-            u.e[0] * v.e[1] - u.e[1] * v.e[0]
+            u.y() * v.z() - u.z() * v.y(),
+            u.z() * v.x() - u.x() * v.z(),
+            u.x() * v.y() - u.y() * v.x()
         );
     }
 
@@ -360,7 +363,7 @@ Using our new `Color` (alias `Vec3`), we'll create a utility function to write a
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="color.rs | Color utility functions"
+    ```rust filename="color.rs | Color utility functions" {1-14}
     use std::io::Write;
 
     use crate::vec3::Vec3;
@@ -369,7 +372,7 @@ Using our new `Color` (alias `Vec3`), we'll create a utility function to write a
     pub type Color = Vec3; // RGB color
 
     pub fn write_color(out: &mut impl Write, pixel_color: Color) {
-        // Write the translated [0,255] value of each color component.
+        // Write the translated [0, 255] value of each color component
         let r = (255.999 * pixel_color.x()) as i32;
         let g = (255.999 * pixel_color.y()) as i32;
         let b = (255.999 * pixel_color.z()) as i32;
@@ -379,7 +382,7 @@ Using our new `Color` (alias `Vec3`), we'll create a utility function to write a
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="color.h | Color utility functions"
+    ```cpp filename="color.h | Color utility functions" {1-19}
     #ifndef COLOR_H
     #define COLOR_H
 
@@ -391,11 +394,11 @@ Using our new `Color` (alias `Vec3`), we'll create a utility function to write a
     using Color = Vec3; // RGB color
 
     inline void write_color(std::ostream &out, Color pixel_color) {
-        // Write the translated [0,255] value of each color component.
+        // Write the translated [0, 255] value of each color component
         auto r = static_cast<int>(255.999 * pixel_color.x());
         auto g = static_cast<int>(255.999 * pixel_color.y());
         auto b = static_cast<int>(255.999 * pixel_color.z());
-        out << r << ' ' << g << ' ' << b << '\n';
+        out << r << ' ' << g << ' ' << b << std::endl;
     }
 
     #endif
@@ -442,7 +445,7 @@ Now we can change our main to use this:
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="main.cpp | Final code for the first PPM image" {3-4,21-22}
+    ```cpp filename="main.cpp | Final code for the first PPM image" {2-3,21-22}
     #include <iostream>
 
     #include "color.h"

@@ -19,24 +19,65 @@ number as desired with the following code snippet, added to `rtweekend.h`:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="common.rs | random_double() functions"
+    ```rust filename="common.rs | random_double() functions" {1-2,13-22}
+    use rand::Rng;
+
+    // Constants
+
+    pub use std::f64::consts::PI;
+    pub use std::f64::INFINITY;
+
+    // Utility functions
+
+    pub fn degrees_to_radians(degrees: f64) -> f64 {
+        degrees * PI / 180.0
+    }
+
+    pub fn random_double() -> f64 {
+        // Return a random real in [0.0, 1.0)
+        rand::thread_rng().gen()
+    }
+
+    pub fn random_double_range(min: f64, max: f64) -> f64 {
+        // Return a random real in [min, max)
+        min + (max - min) * random_double()
+    }
     ```
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="common.h | random_double() functions"
-        #include <cstdlib>
-        ...
+    ```cpp filename="common.h | random_double() functions" {5,18-29}
+    #ifndef COMMON_H
+    #define COMMON_H
 
-        inline double random_double() {
-            // Returns a random real in [0,1).
-            return rand() / (RAND_MAX + 1.0);
-        }
+    #include <limits>
+    #include <random>
 
-        inline double random_double(double min, double max) {
-            // Returns a random real in [min,max).
-            return min + (max-min)*random_double();
-        }
+    // Constants
+
+    #undef INFINITY // Undefine the C macro in the cmath header
+    inline const double INFINITY = std::numeric_limits<double>::infinity();
+    inline const double PI = 3.1415926535897932385;
+
+    // Utility functions
+
+    inline double degrees_to_radians(double degrees) {
+        return degrees * PI / 180.0;
+    }
+
+    inline double random_double() {
+        static std::uniform_real_distribution<double> distribution(0.0, 1.0);
+        static std::mt19937 generator;
+        // Return a random real in [0.0, 1.0)
+        return distribution(generator);
+    }
+
+    inline double random_double_range(double min, double max) {
+        // Return a random real in [min, max)
+        return min + (max - min) * random_double();
+    }
+
+    #endif
     ```
   </Tab>
 </Tabs>
@@ -68,42 +109,83 @@ before:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="camera.rs | The Camera struct"
+    ```rust filename="camera.rs | The Camera struct" {1-38}
+    use crate::ray::Ray;
+    use crate::vec3::{Point3, Vec3};
+
+    pub struct Camera {
+        origin: Point3,
+        lower_left_corner: Point3,
+        horizontal: Vec3,
+        vertical: Vec3,
+    }
+
+    impl Camera {
+        pub fn new() -> Camera {
+            let aspect_ratio = 16.0 / 9.0;
+            let viewport_height = 2.0;
+            let viewport_width = aspect_ratio * viewport_height;
+            let focal_length = 1.0;
+
+            let origin = Point3::new(0.0, 0.0, 0.0);
+            let horizontal = Vec3::new(viewport_width, 0.0, 0.0);
+            let vertical = Vec3::new(0.0, viewport_height, 0.0);
+            let lower_left_corner =
+                origin - horizontal / 2.0 - vertical / 2.0 - Vec3::new(0.0, 0.0, focal_length);
+
+            Camera {
+                origin,
+                lower_left_corner,
+                horizontal,
+                vertical,
+            }
+        }
+
+        pub fn get_ray(&self, u: f64, v: f64) -> Ray {
+            Ray::new(
+                self.origin,
+                self.lower_left_corner + u * self.horizontal + v * self.vertical - self.origin,
+            )
+        }
+    }
     ```
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="camera.h | The Camera class"
-        #ifndef CAMERA_H
-        #define CAMERA_H
+    ```cpp filename="camera.h | The Camera class" {1-33}
+    #ifndef CAMERA_H
+    #define CAMERA_H
 
-        #include "rtweekend.h"
+    #include "ray.h"
+    #include "vec3.h"
 
-        class camera {
-            public:
-                camera() {
-                    auto aspect_ratio = 16.0 / 9.0;
-                    auto viewport_height = 2.0;
-                    auto viewport_width = aspect_ratio * viewport_height;
-                    auto focal_length = 1.0;
+    class Camera {
+    public:
+        Camera() {
+            auto aspect_ratio = 16.0 / 9.0;
+            auto viewport_height = 2.0;
+            auto viewport_width = aspect_ratio * viewport_height;
+            auto focal_length = 1.0;
 
-                    origin = point3(0, 0, 0);
-                    horizontal = vec3(viewport_width, 0.0, 0.0);
-                    vertical = vec3(0.0, viewport_height, 0.0);
-                    lower_left_corner = origin - horizontal/2 - vertical/2 - vec3(0, 0, focal_length);
-                }
+            origin = Point3(0.0, 0.0, 0.0);
+            horizontal = Vec3(viewport_width, 0.0, 0.0);
+            vertical = Vec3(0.0, viewport_height, 0.0);
+            lower_left_corner =
+                origin - horizontal / 2.0 - vertical / 2.0 - Vec3(0.0, 0.0, focal_length);
+        }
 
-                ray get_ray(double u, double v) const {
-                    return ray(origin, lower_left_corner + u*horizontal + v*vertical - origin);
-                }
+        Ray get_ray(double u, double v) const {
+            return Ray(origin, lower_left_corner + u * horizontal + v * vertical - origin);
+        }
 
-            private:
-                point3 origin;
-                point3 lower_left_corner;
-                vec3 horizontal;
-                vec3 vertical;
-        };
-        #endif
+    private:
+        Point3 origin;
+        Point3 lower_left_corner;
+        Vec3 horizontal;
+        Vec3 vertical;
+    };
+
+    #endif
     ```
   </Tab>
 </Tabs>
@@ -116,45 +198,155 @@ samples) when writing out the color. In addition, we'll add a handy utility func
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="common.rs | The clamp() utility function"
+    ```rust filename="common.rs | The clamp() utility function" {23-32}
+    use rand::Rng;
+
+    // Constants
+
+    pub use std::f64::consts::PI;
+    pub use std::f64::INFINITY;
+
+    // Utility functions
+
+    pub fn degrees_to_radians(degrees: f64) -> f64 {
+        degrees * PI / 180.0
+    }
+
+    pub fn random_double() -> f64 {
+        // Return a random real in [0.0, 1.0)
+        rand::thread_rng().gen()
+    }
+
+    pub fn random_double_range(min: f64, max: f64) -> f64 {
+        // Return a random real in [min, max)
+        min + (max - min) * random_double()
+    }
+
+    pub fn clamp(x: f64, min: f64, max: f64) -> f64 {
+        if x < min {
+            return min;
+        }
+        if x > max {
+            return max;
+        }
+        x
+    }
     ```
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="common.h | The clamp() utility function"
-        inline double clamp(double x, double min, double max) {
-            if (x < min) return min;
-            if (x > max) return max;
-            return x;
+    ```cpp filename="common.h | The clamp() utility function" {30-39}
+    #ifndef COMMON_H
+    #define COMMON_H
+
+    #include <limits>
+    #include <random>
+
+    // Constants
+
+    #undef INFINITY // Undefine the C macro in the cmath header
+    inline const double INFINITY = std::numeric_limits<double>::infinity();
+    inline const double PI = 3.1415926535897932385;
+
+    // Utility functions
+
+    inline double degrees_to_radians(double degrees) {
+        return degrees * PI / 180.0;
+    }
+
+    inline double random_double() {
+        static std::uniform_real_distribution<double> distribution(0.0, 1.0);
+        static std::mt19937 generator;
+        // Return a random real in [0.0, 1.0)
+        return distribution(generator);
+    }
+
+    inline double random_double_range(double min, double max) {
+        // Return a random real in [min, max)
+        return min + (max - min) * random_double();
+    }
+
+    inline double clamp(double x, double min, double max) {
+        if (x < min) {
+            return min;
         }
+        if (x > max) {
+            return max;
+        }
+        return x;
+    }
+
+    #endif
     ```
   </Tab>
 </Tabs>
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="color.rs | The multi-sample write_color() function"
+    ```rust filename="color.rs | The multi-sample write_color() function" {3,8-18,21-28}
+    use std::io::Write;
+
+    use crate::common;
+    use crate::vec3::Vec3;
+
+    // Type alias
+    pub type Color = Vec3; // RGB color
+
+    pub fn write_color(out: &mut impl Write, pixel_color: Color, samples_per_pixel: i32) {
+        let mut r = pixel_color.x();
+        let mut g = pixel_color.y();
+        let mut b = pixel_color.z();
+
+        // Divide the color by the number of samples
+        let scale = 1.0 / samples_per_pixel as f64;
+        r *= scale;
+        g *= scale;
+        b *= scale;
+
+        // Write the translated [0, 255] value of each color component
+        writeln!(
+            out,
+            "{} {} {}",
+            (256.0 * common::clamp(r, 0.0, 0.999)) as i32,
+            (256.0 * common::clamp(g, 0.0, 0.999)) as i32,
+            (256.0 * common::clamp(b, 0.0, 0.999)) as i32,
+        )
+        .expect("writing color");
+    }
     ```
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="color.h | The multi-sample write_color() function"
-        void write_color(std::ostream &out, color pixel_color, int samples_per_pixel) {
-            auto r = pixel_color.x();
-            auto g = pixel_color.y();
-            auto b = pixel_color.z();
+    ```cpp filename="color.h | The multi-sample write_color() function" {6,11-21,24-26}
+    #ifndef COLOR_H
+    #define COLOR_H
 
-            // Divide the color by the number of samples.
-            auto scale = 1.0 / samples_per_pixel;
-            r *= scale;
-            g *= scale;
-            b *= scale;
+    #include <ostream>
 
-            // Write the translated [0,255] value of each color component.
-            out << static_cast<int>(256 * clamp(r, 0.0, 0.999)) << ' '
-                << static_cast<int>(256 * clamp(g, 0.0, 0.999)) << ' '
-                << static_cast<int>(256 * clamp(b, 0.0, 0.999)) << '\n';
-        }
+    #include "common.h"
+    #include "vec3.h"
+
+    // Type alias
+    using Color = Vec3; // RGB color
+
+    inline void write_color(std::ostream &out, Color pixel_color, int samples_per_pixel) {
+        auto r = pixel_color.x();
+        auto g = pixel_color.y();
+        auto b = pixel_color.z();
+
+        // Divide the color by the number of samples
+        auto scale = 1.0 / samples_per_pixel;
+        r *= scale;
+        g *= scale;
+        b *= scale;
+
+        // Write the translated [0, 255] value of each color component
+        out << static_cast<int>(256 * clamp(r, 0.0, 0.999)) << ' '
+            << static_cast<int>(256 * clamp(g, 0.0, 0.999)) << ' '
+            << static_cast<int>(256 * clamp(b, 0.0, 0.999)) << std::endl;
+    }
+
+    #endif
     ```
   </Tab>
 </Tabs>
@@ -163,58 +355,142 @@ Main is also changed:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="main.rs | Rendering with multi-sampled pixels"
+    ```rust filename="main.rs | Rendering with multi-sampled pixels" {1,12,18,37,47,56-63}
+    mod camera;
+    mod color;
+    mod common;
+    mod hittable;
+    mod hittable_list;
+    mod ray;
+    mod sphere;
+    mod vec3;
+
+    use std::io;
+
+    use camera::Camera;
+    use color::Color;
+    use hittable::{HitRecord, Hittable};
+    use hittable_list::HittableList;
+    use ray::Ray;
+    use sphere::Sphere;
+    use vec3::Vec3;
+
+    fn ray_color(r: &Ray, world: &dyn Hittable) -> Color {
+        let mut rec = HitRecord::new();
+        if world.hit(r, 0.0, common::INFINITY, &mut rec) {
+            return 0.5 * (rec.normal + Color::new(1.0, 1.0, 1.0));
+        }
+
+        let unit_direction = vec3::unit_vector(r.direction());
+        let t = 0.5 * (unit_direction.y() + 1.0);
+        (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
+    }
+
+    fn main() {
+        // Image
+
+        const ASPECT_RATIO: f64 = 16.0 / 9.0;
+        const IMAGE_WIDTH: i32 = 400;
+        const IMAGE_HEIGHT: i32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as i32;
+        const SAMPLES_PER_PIXEL: i32 = 100;
+
+        // World
+
+        let mut world = HittableList::new();
+        world.add(Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5)));
+        world.add(Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0)));
+
+        // Camera
+
+        let cam = Camera::new();
+
+        // Render
+
+        print!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT);
+
+        for j in (0..IMAGE_HEIGHT).rev() {
+            eprint!("\rScanlines remaining: {} ", j);
+            for i in 0..IMAGE_WIDTH {
+                let mut pixel_color = Color::new(0.0, 0.0, 0.0);
+                for _ in 0..SAMPLES_PER_PIXEL {
+                    let u = (i as f64 + common::random_double()) / (IMAGE_WIDTH - 1) as f64;
+                    let v = (j as f64 + common::random_double()) / (IMAGE_HEIGHT - 1) as f64;
+                    let r = cam.get_ray(u, v);
+                    pixel_color += ray_color(&r, &world);
+                }
+                color::write_color(&mut io::stdout(), pixel_color, SAMPLES_PER_PIXEL);
+            }
+        }
+
+        eprint!("\nDone.\n");
+    }
     ```
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="main.cpp | Rendering with multi-sampled pixels"
-        #include "camera.h"
+    ```cpp filename="main.cpp | Rendering with multi-sampled pixels" {3,29,39,48-55}
+    #include <iostream>
 
-        ...
+    #include "camera.h"
+    #include "color.h"
+    #include "common.h"
+    #include "hittable.h"
+    #include "hittable_list.h"
+    #include "ray.h"
+    #include "sphere.h"
+    #include "vec3.h"
 
-        int main() {
-
-            // Image
-
-            const auto aspect_ratio = 16.0 / 9.0;
-            const int image_width = 400;
-            const int image_height = static_cast<int>(image_width / aspect_ratio);
-
-            const int samples_per_pixel = 100;
-
-            // World
-
-            hittable_list world;
-            world.add(make_shared<sphere>(point3(0,0,-1), 0.5));
-            world.add(make_shared<sphere>(point3(0,-100.5,-1), 100));
-
-            // Camera
-
-
-            camera cam;
-
-            // Render
-
-            std::cout << "P3\n" << image_width << " " << image_height << "\n255\n";
-
-            for (int j = image_height-1; j >= 0; --j) {
-                std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
-                for (int i = 0; i < image_width; ++i) {
-
-                    color pixel_color(0, 0, 0);
-                    for (int s = 0; s < samples_per_pixel; ++s) {
-                        auto u = (i + random_double()) / (image_width-1);
-                        auto v = (j + random_double()) / (image_height-1);
-                        ray r = cam.get_ray(u, v);
-                        pixel_color += ray_color(r, world);
-                    }
-                    write_color(std::cout, pixel_color, samples_per_pixel);
-                }
-            }
-
-            std::cerr << "\nDone.\n";
+    Color ray_color(const Ray &r, const Hittable &world) {
+        HitRecord rec;
+        if (world.hit(r, 0.0, INFINITY, rec)) {
+            return 0.5 * (rec.normal + Color(1.0, 1.0, 1.0));
         }
+
+        Vec3 unit_direction = unit_vector(r.direction());
+        auto t = 0.5 * (unit_direction.y() + 1.0);
+        return (1.0 - t) * Color(1.0, 1.0, 1.0) + t * Color(0.5, 0.7, 1.0);
+    }
+
+    int main() {
+        // Image
+
+        const double ASPECT_RATIO = 16.0 / 9.0;
+        const int IMAGE_WIDTH = 400;
+        const int IMAGE_HEIGHT = static_cast<int>(IMAGE_WIDTH / ASPECT_RATIO);
+        const int SAMPLES_PER_PIXEL = 100;
+
+        // World
+
+        HittableList world;
+        world.add(std::make_unique<Sphere>(Point3(0.0, 0.0, -1.0), 0.5));
+        world.add(std::make_unique<Sphere>(Point3(0.0, -100.5, -1.0), 100.0));
+
+        // Camera
+
+        Camera cam;
+
+        // Render
+
+        std::cout << "P3\n" << IMAGE_WIDTH << ' ' << IMAGE_HEIGHT << "\n255\n";
+
+        for (int j = IMAGE_HEIGHT - 1; j >= 0; --j) {
+            std::cerr << "\rScanlines remaining: " << j << ' ';
+            for (int i = 0; i < IMAGE_WIDTH; ++i) {
+                Color pixel_color(0.0, 0.0, 0.0);
+                for (int s = 0; s < SAMPLES_PER_PIXEL; s++) {
+                    auto u = (i + random_double()) / (IMAGE_WIDTH - 1);
+                    auto v = (j + random_double()) / (IMAGE_HEIGHT - 1);
+                    Ray r = cam.get_ray(u, v);
+                    pixel_color += ray_color(r, world);
+                }
+                write_color(std::cout, pixel_color, SAMPLES_PER_PIXEL);
+            }
+        }
+
+        std::cerr << "\nDone.\n";
+
+        return 0;
+    }
     ```
   </Tab>
 </Tabs>

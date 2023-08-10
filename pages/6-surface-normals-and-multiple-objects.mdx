@@ -21,35 +21,154 @@ let us compute and visualize $\mathbf{n}$:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="main.rs | Rendering surface normals on a sphere"
+    ```rust filename="main.rs | Rendering surface normals on a sphere" {11,17-21,25-28}
+    mod color;
+    mod ray;
+    mod vec3;
+
+    use std::io;
+
+    use color::Color;
+    use ray::Ray;
+    use vec3::{Point3, Vec3};
+
+    fn hit_sphere(center: Point3, radius: f64, r: &Ray) -> f64 {
+        let oc = r.origin() - center;
+        let a = vec3::dot(r.direction(), r.direction());
+        let b = 2.0 * vec3::dot(oc, r.direction());
+        let c = vec3::dot(oc, oc) - radius * radius;
+        let discriminant = b * b - 4.0 * a * c;
+        if discriminant < 0.0 {
+            -1.0
+        } else {
+            (-b - f64::sqrt(discriminant)) / (2.0 * a)
+        }
+    }
+
+    fn ray_color(r: &Ray) -> Color {
+        let t = hit_sphere(Point3::new(0.0, 0.0, -1.0), 0.5, r);
+        if t > 0.0 {
+            let n = vec3::unit_vector(r.at(t) - Vec3::new(0.0, 0.0, -1.0));
+            return 0.5 * Color::new(n.x() + 1.0, n.y() + 1.0, n.z() + 1.0);
+        }
+
+        let unit_direction = vec3::unit_vector(r.direction());
+        let t = 0.5 * (unit_direction.y() + 1.0);
+        (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
+    }
+
+    fn main() {
+        // Image
+
+        const ASPECT_RATIO: f64 = 16.0 / 9.0;
+        const IMAGE_WIDTH: i32 = 400;
+        const IMAGE_HEIGHT: i32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as i32;
+
+        // Camera
+
+        let viewport_height = 2.0;
+        let viewport_width = ASPECT_RATIO * viewport_height;
+        let focal_length = 1.0;
+
+        let origin = Point3::new(0.0, 0.0, 0.0);
+        let horizontal = Vec3::new(viewport_width, 0.0, 0.0);
+        let vertical = Vec3::new(0.0, viewport_height, 0.0);
+        let lower_left_corner =
+            origin - horizontal / 2.0 - vertical / 2.0 - Vec3::new(0.0, 0.0, focal_length);
+
+        // Render
+
+        print!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT);
+
+        for j in (0..IMAGE_HEIGHT).rev() {
+            eprint!("\rScanlines remaining: {} ", j);
+            for i in 0..IMAGE_WIDTH {
+                let u = i as f64 / (IMAGE_WIDTH - 1) as f64;
+                let v = j as f64 / (IMAGE_HEIGHT - 1) as f64;
+                let r = Ray::new(
+                    origin,
+                    lower_left_corner + u * horizontal + v * vertical - origin,
+                );
+                let pixel_color = ray_color(&r);
+                color::write_color(&mut io::stdout(), pixel_color);
+            }
+        }
+
+        eprint!("\nDone.\n");
+    }
     ```
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="main.cpp | Rendering surface normals on a sphere"
-    double hit_sphere(const point3& center, double radius, const ray& r) {
-        vec3 oc = r.origin() - center;
+    ```cpp filename="main.cpp | Rendering surface normals on a sphere" {7,13-17,21-24,28}
+    #include <iostream>
+
+    #include "color.h"
+    #include "ray.h"
+    #include "vec3.h"
+
+    double hit_sphere(Point3 center, double radius, const Ray &r) {
+        Vec3 oc = r.origin() - center;
         auto a = dot(r.direction(), r.direction());
         auto b = 2.0 * dot(oc, r.direction());
-        auto c = dot(oc, oc) - radius*radius;
-        auto discriminant = b*b - 4*a*c;
-
-        if (discriminant < 0) {
+        auto c = dot(oc, oc) - radius * radius;
+        auto discriminant = b * b - 4.0 * a * c;
+        if (discriminant < 0.0) {
             return -1.0;
         } else {
-            return (-b - sqrt(discriminant) ) / (2.0*a);
+            return (-b - sqrt(discriminant)) / (2.0 * a);
         }
     }
 
-    color ray_color(const ray& r) {
-        auto t = hit_sphere(point3(0,0,-1), 0.5, r);
+    Color ray_color(const Ray &r) {
+        auto t = hit_sphere(Point3(0.0, 0.0, -1.0), 0.5, r);
         if (t > 0.0) {
-            vec3 N = unit_vector(r.at(t) - vec3(0,0,-1));
-            return 0.5*color(N.x()+1, N.y()+1, N.z()+1);
+            Vec3 n = unit_vector(r.at(t) - Vec3(0.0, 0.0, -1.0));
+            return 0.5 * Color(n.x() + 1.0, n.y() + 1.0, n.z() + 1.0);
         }
-        vec3 unit_direction = unit_vector(r.direction());
-        t = 0.5*(unit_direction.y() + 1.0);
-        return (1.0-t)*color(1.0, 1.0, 1.0) + t*color(0.5, 0.7, 1.0);
+
+        Vec3 unit_direction = unit_vector(r.direction());
+        t = 0.5 * (unit_direction.y() + 1.0);
+        return (1.0 - t) * Color(1.0, 1.0, 1.0) + t * Color(0.5, 0.7, 1.0);
+    }
+
+    int main() {
+        // Image
+
+        const double ASPECT_RATIO = 16.0 / 9.0;
+        const int IMAGE_WIDTH = 400;
+        const int IMAGE_HEIGHT = static_cast<int>(IMAGE_WIDTH / ASPECT_RATIO);
+
+        // Camera
+
+        auto viewport_height = 2.0;
+        auto viewport_width = ASPECT_RATIO * viewport_height;
+        auto focal_length = 1.0;
+
+        auto origin = Point3(0.0, 0.0, 0.0);
+        auto horizontal = Vec3(viewport_width, 0.0, 0.0);
+        auto vertical = Vec3(0.0, viewport_height, 0.0);
+        auto lower_left_corner =
+            origin - horizontal / 2.0 - vertical / 2.0 - Vec3(0.0, 0.0, focal_length);
+
+        // Render
+
+        std::cout << "P3\n" << IMAGE_WIDTH << ' ' << IMAGE_HEIGHT << "\n255\n";
+
+        for (int j = IMAGE_HEIGHT - 1; j >= 0; --j) {
+            std::cerr << "\rScanlines remaining: " << j << ' ';
+            for (int i = 0; i < IMAGE_WIDTH; ++i) {
+                auto u = static_cast<double>(i) / (IMAGE_WIDTH - 1);
+                auto v = static_cast<double>(j) / (IMAGE_HEIGHT - 1);
+                Ray r(origin, lower_left_corner + u * horizontal + v * vertical - origin);
+                Color pixel_color = ray_color(r);
+                write_color(std::cout, pixel_color);
+            }
+        }
+
+        std::cerr << "\nDone.\n";
+
+        return 0;
     }
     ```
   </Tab>
@@ -104,24 +223,154 @@ Using these observations, we can now simplify the sphere-intersection code to th
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="main.rs | Ray-sphere intersection code (after)"
+    ```rust filename="main.rs | Ray-sphere intersection code (after)" {13-16,20}
+    mod color;
+    mod ray;
+    mod vec3;
+
+    use std::io;
+
+    use color::Color;
+    use ray::Ray;
+    use vec3::{Point3, Vec3};
+
+    fn hit_sphere(center: Point3, radius: f64, r: &Ray) -> f64 {
+        let oc = r.origin() - center;
+        let a = r.direction().length_squared();
+        let half_b = vec3::dot(oc, r.direction());
+        let c = oc.length_squared() - radius * radius;
+        let discriminant = half_b * half_b - a * c;
+        if discriminant < 0.0 {
+            -1.0
+        } else {
+            (-half_b - f64::sqrt(discriminant)) / a
+        }
+    }
+
+    fn ray_color(r: &Ray) -> Color {
+        let t = hit_sphere(Point3::new(0.0, 0.0, -1.0), 0.5, r);
+        if t > 0.0 {
+            let n = vec3::unit_vector(r.at(t) - Vec3::new(0.0, 0.0, -1.0));
+            return 0.5 * Color::new(n.x() + 1.0, n.y() + 1.0, n.z() + 1.0);
+        }
+
+        let unit_direction = vec3::unit_vector(r.direction());
+        let t = 0.5 * (unit_direction.y() + 1.0);
+        (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
+    }
+
+    fn main() {
+        // Image
+
+        const ASPECT_RATIO: f64 = 16.0 / 9.0;
+        const IMAGE_WIDTH: i32 = 400;
+        const IMAGE_HEIGHT: i32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as i32;
+
+        // Camera
+
+        let viewport_height = 2.0;
+        let viewport_width = ASPECT_RATIO * viewport_height;
+        let focal_length = 1.0;
+
+        let origin = Point3::new(0.0, 0.0, 0.0);
+        let horizontal = Vec3::new(viewport_width, 0.0, 0.0);
+        let vertical = Vec3::new(0.0, viewport_height, 0.0);
+        let lower_left_corner =
+            origin - horizontal / 2.0 - vertical / 2.0 - Vec3::new(0.0, 0.0, focal_length);
+
+        // Render
+
+        print!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT);
+
+        for j in (0..IMAGE_HEIGHT).rev() {
+            eprint!("\rScanlines remaining: {} ", j);
+            for i in 0..IMAGE_WIDTH {
+                let u = i as f64 / (IMAGE_WIDTH - 1) as f64;
+                let v = j as f64 / (IMAGE_HEIGHT - 1) as f64;
+                let r = Ray::new(
+                    origin,
+                    lower_left_corner + u * horizontal + v * vertical - origin,
+                );
+                let pixel_color = ray_color(&r);
+                color::write_color(&mut io::stdout(), pixel_color);
+            }
+        }
+
+        eprint!("\nDone.\n");
+    }
     ```
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="main.cpp | Ray-sphere intersection code (after)"
-    double hit_sphere(const point3& center, double radius, const ray& r) {
-        vec3 oc = r.origin() - center;
+    ```cpp filename="main.cpp | Ray-sphere intersection code (after)" {9-12,16}
+    #include <iostream>
+
+    #include "color.h"
+    #include "ray.h"
+    #include "vec3.h"
+
+    double hit_sphere(Point3 center, double radius, const Ray &r) {
+        Vec3 oc = r.origin() - center;
         auto a = r.direction().length_squared();
         auto half_b = dot(oc, r.direction());
-        auto c = oc.length_squared() - radius*radius;
-        auto discriminant = half_b*half_b - a*c;
-
-        if (discriminant < 0) {
+        auto c = oc.length_squared() - radius * radius;
+        auto discriminant = half_b * half_b - a * c;
+        if (discriminant < 0.0) {
             return -1.0;
         } else {
-            return (-half_b - sqrt(discriminant) ) / a;
+            return (-half_b - sqrt(discriminant)) / a;
         }
+    }
+
+    Color ray_color(const Ray &r) {
+        auto t = hit_sphere(Point3(0.0, 0.0, -1.0), 0.5, r);
+        if (t > 0.0) {
+            Vec3 n = unit_vector(r.at(t) - Vec3(0.0, 0.0, -1.0));
+            return 0.5 * Color(n.x() + 1.0, n.y() + 1.0, n.z() + 1.0);
+        }
+
+        Vec3 unit_direction = unit_vector(r.direction());
+        t = 0.5 * (unit_direction.y() + 1.0);
+        return (1.0 - t) * Color(1.0, 1.0, 1.0) + t * Color(0.5, 0.7, 1.0);
+    }
+
+    int main() {
+        // Image
+
+        const double ASPECT_RATIO = 16.0 / 9.0;
+        const int IMAGE_WIDTH = 400;
+        const int IMAGE_HEIGHT = static_cast<int>(IMAGE_WIDTH / ASPECT_RATIO);
+
+        // Camera
+
+        auto viewport_height = 2.0;
+        auto viewport_width = ASPECT_RATIO * viewport_height;
+        auto focal_length = 1.0;
+
+        auto origin = Point3(0.0, 0.0, 0.0);
+        auto horizontal = Vec3(viewport_width, 0.0, 0.0);
+        auto vertical = Vec3(0.0, viewport_height, 0.0);
+        auto lower_left_corner =
+            origin - horizontal / 2.0 - vertical / 2.0 - Vec3(0.0, 0.0, focal_length);
+
+        // Render
+
+        std::cout << "P3\n" << IMAGE_WIDTH << ' ' << IMAGE_HEIGHT << "\n255\n";
+
+        for (int j = IMAGE_HEIGHT - 1; j >= 0; --j) {
+            std::cerr << "\rScanlines remaining: " << j << ' ';
+            for (int i = 0; i < IMAGE_WIDTH; ++i) {
+                auto u = static_cast<double>(i) / (IMAGE_WIDTH - 1);
+                auto v = static_cast<double>(j) / (IMAGE_HEIGHT - 1);
+                Ray r(origin, lower_left_corner + u * horizontal + v * vertical - origin);
+                Color pixel_color = ray_color(r);
+                write_color(std::cout, pixel_color);
+            }
+        }
+
+        std::cerr << "\nDone.\n";
+
+        return 0;
     }
     ```
   </Tab>
@@ -147,26 +396,49 @@ the abstract class:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="hittable.rs | The Hittable trait"
+    ```rust filename="hittable.rs | The Hittable trait" {1-19}
+    use crate::ray::Ray;
+    use crate::vec3::{self, Point3, Vec3};
+
+    #[derive(Clone, Default)]
+    pub struct HitRecord {
+        pub p: Point3,
+        pub normal: Vec3,
+        pub t: f64,
+    }
+
+    impl HitRecord {
+        pub fn new() -> HitRecord {
+            Default::default()
+        }
+    }
+
+    pub trait Hittable {
+        fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool;
+    }
     ```
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="hittable.h | The Hittable abstract class"
+    ```cpp filename="hittable.h | The Hittable abstract class" {1-21}
     #ifndef HITTABLE_H
     #define HITTABLE_H
 
     #include "ray.h"
 
-    struct hit_record {
-        point3 p;
-        vec3 normal;
-        double t;
+    struct HitRecord {
+        HitRecord() = default;
+
+        Point3 p;
+        Vec3 normal;
+        double t = 0.0;
     };
 
-    class hittable {
-        public:
-            virtual bool hit(const ray& r, double t_min, double t_max, hit_record& rec) const = 0;
+    class Hittable {
+    public:
+        virtual ~Hittable() = default;
+
+        virtual bool hit(const Ray &r, double t_min, double t_max, HitRecord &rec) const = 0;
     };
 
     #endif
@@ -178,47 +450,95 @@ And here's the sphere:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="sphere.rs | The Sphere struct"
+    ```rust filename="sphere.rs | The Sphere struct" {1-47}
+    use crate::hittable::{HitRecord, Hittable};
+    use crate::ray::Ray;
+    use crate::vec3::{self, Point3};
+
+    pub struct Sphere {
+        center: Point3,
+        radius: f64,
+    }
+
+    impl Sphere {
+        pub fn new(cen: Point3, r: f64) -> Sphere {
+            Sphere {
+                center: cen,
+                radius: r,
+            }
+        }
+    }
+
+    impl Hittable for Sphere {
+        fn hit(&self, r: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
+            let oc = r.origin() - self.center;
+            let a = r.direction().length_squared();
+            let half_b = vec3::dot(oc, r.direction());
+            let c = oc.length_squared() - self.radius * self.radius;
+            let discriminant = half_b * half_b - a * c;
+            if discriminant < 0.0 {
+                return false;
+            }
+
+            let sqrt_d = f64::sqrt(discriminant);
+
+            // Find the nearest root that lies in the acceptable range
+            let mut root = (-half_b - sqrt_d) / a;
+            if root <= t_min || t_max <= root {
+                root = (-half_b + sqrt_d) / a;
+                if root <= t_min || t_max <= root {
+                    return false;
+                }
+            }
+
+            rec.t = root;
+            rec.p = r.at(rec.t);
+            rec.normal = (rec.p - center) / radius;
+
+            true
+        }
+    }
     ```
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="sphere.h | The Sphere class"
+    ```cpp filename="sphere.h | The Sphere class" {1-46}
     #ifndef SPHERE_H
     #define SPHERE_H
 
     #include "hittable.h"
     #include "vec3.h"
 
-    class sphere : public hittable {
-        public:
-            sphere() {}
-            sphere(point3 cen, double r) : center(cen), radius(r) {};
+    class Sphere : public Hittable {
+    public:
+        Sphere(Point3 cen, double r) : center{cen}, radius{r} {};
 
-            virtual bool hit(
-                const ray& r, double t_min, double t_max, hit_record& rec) const override;
+        bool hit(const Ray &r, double t_min, double t_max, HitRecord &rec) const override;
 
-        public:
-            point3 center;
-            double radius;
+    private:
+        Point3 center;
+        double radius;
     };
 
-    bool sphere::hit(const ray& r, double t_min, double t_max, hit_record& rec) const {
-        vec3 oc = r.origin() - center;
+    inline bool Sphere::hit(const Ray &r, double t_min, double t_max, HitRecord &rec) const {
+        Vec3 oc = r.origin() - center;
         auto a = r.direction().length_squared();
         auto half_b = dot(oc, r.direction());
-        auto c = oc.length_squared() - radius*radius;
+        auto c = oc.length_squared() - radius * radius;
+        auto discriminant = half_b * half_b - a * c;
+        if (discriminant < 0.0) {
+            return false;
+        }
 
-        auto discriminant = half_b*half_b - a*c;
-        if (discriminant < 0) return false;
-        auto sqrtd = sqrt(discriminant);
+        auto sqrt_d = sqrt(discriminant);
 
-        // Find the nearest root that lies in the acceptable range.
-        auto root = (-half_b - sqrtd) / a;
-        if (root < t_min || t_max < root) {
-            root = (-half_b + sqrtd) / a;
-            if (root < t_min || t_max < root)
+        // Find the nearest root that lies in the acceptable range
+        auto root = (-half_b - sqrt_d) / a;
+        if (root <= t_min || t_max <= root) {
+            root = (-half_b + sqrt_d) / a;
+            if (root <= t_min || t_max <= root) {
                 return false;
+            }
         }
 
         rec.t = root;
@@ -296,23 +616,69 @@ calculation for us.
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="hittable.rs | Adding front-face tracking to HitRecord"
+    ```rust filename="hittable.rs | Adding front-face tracking to HitRecord" {9,16-24}
+    use crate::ray::Ray;
+    use crate::vec3::{self, Point3, Vec3};
+
+    #[derive(Clone, Default)]
+    pub struct HitRecord {
+        pub p: Point3,
+        pub normal: Vec3,
+        pub t: f64,
+        pub front_face: bool,
+    }
+
+    impl HitRecord {
+        pub fn new() -> HitRecord {
+            Default::default()
+        }
+
+        pub fn set_face_normal(&mut self, r: &Ray, outward_normal: Vec3) {
+            self.front_face = vec3::dot(r.direction(), outward_normal) < 0.0;
+            self.normal = if self.front_face {
+                outward_normal
+            } else {
+                -outward_normal
+            };
+        }
+    }
+
+    pub trait Hittable {
+        fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool;
+    }
     ```
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="hittable.h | Adding front-face tracking to HitRecord"
-    struct hit_record {
-        point3 p;
-        vec3 normal;
-        double t;
-        bool front_face;
+    ```cpp filename="hittable.h | Adding front-face tracking to HitRecord" {5,9-13,18}
+    #ifndef HITTABLE_H
+    #define HITTABLE_H
 
-        inline void set_face_normal(const ray& r, const vec3& outward_normal) {
-            front_face = dot(r.direction(), outward_normal) < 0;
-            normal = front_face ? outward_normal :-outward_normal;
+    #include "ray.h"
+    #include "vec3.h"
+
+    struct HitRecord {
+        HitRecord() = default;
+
+        void set_face_normal(const Ray &r, Vec3 outward_normal) {
+            front_face = dot(r.direction(), outward_normal) < 0.0;
+            normal = front_face ? outward_normal : -outward_normal;
         }
+
+        Point3 p;
+        Vec3 normal;
+        double t = 0.0;
+        bool front_face = false;
     };
+
+    class Hittable {
+    public:
+        virtual ~Hittable() = default;
+
+        virtual bool hit(const Ray &r, double t_min, double t_max, HitRecord &rec) const = 0;
+    };
+
+    #endif
     ```
   </Tab>
 </Tabs>
@@ -321,22 +687,107 @@ And then we add the surface side determination to the class:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="sphere.rs | The Sphere struct with normal determination"
+    ```rust filename="sphere.rs | The Sphere struct with normal determination" {43-44}
+    use crate::hittable::{HitRecord, Hittable};
+    use crate::ray::Ray;
+    use crate::vec3::{self, Point3};
+
+    pub struct Sphere {
+        center: Point3,
+        radius: f64,
+    }
+
+    impl Sphere {
+        pub fn new(cen: Point3, r: f64) -> Sphere {
+            Sphere {
+                center: cen,
+                radius: r,
+            }
+        }
+    }
+
+    impl Hittable for Sphere {
+        fn hit(&self, r: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
+            let oc = r.origin() - self.center;
+            let a = r.direction().length_squared();
+            let half_b = vec3::dot(oc, r.direction());
+            let c = oc.length_squared() - self.radius * self.radius;
+            let discriminant = half_b * half_b - a * c;
+            if discriminant < 0.0 {
+                return false;
+            }
+
+            let sqrt_d = f64::sqrt(discriminant);
+
+            // Find the nearest root that lies in the acceptable range
+            let mut root = (-half_b - sqrt_d) / a;
+            if root <= t_min || t_max <= root {
+                root = (-half_b + sqrt_d) / a;
+                if root <= t_min || t_max <= root {
+                    return false;
+                }
+            }
+
+            rec.t = root;
+            rec.p = r.at(rec.t);
+            let outward_normal = (rec.p - self.center) / self.radius;
+            rec.set_face_normal(r, outward_normal);
+
+            true
+        }
+    }
     ```
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="sphere.h | The Sphere class with normal determination"
-    bool sphere::hit(const ray& r, double t_min, double t_max, hit_record& rec) const {
-        ...
+    ```cpp filename="sphere.h | The Sphere class with normal determination" {41-42}
+    #ifndef SPHERE_H
+    #define SPHERE_H
+
+    #include "hittable.h"
+    #include "vec3.h"
+
+    class Sphere : public Hittable {
+    public:
+        Sphere(Point3 cen, double r) : center{cen}, radius{r} {};
+
+        bool hit(const Ray &r, double t_min, double t_max, HitRecord &rec) const override;
+
+    private:
+        Point3 center;
+        double radius;
+    };
+
+    inline bool Sphere::hit(const Ray &r, double t_min, double t_max, HitRecord &rec) const {
+        Vec3 oc = r.origin() - center;
+        auto a = r.direction().length_squared();
+        auto half_b = dot(oc, r.direction());
+        auto c = oc.length_squared() - radius * radius;
+        auto discriminant = half_b * half_b - a * c;
+        if (discriminant < 0.0) {
+            return false;
+        }
+
+        auto sqrt_d = sqrt(discriminant);
+
+        // Find the nearest root that lies in the acceptable range
+        auto root = (-half_b - sqrt_d) / a;
+        if (root <= t_min || t_max <= root) {
+            root = (-half_b + sqrt_d) / a;
+            if (root <= t_min || t_max <= root) {
+                return false;
+            }
+        }
 
         rec.t = root;
         rec.p = r.at(rec.t);
-        vec3 outward_normal = (rec.p - center) / radius;
+        Vec3 outward_normal = (rec.p - center) / radius;
         rec.set_face_normal(r, outward_normal);
 
         return true;
     }
+
+    #endif
     ```
   </Tab>
 </Tabs>
@@ -348,47 +799,78 @@ that stores a list of `hittable`s:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="hittable_list.rs | The HittableList struct"
+    ```rust filename="hittable_list.rs | The HittableList struct" {1-35}
+    use crate::hittable::{HitRecord, Hittable};
+    use crate::ray::Ray;
+
+    #[derive(Default)]
+    pub struct HittableList {
+        objects: Vec<Box<dyn Hittable>>,
+    }
+
+    impl HittableList {
+        pub fn new() -> HittableList {
+            Default::default()
+        }
+
+        pub fn add(&mut self, object: Box<dyn Hittable>) {
+            self.objects.push(object);
+        }
+    }
+
+    impl Hittable for HittableList {
+        fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
+            let mut temp_rec = HitRecord::new();
+            let mut hit_anything = false;
+            let mut closest_so_far = t_max;
+
+            for object in &self.objects {
+                if object.hit(ray, t_min, closest_so_far, &mut temp_rec) {
+                    hit_anything = true;
+                    closest_so_far = temp_rec.t;
+                    *rec = temp_rec.clone();
+                }
+            }
+
+            hit_anything
+        }
+    }
     ```
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="hittable_list.h | The HittableList class"
+    ```cpp filename="hittable_list.h | The HittableList class" {1-39}
     #ifndef HITTABLE_LIST_H
     #define HITTABLE_LIST_H
-
-    #include "hittable.h"
 
     #include <memory>
     #include <vector>
 
-    using std::shared_ptr;
-    using std::make_shared;
+    #include "hittable.h"
 
-    class hittable_list : public hittable {
-        public:
-            hittable_list() {}
-            hittable_list(shared_ptr<hittable> object) { add(object); }
+    class HittableList : public Hittable {
+    public:
+        HittableList() = default;
 
-            void clear() { objects.clear(); }
-            void add(shared_ptr<hittable> object) { objects.push_back(object); }
+        void add(std::unique_ptr<Hittable> object) {
+            objects.push_back(std::move(object));
+        }
 
-            virtual bool hit(
-                const ray& r, double t_min, double t_max, hit_record& rec) const override;
+        bool hit(const Ray &r, double t_min, double t_max, HitRecord &rec) const override;
 
-        public:
-            std::vector<shared_ptr<hittable>> objects;
+    private:
+        std::vector<std::unique_ptr<Hittable>> objects;
     };
 
-    bool hittable_list::hit(const ray& r, double t_min, double t_max, hit_record& rec) const {
-        hit_record temp_rec;
-        bool hit_anything = false;
-        auto closest_so_far = t_max;
+    inline bool HittableList::hit(const Ray &r, double t_min, double t_max, HitRecord &rec) const {
+        HitRecord temp_rec;
+        auto hit_anything = false;
+        auto closet_so_far = t_max;
 
-        for (const auto& object : objects) {
-            if (object->hit(r, t_min, closest_so_far, temp_rec)) {
+        for (const auto &object : objects) {
+            if (object->hit(r, t_min, closet_so_far, temp_rec)) {
                 hit_anything = true;
-                closest_so_far = temp_rec.t;
+                closet_so_far = temp_rec.t;
                 rec = temp_rec;
             }
         }
@@ -458,41 +940,38 @@ file.
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="common.rs | The common module"
+    ```rust filename="common.rs | The common module" {1-10}
+    // Constants
+
+    pub use std::f64::consts::PI;
+    pub use std::f64::INFINITY;
+
+    // Utility functions
+
+    pub fn degrees_to_radians(degrees: f64) -> f64 {
+        degrees * PI / 180.0
+    }
     ```
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="common.h | The common header"
-    #ifndef RTWEEKEND_H
-    #define RTWEEKEND_H
+    ```cpp filename="common.h | The common header" {1-18}
+    #ifndef COMMON_H
+    #define COMMON_H
 
-    #include <cmath>
     #include <limits>
-    #include <memory>
-
-
-    // Usings
-
-    using std::shared_ptr;
-    using std::make_shared;
-    using std::sqrt;
 
     // Constants
 
-    const double infinity = std::numeric_limits<double>::infinity();
-    const double pi = 3.1415926535897932385;
+    #undef INFINITY // Undefine the C macro in the cmath header
+    inline const double INFINITY = std::numeric_limits<double>::infinity();
+    inline const double PI = 3.1415926535897932385;
 
-    // Utility Functions
+    // Utility functions
 
     inline double degrees_to_radians(double degrees) {
-        return degrees * pi / 180.0;
+        return degrees * PI / 180.0;
     }
-
-    // Common Headers
-
-    #include "ray.h"
-    #include "vec3.h"
 
     #endif
     ```
@@ -503,72 +982,149 @@ And the new main:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="main.rs | The new main() with Hittables"
+    ```rust filename="main.rs | The new main() with Hittables" {2-4,6,12-13,15,18-21,35-40,67}
+    mod color;
+    mod common;
+    mod hittable;
+    mod hittable_list;
+    mod ray;
+    mod sphere;
+    mod vec3;
+
+    use std::io;
+
+    use color::Color;
+    use hittable::{HitRecord, Hittable};
+    use hittable_list::HittableList;
+    use ray::Ray;
+    use sphere::Sphere;
+    use vec3::{Point3, Vec3};
+
+    fn ray_color(r: &Ray, world: &dyn Hittable) -> Color {
+        let mut rec = HitRecord::new();
+        if world.hit(r, 0.0, common::INFINITY, &mut rec) {
+            return 0.5 * (rec.normal + Color::new(1.0, 1.0, 1.0));
+        }
+
+        let unit_direction = vec3::unit_vector(r.direction());
+        let t = 0.5 * (unit_direction.y() + 1.0);
+        (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
+    }
+
+    fn main() {
+        // Image
+
+        const ASPECT_RATIO: f64 = 16.0 / 9.0;
+        const IMAGE_WIDTH: i32 = 400;
+        const IMAGE_HEIGHT: i32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as i32;
+
+        // World
+
+        let mut world = HittableList::new();
+        world.add(Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5)));
+        world.add(Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0)));
+
+        // Camera
+
+        let viewport_height = 2.0;
+        let viewport_width = ASPECT_RATIO * viewport_height;
+        let focal_length = 1.0;
+
+        let origin = Point3::new(0.0, 0.0, 0.0);
+        let horizontal = Vec3::new(viewport_width, 0.0, 0.0);
+        let vertical = Vec3::new(0.0, viewport_height, 0.0);
+        let lower_left_corner =
+            origin - horizontal / 2.0 - vertical / 2.0 - Vec3::new(0.0, 0.0, focal_length);
+
+        // Render
+
+        print!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT);
+
+        for j in (0..IMAGE_HEIGHT).rev() {
+            eprint!("\rScanlines remaining: {} ", j);
+            for i in 0..IMAGE_WIDTH {
+                let u = i as f64 / (IMAGE_WIDTH - 1) as f64;
+                let v = j as f64 / (IMAGE_HEIGHT - 1) as f64;
+                let r = Ray::new(
+                    origin,
+                    lower_left_corner + u * horizontal + v * vertical - origin,
+                );
+                let pixel_color = ray_color(&r, &world);
+                color::write_color(&mut io::stdout(), pixel_color);
+            }
+        }
+
+        eprint!("\nDone.\n");
+    }
     ```
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="main.cpp | The new main() with Hittables"
-    #include "rtweekend.h"
-
-    #include "color.h"
-    #include "hittable_list.h"
-    #include "sphere.h"
-
+    ```cpp filename="main.cpp | The new main() with Hittables" {4-6,8,11-14,18,28-33,57}
     #include <iostream>
 
-    color ray_color(const ray& r, const hittable& world) {
-        hit_record rec;
-        if (world.hit(r, 0, infinity, rec)) {
-            return 0.5 * (rec.normal + color(1,1,1));
+    #include "color.h"
+    #include "common.h"
+    #include "hittable.h"
+    #include "hittable_list.h"
+    #include "ray.h"
+    #include "sphere.h"
+    #include "vec3.h"
+
+    Color ray_color(const Ray &r, const Hittable &world) {
+        HitRecord rec;
+        if (world.hit(r, 0.0, INFINITY, rec)) {
+            return 0.5 * (rec.normal + Color(1.0, 1.0, 1.0));
         }
 
-        vec3 unit_direction = unit_vector(r.direction());
-        auto t = 0.5*(unit_direction.y() + 1.0);
-        return (1.0-t)*color(1.0, 1.0, 1.0) + t*color(0.5, 0.7, 1.0);
+        Vec3 unit_direction = unit_vector(r.direction());
+        auto t = 0.5 * (unit_direction.y() + 1.0);
+        return (1.0 - t) * Color(1.0, 1.0, 1.0) + t * Color(0.5, 0.7, 1.0);
     }
 
     int main() {
-
         // Image
 
-        const auto aspect_ratio = 16.0 / 9.0;
-        const int image_width = 400;
-        const int image_height = static_cast<int>(image_width / aspect_ratio);
+        const double ASPECT_RATIO = 16.0 / 9.0;
+        const int IMAGE_WIDTH = 400;
+        const int IMAGE_HEIGHT = static_cast<int>(IMAGE_WIDTH / ASPECT_RATIO);
 
         // World
 
-        hittable_list world;
-        world.add(make_shared<sphere>(point3(0,0,-1), 0.5));
-        world.add(make_shared<sphere>(point3(0,-100.5,-1), 100));
+        HittableList world;
+        world.add(std::make_unique<Sphere>(Point3(0.0, 0.0, -1.0), 0.5));
+        world.add(std::make_unique<Sphere>(Point3(0.0, -100.5, -1.0), 100.0));
 
         // Camera
 
         auto viewport_height = 2.0;
-        auto viewport_width = aspect_ratio * viewport_height;
+        auto viewport_width = ASPECT_RATIO * viewport_height;
         auto focal_length = 1.0;
 
-        auto origin = point3(0, 0, 0);
-        auto horizontal = vec3(viewport_width, 0, 0);
-        auto vertical = vec3(0, viewport_height, 0);
-        auto lower_left_corner = origin - horizontal/2 - vertical/2 - vec3(0, 0, focal_length);
+        auto origin = Point3(0.0, 0.0, 0.0);
+        auto horizontal = Vec3(viewport_width, 0.0, 0.0);
+        auto vertical = Vec3(0.0, viewport_height, 0.0);
+        auto lower_left_corner =
+            origin - horizontal / 2.0 - vertical / 2.0 - Vec3(0.0, 0.0, focal_length);
 
         // Render
 
-        std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
+        std::cout << "P3\n" << IMAGE_WIDTH << ' ' << IMAGE_HEIGHT << "\n255\n";
 
-        for (int j = image_height-1; j >= 0; --j) {
-            std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
-            for (int i = 0; i < image_width; ++i) {
-                auto u = double(i) / (image_width-1);
-                auto v = double(j) / (image_height-1);
-                ray r(origin, lower_left_corner + u*horizontal + v*vertical);
-                color pixel_color = ray_color(r, world);
+        for (int j = IMAGE_HEIGHT - 1; j >= 0; --j) {
+            std::cerr << "\rScanlines remaining: " << j << ' ';
+            for (int i = 0; i < IMAGE_WIDTH; ++i) {
+                auto u = static_cast<double>(i) / (IMAGE_WIDTH - 1);
+                auto v = static_cast<double>(j) / (IMAGE_HEIGHT - 1);
+                Ray r(origin, lower_left_corner + u * horizontal + v * vertical - origin);
+                Color pixel_color = ray_color(r, world);
                 write_color(std::cout, pixel_color);
             }
         }
 
         std::cerr << "\nDone.\n";
+
+        return 0;
     }
     ```
   </Tab>

@@ -17,42 +17,92 @@ This implies $h = \tan(\frac{\theta}{2})$. Our camera now becomes:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="camera.rs | Camera with adjustable field-of-view (fov)"
+    ```rust filename="camera.rs | Camera with adjustable field-of-view (fov)" {1,13-19}
+    use crate::common;
+    use crate::ray::Ray;
+    use crate::vec3::{Point3, Vec3};
+
+    pub struct Camera {
+        origin: Point3,
+        lower_left_corner: Point3,
+        horizontal: Vec3,
+        vertical: Vec3,
+    }
+
+    impl Camera {
+        pub fn new(
+            vfov: f64, // Vertical field-of-view in degrees
+            aspect_ratio: f64,
+        ) -> Camera {
+            let theta = common::degrees_to_radians(vfov);
+            let h = f64::tan(theta / 2.0);
+            let viewport_height = 2.0 * h;
+            let viewport_width = aspect_ratio * viewport_height;
+            let focal_length = 1.0;
+
+            let origin = Point3::new(0.0, 0.0, 0.0);
+            let horizontal = Vec3::new(viewport_width, 0.0, 0.0);
+            let vertical = Vec3::new(0.0, viewport_height, 0.0);
+            let lower_left_corner =
+                origin - horizontal / 2.0 - vertical / 2.0 - Vec3::new(0.0, 0.0, focal_length);
+
+            Camera {
+                origin,
+                lower_left_corner,
+                horizontal,
+                vertical,
+            }
+        }
+
+        pub fn get_ray(&self, u: f64, v: f64) -> Ray {
+            Ray::new(
+                self.origin,
+                self.lower_left_corner + u * self.horizontal + v * self.vertical - self.origin,
+            )
+        }
+    }
     ```
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="camera.h | Camera with adjustable field-of-view (fov)"
-        class camera {
-            public:
+    ```cpp filename="camera.h | Camera with adjustable field-of-view (fov)" {9-15}
+    #ifndef CAMERA_H
+    #define CAMERA_H
 
-                camera(
-                    double vfov, // vertical field-of-view in degrees
-                    double aspect_ratio
-                ) {
-                    auto theta = degrees_to_radians(vfov);
-                    auto h = tan(theta/2);
-                    auto viewport_height = 2.0 * h;
-                    auto viewport_width = aspect_ratio * viewport_height;
+    #include "ray.h"
+    #include "vec3.h"
 
-                    auto focal_length = 1.0;
+    class Camera {
+    public:
+        Camera(
+            double vfov, // Vertical field-of-view in degrees
+            double aspect_ratio
+        ) {
+            auto theta = degrees_to_radians(vfov);
+            auto h = tan(theta / 2.0);
+            auto viewport_height = 2.0 * h;
+            auto viewport_width = aspect_ratio * viewport_height;
+            auto focal_length = 1.0;
 
-                    origin = point3(0, 0, 0);
-                    horizontal = vec3(viewport_width, 0.0, 0.0);
-                    vertical = vec3(0.0, viewport_height, 0.0);
-                    lower_left_corner = origin - horizontal/2 - vertical/2 - vec3(0, 0, focal_length);
-                }
+            origin = Point3(0.0, 0.0, 0.0);
+            horizontal = Vec3(viewport_width, 0.0, 0.0);
+            vertical = Vec3(0.0, viewport_height, 0.0);
+            lower_left_corner =
+                origin - horizontal / 2.0 - vertical / 2.0 - Vec3(0.0, 0.0, focal_length);
+        }
 
-                ray get_ray(double u, double v) const {
-                    return ray(origin, lower_left_corner + u*horizontal + v*vertical - origin);
-                }
+        Ray get_ray(double u, double v) const {
+            return Ray(origin, lower_left_corner + u * horizontal + v * vertical - origin);
+        }
 
-            private:
-                point3 origin;
-                point3 lower_left_corner;
-                vec3 horizontal;
-                vec3 vertical;
-        };
+    private:
+        Point3 origin;
+        Point3 lower_left_corner;
+        Vec3 horizontal;
+        Vec3 vertical;
+    };
+
+    #endif
     ```
   </Tab>
 </Tabs>
@@ -61,37 +111,190 @@ When calling it with camera `cam(90, aspect_ratio)` and these spheres:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="main.rs | Scene with wide-angle camera"
+    ```rust filename="main.rs | Scene with wide-angle camera" {18,60,63-64,67-68,72-73,79}
+    mod camera;
+    mod color;
+    mod common;
+    mod hittable;
+    mod hittable_list;
+    mod material;
+    mod ray;
+    mod sphere;
+    mod vec3;
+
+    use std::io;
+    use std::rc::Rc;
+
+    use camera::Camera;
+    use color::Color;
+    use hittable::{HitRecord, Hittable};
+    use hittable_list::HittableList;
+    use material::Lambertian;
+    use ray::Ray;
+    use sphere::Sphere;
+    use vec3::Vec3;
+
+    fn ray_color(r: &Ray, world: &dyn Hittable, depth: i32) -> Color {
+        // If we've exceeded the ray bounce limit, no more light is gathered
+        if depth <= 0 {
+            return Color::new(0.0, 0.0, 0.0);
+        }
+
+        let mut rec = HitRecord::new();
+        if world.hit(r, 0.001, f64::INFINITY, &mut rec) {
+            let mut scattered = Ray::default();
+            let mut attenuation = Color::default();
+            if rec
+                .mat_ptr
+                .as_ref()
+                .unwrap()
+                .scatter(r, &rec, &mut attenuation, &mut scattered)
+            {
+                return attenuation * ray_color(&scattered, world, depth - 1);
+            }
+            return Color::new(0.0, 0.0, 0.0);
+        }
+
+        let unit_direction = vec3::unit_vector(r.direction());
+        let t = 0.5 * (unit_direction.y() + 1.0);
+        (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
+    }
+
+    fn main() {
+        // Image
+
+        const ASPECT_RATIO: f64 = 16.0 / 9.0;
+        const IMAGE_WIDTH: i32 = 400;
+        const IMAGE_HEIGHT: i32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as i32;
+        const SAMPLES_PER_PIXEL: i32 = 100;
+        const MAX_DEPTH: i32 = 50;
+
+        // World
+
+        let r = f64::cos(common::PI / 4.0);
+        let mut world = HittableList::new();
+
+        let material_left = Rc::new(Lambertian::new(Color::new(0.0, 0.0, 1.0)));
+        let material_right = Rc::new(Lambertian::new(Color::new(1.0, 0.0, 0.0)));
+
+        world.add(Box::new(Sphere::new(
+            Vec3::new(-r, 0.0, -1.0),
+            r,
+            material_left,
+        )));
+        world.add(Box::new(Sphere::new(
+            Vec3::new(r, 0.0, -1.0),
+            r,
+            material_right,
+        )));
+
+        // Camera
+
+        let cam = Camera::new(90.0, ASPECT_RATIO);
+
+        // Render
+
+        print!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT);
+
+        for j in (0..IMAGE_HEIGHT).rev() {
+            eprint!("\rScanlines remaining: {} ", j);
+            for i in 0..IMAGE_WIDTH {
+                let mut pixel_color = Color::new(0.0, 0.0, 0.0);
+                for _ in 0..SAMPLES_PER_PIXEL {
+                    let u = (i as f64 + common::random_double()) / (IMAGE_WIDTH - 1) as f64;
+                    let v = (j as f64 + common::random_double()) / (IMAGE_HEIGHT - 1) as f64;
+                    let r = cam.get_ray(u, v);
+                    pixel_color += ray_color(&r, &world, MAX_DEPTH);
+                }
+                color::write_color(&mut io::stdout(), pixel_color, SAMPLES_PER_PIXEL);
+            }
+        }
+
+        eprint!("\nDone.\n");
+    }
     ```
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="main.cpp | Scene with wide-angle camera"
-        int main() {
-            ...
-            // World
+    ```cpp filename="main.cpp | Scene with wide-angle camera" {44,46,47-51,55}
+    #include <iostream>
 
+    #include "camera.h"
+    #include "color.h"
+    #include "common.h"
+    #include "hittable.h"
+    #include "hittable_list.h"
+    #include "ray.h"
+    #include "sphere.h"
+    #include "vec3.h"
 
+    Color ray_color(const Ray &r, const Hittable &world, int depth) {
+        // If we've exceeded the ray bounce limit, no more light is gathered
+        if (depth <= 0) {
+            return Color(0.0, 0.0, 0.0);
+        }
 
-            auto R = cos(pi/4);
-            hittable_list world;
+        HitRecord rec;
+        if (world.hit(r, 0.001, INFINITY, rec)) {
+            Ray scattered;
+            Color attenuation;
+            if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
+                return attenuation * ray_color(scattered, world, depth - 1);
+            }
+            return Color(0.0, 0.0, 0.0);
+        }
 
-            auto material_left  = make_shared<lambertian>(color(0,0,1));
-            auto material_right = make_shared<lambertian>(color(1,0,0));
+        Vec3 unit_direction = unit_vector(r.direction());
+        auto t = 0.5 * (unit_direction.y() + 1.0);
+        return (1.0 - t) * Color(1.0, 1.0, 1.0) + t * Color(0.5, 0.7, 1.0);
+    }
 
-            world.add(make_shared<sphere>(point3(-R, 0, -1), R, material_left));
-            world.add(make_shared<sphere>(point3( R, 0, -1), R, material_right));
+    int main() {
+        // Image
 
-            // Camera
+        const double ASPECT_RATIO = 16.0 / 9.0;
+        const int IMAGE_WIDTH = 400;
+        const int IMAGE_HEIGHT = static_cast<int>(IMAGE_WIDTH / ASPECT_RATIO);
+        const int SAMPLES_PER_PIXEL = 100;
+        const int MAX_DEPTH = 50;
 
-            camera cam(90.0, aspect_ratio);
+        // World
 
-            // Render
+        auto r = cos(PI / 4.0);
+        HittableList world;
 
-            std::cout << "P3\n" << image_width << " " << image_height << "\n255\n";
+        auto material_left = std::make_shared<Lambertian>(Color(0.0, 0.0, 1.0));
+        auto material_right = std::make_shared<Lambertian>(Color(1.0, 0.0, 0.0));
 
-            for (int j = image_height-1; j >= 0; --j) {
-            ...
+        world.add(std::make_unique<Sphere>(Point3(-r, 0.0, -1.0), r, material_left));
+        world.add(std::make_unique<Sphere>(Point3(r, 0.0, -1.0), r, material_right));
+
+        // Camera
+
+        Camera cam(90.0, ASPECT_RATIO);
+
+        // Render
+
+        std::cout << "P3\n" << IMAGE_WIDTH << ' ' << IMAGE_HEIGHT << "\n255\n";
+
+        for (int j = IMAGE_HEIGHT - 1; j >= 0; --j) {
+            std::cerr << "\rScanlines remaining: " << j << ' ';
+            for (int i = 0; i < IMAGE_WIDTH; ++i) {
+                Color pixel_color(0.0, 0.0, 0.0);
+                for (int s = 0; s < SAMPLES_PER_PIXEL; s++) {
+                    auto u = (i + random_double()) / (IMAGE_WIDTH - 1);
+                    auto v = (j + random_double()) / (IMAGE_HEIGHT - 1);
+                    Ray r = cam.get_ray(u, v);
+                    pixel_color += ray_color(r, world, MAX_DEPTH);
+                }
+                write_color(std::cout, pixel_color, SAMPLES_PER_PIXEL);
+            }
+        }
+
+        std::cerr << "\nDone.\n";
+
+        return 0;
+    }
     ```
   </Tab>
 </Tabs>
@@ -127,51 +330,102 @@ camera horizontally level until you decide to experiment with crazy camera angle
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="camera.rs | Positionable and orientable camera"
+    ```rust filename="camera.rs | Positionable and orientable camera" {3,14-16,24,25-32,42,45}
+    use crate::common;
+    use crate::ray::Ray;
+    use crate::vec3::{self, Point3, Vec3};
+
+    pub struct Camera {
+        origin: Point3,
+        lower_left_corner: Point3,
+        horizontal: Vec3,
+        vertical: Vec3,
+    }
+
+    impl Camera {
+        pub fn new(
+            lookfrom: Point3,
+            lookat: Point3,
+            vup: Vec3,
+            vfov: f64, // Vertical field-of-view in degrees
+            aspect_ratio: f64,
+        ) -> Camera {
+            let theta = common::degrees_to_radians(vfov);
+            let h = f64::tan(theta / 2.0);
+            let viewport_height = 2.0 * h;
+            let viewport_width = aspect_ratio * viewport_height;
+
+            let w = vec3::unit_vector(lookfrom - lookat);
+            let u = vec3::unit_vector(vec3::cross(vup, w));
+            let v = vec3::cross(w, u);
+
+            let origin = lookfrom;
+            let horizontal = viewport_width * u;
+            let vertical = viewport_height * v;
+            let lower_left_corner = origin - horizontal / 2.0 - vertical / 2.0 - w;
+
+            Camera {
+                origin,
+                lower_left_corner,
+                horizontal,
+                vertical,
+            }
+        }
+
+        pub fn get_ray(&self, s: f64, t: f64) -> Ray {
+            Ray::new(
+                self.origin,
+                self.lower_left_corner + s * self.horizontal + t * self.vertical - self.origin,
+            )
+        }
+    }
     ```
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="camera.h | Positionable and orientable camera"
-        class camera {
-            public:
-                camera(
+    ```cpp filename="camera.h | Positionable and orientable camera" {10-12,20,21-28,31-32}
+    #ifndef CAMERA_H
+    #define CAMERA_H
 
-                    point3 lookfrom,
-                    point3 lookat,
-                    vec3   vup,
-                    double vfov, // vertical field-of-view in degrees
-                    double aspect_ratio
-                ) {
-                    auto theta = degrees_to_radians(vfov);
-                    auto h = tan(theta/2);
-                    auto viewport_height = 2.0 * h;
-                    auto viewport_width = aspect_ratio * viewport_height;
+    #include "ray.h"
+    #include "vec3.h"
 
+    class Camera {
+    public:
+        Camera(
+            Point3 lookfrom,
+            Point3 lookat,
+            Vec3 vup,
+            double vfov, // Vertical field-of-view in degrees
+            double aspect_ratio
+        ) {
+            auto theta = degrees_to_radians(vfov);
+            auto h = tan(theta / 2.0);
+            auto viewport_height = 2.0 * h;
+            auto viewport_width = aspect_ratio * viewport_height;
 
+            auto w = unit_vector(lookfrom - lookat);
+            auto u = unit_vector(cross(vup, w));
+            auto v = cross(w, u);
 
-                    auto w = unit_vector(lookfrom - lookat);
-                    auto u = unit_vector(cross(vup, w));
-                    auto v = cross(w, u);
+            origin = lookfrom;
+            horizontal = viewport_width * u;
+            vertical = viewport_height * v;
+            lower_left_corner = origin - horizontal / 2.0 - vertical / 2.0 - w;
+        }
 
-                    origin = lookfrom;
-                    horizontal = viewport_width * u;
-                    vertical = viewport_height * v;
-                    lower_left_corner = origin - horizontal/2 - vertical/2 - w;
-                }
+        Ray get_ray(double s, double t) const {
+            return Ray(origin, lower_left_corner + s * horizontal + t * vertical - origin);
+        }
 
+    private:
+        Point3 origin;
+        Point3 lower_left_corner;
+        Vec3 horizontal;
+        Vec3 vertical;
+    };
 
-
-                ray get_ray(double s, double t) const {
-                    return ray(origin, lower_left_corner + s*horizontal + t*vertical - origin);
-                }
-
-            private:
-                point3 origin;
-                point3 lower_left_corner;
-                vec3 horizontal;
-                vec3 vertical;
-        };
+    #endif
     ```
   </Tab>
 </Tabs>
@@ -180,26 +434,222 @@ We'll change back to the prior scene, and use the new viewpoint:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="main.rs | Scene with alternate viewpoint"
+    ```rust filename="main.rs | Scene with alternate viewpoint" {18,21,59,62-65,68-84,88-89,95-101}
+    mod camera;
+    mod color;
+    mod common;
+    mod hittable;
+    mod hittable_list;
+    mod material;
+    mod ray;
+    mod sphere;
+    mod vec3;
+
+    use std::io;
+    use std::rc::Rc;
+
+    use camera::Camera;
+    use color::Color;
+    use hittable::{HitRecord, Hittable};
+    use hittable_list::HittableList;
+    use material::{Dielectric, Lambertian, Metal};
+    use ray::Ray;
+    use sphere::Sphere;
+    use vec3::{Point3, Vec3};
+
+    fn ray_color(r: &Ray, world: &dyn Hittable, depth: i32) -> Color {
+        // If we've exceeded the ray bounce limit, no more light is gathered
+        if depth <= 0 {
+            return Color::new(0.0, 0.0, 0.0);
+        }
+
+        let mut rec = HitRecord::new();
+        if world.hit(r, 0.001, f64::INFINITY, &mut rec) {
+            let mut scattered = Ray::default();
+            let mut attenuation = Color::default();
+            if rec
+                .mat_ptr
+                .as_ref()
+                .unwrap()
+                .scatter(r, &rec, &mut attenuation, &mut scattered)
+            {
+                return attenuation * ray_color(&scattered, world, depth - 1);
+            }
+            return Color::new(0.0, 0.0, 0.0);
+        }
+
+        let unit_direction = vec3::unit_vector(r.direction());
+        let t = 0.5 * (unit_direction.y() + 1.0);
+        (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
+    }
+
+    fn main() {
+        // Image
+
+        const ASPECT_RATIO: f64 = 16.0 / 9.0;
+        const IMAGE_WIDTH: i32 = 400;
+        const IMAGE_HEIGHT: i32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as i32;
+        const SAMPLES_PER_PIXEL: i32 = 100;
+        const MAX_DEPTH: i32 = 50;
+
+        // World
+
+        let mut world = HittableList::new();
+
+        let material_ground = Rc::new(Lambertian::new(Color::new(0.8, 0.8, 0.0)));
+        let material_center = Rc::new(Lambertian::new(Color::new(0.1, 0.2, 0.5)));
+        let material_left = Rc::new(Dielectric::new(1.5));
+        let material_right = Rc::new(Metal::new(Color::new(0.8, 0.6, 0.2), 0.0));
+
+        world.add(Box::new(Sphere::new(
+            Vec3::new(0.0, -100.5, -1.0),
+            100.0,
+            material_ground,
+        )));
+        world.add(Box::new(Sphere::new(
+            Vec3::new(0.0, 0.0, -1.0),
+            0.5,
+            material_center,
+        )));
+        world.add(Box::new(Sphere::new(
+            Vec3::new(-1.0, 0.0, -1.0),
+            0.5,
+            material_left.clone(),
+        )));
+        world.add(Box::new(Sphere::new(
+            Vec3::new(-1.0, 0.0, -1.0),
+            -0.45,
+            material_left,
+        )));
+        world.add(Box::new(Sphere::new(
+            Vec3::new(1.0, 0.0, -1.0),
+            0.5,
+            material_right,
+        )));
+
+        // Camera
+
+        let cam = Camera::new(
+            Point3::new(-2.0, 2.0, 1.0),
+            Point3::new(0.0, 0.0, -1.0),
+            Vec3::new(0.0, 1.0, 0.0),
+            90.0,
+            ASPECT_RATIO,
+        );
+
+        // Render
+
+        print!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT);
+
+        for j in (0..IMAGE_HEIGHT).rev() {
+            eprint!("\rScanlines remaining: {} ", j);
+            for i in 0..IMAGE_WIDTH {
+                let mut pixel_color = Color::new(0.0, 0.0, 0.0);
+                for _ in 0..SAMPLES_PER_PIXEL {
+                    let u = (i as f64 + common::random_double()) / (IMAGE_WIDTH - 1) as f64;
+                    let v = (j as f64 + common::random_double()) / (IMAGE_HEIGHT - 1) as f64;
+                    let r = cam.get_ray(u, v);
+                    pixel_color += ray_color(&r, &world, MAX_DEPTH);
+                }
+                color::write_color(&mut io::stdout(), pixel_color, SAMPLES_PER_PIXEL);
+            }
+        }
+
+        eprint!("\nDone.\n");
+    }
     ```
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="main.cpp | Scene with alternate viewpoint"
-        hittable_list world;
+    ```cpp filename="main.cpp | Scene with alternate viewpoint" {43,46-49,51-55,59-65}
+    #include <iostream>
 
-        auto material_ground = make_shared<lambertian>(color(0.8, 0.8, 0.0));
-        auto material_center = make_shared<lambertian>(color(0.1, 0.2, 0.5));
-        auto material_left   = make_shared<dielectric>(1.5);
-        auto material_right  = make_shared<metal>(color(0.8, 0.6, 0.2), 0.0);
+    #include "camera.h"
+    #include "color.h"
+    #include "common.h"
+    #include "hittable.h"
+    #include "hittable_list.h"
+    #include "ray.h"
+    #include "sphere.h"
+    #include "vec3.h"
 
-        world.add(make_shared<sphere>(point3( 0.0, -100.5, -1.0), 100.0, material_ground));
-        world.add(make_shared<sphere>(point3( 0.0,    0.0, -1.0),   0.5, material_center));
-        world.add(make_shared<sphere>(point3(-1.0,    0.0, -1.0),   0.5, material_left));
-        world.add(make_shared<sphere>(point3(-1.0,    0.0, -1.0), -0.45, material_left));
-        world.add(make_shared<sphere>(point3( 1.0,    0.0, -1.0),   0.5, material_right));
+    Color ray_color(const Ray &r, const Hittable &world, int depth) {
+        // If we've exceeded the ray bounce limit, no more light is gathered
+        if (depth <= 0) {
+            return Color(0.0, 0.0, 0.0);
+        }
 
-        camera cam(point3(-2,2,1), point3(0,0,-1), vec3(0,1,0), 90, aspect_ratio);
+        HitRecord rec;
+        if (world.hit(r, 0.001, INFINITY, rec)) {
+            Ray scattered;
+            Color attenuation;
+            if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
+                return attenuation * ray_color(scattered, world, depth - 1);
+            }
+            return Color(0.0, 0.0, 0.0);
+        }
+
+        Vec3 unit_direction = unit_vector(r.direction());
+        auto t = 0.5 * (unit_direction.y() + 1.0);
+        return (1.0 - t) * Color(1.0, 1.0, 1.0) + t * Color(0.5, 0.7, 1.0);
+    }
+
+    int main() {
+        // Image
+
+        const double ASPECT_RATIO = 16.0 / 9.0;
+        const int IMAGE_WIDTH = 400;
+        const int IMAGE_HEIGHT = static_cast<int>(IMAGE_WIDTH / ASPECT_RATIO);
+        const int SAMPLES_PER_PIXEL = 100;
+        const int MAX_DEPTH = 50;
+
+        // World
+
+        HittableList world;
+
+        auto material_ground = std::make_shared<Lambertian>(Color(0.8, 0.8, 0.0));
+        auto material_center = std::make_shared<Lambertian>(Color(0.1, 0.2, 0.5));
+        auto material_left = std::make_shared<Dielectric>(1.5);
+        auto material_right = std::make_shared<Metal>(Color(0.8, 0.6, 0.2), 0.0);
+
+        world.add(std::make_unique<Sphere>(Point3(0.0, -100.5, -1.0), 100.0, material_ground));
+        world.add(std::make_unique<Sphere>(Point3(0.0, 0.0, -1.0), 0.5, material_center));
+        world.add(std::make_unique<Sphere>(Point3(-1.0, 0.0, -1.0), 0.5, material_left));
+        world.add(std::make_unique<Sphere>(Point3(-1.0, 0.0, -1.0), -0.45, material_left));
+        world.add(std::make_unique<Sphere>(Point3(1.0, 0.0, -1.0), 0.5, material_right));
+
+        // Camera
+
+        Camera cam(
+            Point3(-2.0, 2.0, 1.0),
+            Point3(0.0, 0.0, -1.0),
+            Vec3(0.0, 1.0, 0.0),
+            90.0,
+            ASPECT_RATIO
+        );
+
+        // Render
+
+        std::cout << "P3\n" << IMAGE_WIDTH << ' ' << IMAGE_HEIGHT << "\n255\n";
+
+        for (int j = IMAGE_HEIGHT - 1; j >= 0; --j) {
+            std::cerr << "\rScanlines remaining: " << j << ' ';
+            for (int i = 0; i < IMAGE_WIDTH; ++i) {
+                Color pixel_color(0.0, 0.0, 0.0);
+                for (int s = 0; s < SAMPLES_PER_PIXEL; s++) {
+                    auto u = (i + random_double()) / (IMAGE_WIDTH - 1);
+                    auto v = (j + random_double()) / (IMAGE_HEIGHT - 1);
+                    Ray r = cam.get_ray(u, v);
+                    pixel_color += ray_color(r, world, MAX_DEPTH);
+                }
+                write_color(std::cout, pixel_color, SAMPLES_PER_PIXEL);
+            }
+        }
+
+        std::cerr << "\nDone.\n";
+
+        return 0;
+    }
     ```
   </Tab>
 </Tabs>
@@ -212,13 +662,222 @@ And we can change field of view:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="main.rs | Change field of view"
+    ```rust filename="main.rs | Change field of view" {99}
+    mod camera;
+    mod color;
+    mod common;
+    mod hittable;
+    mod hittable_list;
+    mod material;
+    mod ray;
+    mod sphere;
+    mod vec3;
+
+    use std::io;
+    use std::rc::Rc;
+
+    use camera::Camera;
+    use color::Color;
+    use hittable::{HitRecord, Hittable};
+    use hittable_list::HittableList;
+    use material::{Dielectric, Lambertian, Metal};
+    use ray::Ray;
+    use sphere::Sphere;
+    use vec3::{Point3, Vec3};
+
+    fn ray_color(r: &Ray, world: &dyn Hittable, depth: i32) -> Color {
+        // If we've exceeded the ray bounce limit, no more light is gathered
+        if depth <= 0 {
+            return Color::new(0.0, 0.0, 0.0);
+        }
+
+        let mut rec = HitRecord::new();
+        if world.hit(r, 0.001, f64::INFINITY, &mut rec) {
+            let mut scattered = Ray::default();
+            let mut attenuation = Color::default();
+            if rec
+                .mat_ptr
+                .as_ref()
+                .unwrap()
+                .scatter(r, &rec, &mut attenuation, &mut scattered)
+            {
+                return attenuation * ray_color(&scattered, world, depth - 1);
+            }
+            return Color::new(0.0, 0.0, 0.0);
+        }
+
+        let unit_direction = vec3::unit_vector(r.direction());
+        let t = 0.5 * (unit_direction.y() + 1.0);
+        (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
+    }
+
+    fn main() {
+        // Image
+
+        const ASPECT_RATIO: f64 = 16.0 / 9.0;
+        const IMAGE_WIDTH: i32 = 400;
+        const IMAGE_HEIGHT: i32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as i32;
+        const SAMPLES_PER_PIXEL: i32 = 100;
+        const MAX_DEPTH: i32 = 50;
+
+        // World
+
+        let mut world = HittableList::new();
+
+        let material_ground = Rc::new(Lambertian::new(Color::new(0.8, 0.8, 0.0)));
+        let material_center = Rc::new(Lambertian::new(Color::new(0.1, 0.2, 0.5)));
+        let material_left = Rc::new(Dielectric::new(1.5));
+        let material_right = Rc::new(Metal::new(Color::new(0.8, 0.6, 0.2), 0.0));
+
+        world.add(Box::new(Sphere::new(
+            Vec3::new(0.0, -100.5, -1.0),
+            100.0,
+            material_ground,
+        )));
+        world.add(Box::new(Sphere::new(
+            Vec3::new(0.0, 0.0, -1.0),
+            0.5,
+            material_center,
+        )));
+        world.add(Box::new(Sphere::new(
+            Vec3::new(-1.0, 0.0, -1.0),
+            0.5,
+            material_left.clone(),
+        )));
+        world.add(Box::new(Sphere::new(
+            Vec3::new(-1.0, 0.0, -1.0),
+            -0.45,
+            material_left,
+        )));
+        world.add(Box::new(Sphere::new(
+            Vec3::new(1.0, 0.0, -1.0),
+            0.5,
+            material_right,
+        )));
+
+        // Camera
+
+        let cam = Camera::new(
+            Point3::new(-2.0, 2.0, 1.0),
+            Point3::new(0.0, 0.0, -1.0),
+            Vec3::new(0.0, 1.0, 0.0),
+            20.0,
+            ASPECT_RATIO,
+        );
+
+        // Render
+
+        print!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT);
+
+        for j in (0..IMAGE_HEIGHT).rev() {
+            eprint!("\rScanlines remaining: {} ", j);
+            for i in 0..IMAGE_WIDTH {
+                let mut pixel_color = Color::new(0.0, 0.0, 0.0);
+                for _ in 0..SAMPLES_PER_PIXEL {
+                    let u = (i as f64 + common::random_double()) / (IMAGE_WIDTH - 1) as f64;
+                    let v = (j as f64 + common::random_double()) / (IMAGE_HEIGHT - 1) as f64;
+                    let r = cam.get_ray(u, v);
+                    pixel_color += ray_color(&r, &world, MAX_DEPTH);
+                }
+                color::write_color(&mut io::stdout(), pixel_color, SAMPLES_PER_PIXEL);
+            }
+        }
+
+        eprint!("\nDone.\n");
+    }
     ```
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="main.cpp | Change field of view"
-        camera cam(point3(-2,2,1), point3(0,0,-1), vec3(0,1,0), 20, aspect_ratio);
+    ```cpp filename="main.cpp | Change field of view" {63}
+    #include <iostream>
+
+    #include "camera.h"
+    #include "color.h"
+    #include "common.h"
+    #include "hittable.h"
+    #include "hittable_list.h"
+    #include "ray.h"
+    #include "sphere.h"
+    #include "vec3.h"
+
+    Color ray_color(const Ray &r, const Hittable &world, int depth) {
+        // If we've exceeded the ray bounce limit, no more light is gathered
+        if (depth <= 0) {
+            return Color(0.0, 0.0, 0.0);
+        }
+
+        HitRecord rec;
+        if (world.hit(r, 0.001, INFINITY, rec)) {
+            Ray scattered;
+            Color attenuation;
+            if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
+                return attenuation * ray_color(scattered, world, depth - 1);
+            }
+            return Color(0.0, 0.0, 0.0);
+        }
+
+        Vec3 unit_direction = unit_vector(r.direction());
+        auto t = 0.5 * (unit_direction.y() + 1.0);
+        return (1.0 - t) * Color(1.0, 1.0, 1.0) + t * Color(0.5, 0.7, 1.0);
+    }
+
+    int main() {
+        // Image
+
+        const double ASPECT_RATIO = 16.0 / 9.0;
+        const int IMAGE_WIDTH = 400;
+        const int IMAGE_HEIGHT = static_cast<int>(IMAGE_WIDTH / ASPECT_RATIO);
+        const int SAMPLES_PER_PIXEL = 100;
+        const int MAX_DEPTH = 50;
+
+        // World
+
+        HittableList world;
+
+        auto material_ground = std::make_shared<Lambertian>(Color(0.8, 0.8, 0.0));
+        auto material_center = std::make_shared<Lambertian>(Color(0.1, 0.2, 0.5));
+        auto material_left = std::make_shared<Dielectric>(1.5);
+        auto material_right = std::make_shared<Metal>(Color(0.8, 0.6, 0.2), 0.0);
+
+        world.add(std::make_unique<Sphere>(Point3(0.0, -100.5, -1.0), 100.0, material_ground));
+        world.add(std::make_unique<Sphere>(Point3(0.0, 0.0, -1.0), 0.5, material_center));
+        world.add(std::make_unique<Sphere>(Point3(-1.0, 0.0, -1.0), 0.5, material_left));
+        world.add(std::make_unique<Sphere>(Point3(-1.0, 0.0, -1.0), -0.45, material_left));
+        world.add(std::make_unique<Sphere>(Point3(1.0, 0.0, -1.0), 0.5, material_right));
+
+        // Camera
+
+        Camera cam(
+            Point3(-2.0, 2.0, 1.0),
+            Point3(0.0, 0.0, -1.0),
+            Vec3(0.0, 1.0, 0.0),
+            20.0,
+            ASPECT_RATIO
+        );
+
+        // Render
+
+        std::cout << "P3\n" << IMAGE_WIDTH << ' ' << IMAGE_HEIGHT << "\n255\n";
+
+        for (int j = IMAGE_HEIGHT - 1; j >= 0; --j) {
+            std::cerr << "\rScanlines remaining: " << j << ' ';
+            for (int i = 0; i < IMAGE_WIDTH; ++i) {
+                Color pixel_color(0.0, 0.0, 0.0);
+                for (int s = 0; s < SAMPLES_PER_PIXEL; s++) {
+                    auto u = (i + random_double()) / (IMAGE_WIDTH - 1);
+                    auto v = (j + random_double()) / (IMAGE_HEIGHT - 1);
+                    Ray r = cam.get_ray(u, v);
+                    pixel_color += ray_color(r, world, MAX_DEPTH);
+                }
+                write_color(std::cout, pixel_color, SAMPLES_PER_PIXEL);
+            }
+        }
+
+        std::cerr << "\nDone.\n";
+
+        return 0;
+    }
     ```
   </Tab>
 </Tabs>
