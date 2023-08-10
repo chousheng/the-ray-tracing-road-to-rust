@@ -22,12 +22,31 @@ export const getSortedMdxFilenames = () => {
 };
 
 export const parseMdAstNodeMeta = (node) => {
-  let m = node.meta?.match(/^filename="(\S+) \| ([^"]*)"(.*)$/);
+  let meta = {
+    lang: node.lang,
+    filename: "",
+    title: "",
+    addCargoDep: "",
+    genImage: false,
+  };
+
+  let m = node.meta.match(/^filename="(\S+) \| ([^"]*)"(.*)$/);
   if (m) {
-    return { filename: m[1], title: m[2], lang: node.lang };
-  } else {
-    return null;
+    meta.filename = m[1];
+    meta.title = m[2];
   }
+
+  let addCargoDep = node.meta.match(/addCargoDep="([^"]*)"/);
+  if (addCargoDep) {
+    meta.addCargoDep = addCargoDep[1];
+  }
+
+  let genImage = node.meta.match(/(^|\s)genImage(\s|$)/);
+  if (genImage) {
+    meta.genImage = true;
+  }
+
+  return meta;
 };
 
 export const getMdxListingsByLang = () => {
@@ -50,10 +69,12 @@ export const getMdxListingsByLang = () => {
 
       let meta = parseMdAstNodeMeta(node);
 
-      if (meta) {
+      if (meta.title) {
         listing.lang = node.lang;
         listing.filename = meta.filename;
         listing.title = meta.title;
+        listing.addCargoDep = meta.addCargoDep;
+        listing.genImage = meta.genImage;
         listing.code = node.value;
         if (!(listing.lang in listingsByLang)) {
           listingsByLang[listing.lang] = [];

@@ -183,7 +183,7 @@ const importCodeFromGitToMdx = async (importSpecs) => {
       const plugin = () => (mdast) => {
         visit(mdast, "code", (node) => {
           const meta = parseMdAstNodeMeta(node);
-          if (meta?.title in titleToGitCommit && meta.lang == lang) {
+          if (meta.title in titleToGitCommit && meta.lang == lang) {
             const commit = titleToGitCommit[meta.title];
 
             // Replace code

@@ -1,3 +1,4 @@
+import { exec, execSync } from "node:child_process";
 import fs from "node:fs";
 
 import { simpleGit } from "simple-git";
@@ -17,7 +18,12 @@ const exportCodeFromMdxToGit = async () => {
     cpp: "https://github.com/chousheng/ray-tracing-starter-cpp.git",
   };
 
+  const ADD_CARGO_DEP_AND_COMMIT = true;
+  const WRITE_CODE_AND_COMMIT = true;
+  const GEN_IMAGE = true;
+
   for (let lang in listingsByLang) {
+    console.log(`[${lang}]`);
     let git = simpleGit(EXPORT_FOLDER);
     await git.clone(starterRepoPathByLang[lang], lang);
 
@@ -29,13 +35,35 @@ const exportCodeFromMdxToGit = async () => {
     await git.init();
     await git.add(".").commit("Initial commit");
 
+    let i = 1;
+
     for (const listing of listingsByLang[lang]) {
-      fs.writeFileSync(
-        base + "/src/" + listing.filename,
-        listing.code + "\n",
-        () => {},
-      );
-      await git.add(".").commit(`Listing: ${listing.title}`);
+      console.log(`- ${listing.title}`);
+
+      if (ADD_CARGO_DEP_AND_COMMIT && listing.addCargoDep) {
+        console.log(`Adding Cargo dependency: ${listing.addCargoDep}`);
+        execSync(`cd ${base}; cargo add ${listing.addCargoDep}`);
+        await git.add(".").commit(`Add ${listing.addCargoDep} to Cargo`);
+      }
+
+      if (WRITE_CODE_AND_COMMIT) {
+        fs.writeFileSync(
+          base + "/src/" + listing.filename,
+          listing.code + "\n",
+          () => {},
+        );
+        await git.add(".").commit(`Listing: ${listing.title}`);
+      }
+
+      if (GEN_IMAGE && listing.genImage) {
+        console.log(`Generating image: image${i}.ppm`);
+        if (lang == "rust") {
+          execSync(`cd ${base}; cargo run --release > image${i}.ppm`);
+        } else if (lang=="cpp") {
+          execSync(`cd ${base}; make run-release > image${i}.ppm`);
+        }
+        ++i;
+      }
     }
   }
 };
