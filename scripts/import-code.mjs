@@ -307,8 +307,10 @@ const importCodeFromGitToMdx = async (importSpecs) => {
 const main = async () => {
   const importSpecs = [];
 
-  importSpecs.push("rust" + ":" + __dirname + "/../../ray-tracing-impl-rust");
-  importSpecs.push("cpp" + ":" + __dirname + "/../../ray-tracing-impl-cpp");
+  //importSpecs.push("rust" + ":" + __dirname + "/../../ray-tracing-impl-rust");
+  //importSpecs.push("cpp" + ":" + __dirname + "/../../ray-tracing-impl-cpp");
+  importSpecs.push("rust" + ":" + __dirname + "/../code/rust");
+  importSpecs.push("cpp" + ":" + __dirname + "/../code/cpp");
 
   await importCodeFromGitToMdx(importSpecs);
 };
