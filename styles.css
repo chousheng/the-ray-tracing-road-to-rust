@@ -5,3 +5,19 @@
 .line.foldable {
     @apply hidden;
 }
+
+html:not([data-nextra-word-wrap]) .line.add-dots-before::before {
+    @apply text-gray-300;
+    @apply dark:text-gray-600;
+    counter-reset: num-lines-before var(--num-lines-before);
+    content: "... (" counter(num-lines-before) " lines)";
+    display: block;
+}
+
+html:not([data-nextra-word-wrap]) .line.add-dots-after::after {
+    @apply text-gray-300;
+    @apply dark:text-gray-600;
+    counter-reset: num-lines-after var(--num-lines-after);
+    content: "... (" counter(num-lines-after) " lines)";
+    display: block;
+}

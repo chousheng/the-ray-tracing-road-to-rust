@@ -299,6 +299,31 @@ export default function rehypePrettyCode(
           });
         }
 
+        // Parse contextSize
+        const DEFAULT_CONTEXT_SIZE = '3';
+        const contextSize = parseInt(
+          meta.match(/(?:^|\s)contextSize=(.*?)(?:$|\s)/)?.[1] ??
+            DEFAULT_CONTEXT_SIZE
+        );
+        //console.log('contextSize:', contextSize);
+
+        // Build contextLineSet
+        const contextLineSet = new Set();
+        for (const line of lineNumbers) {
+          for (let i = -contextSize; i <= contextSize; i++) {
+            const l = line + i;
+            contextLineSet.add(l);
+          }
+        }
+
+        // Parse foldThreshold
+        const DEFAULT_FOLD_THRESHOLD = '1';
+        const foldThreshold = parseInt(
+          meta.match(/(?:^|\s)foldThreshold=(.*?)(?:$|\s)/)?.[1] ??
+            DEFAULT_FOLD_THRESHOLD
+        );
+        //console.log('foldThreshold:', foldThreshold);
+
         if (!isText(textElement)) {
           return;
         }
@@ -330,6 +355,151 @@ export default function rehypePrettyCode(
             wordIdsMap,
             wordCounter: new Map(),
           };
+
+          // Build lineSize
+          let lineSize = 0;
+          visit(tree, 'element', (element) => {
+            if (
+              Array.isArray(element.properties?.className) &&
+              element.properties?.className?.[0] === 'line'
+            ) {
+              lineSize++;
+            }
+          });
+          //console.log('lineSize:', lineSize);
+
+          // Build contextBlocks
+          const contextBlocks: Array<{
+            startLine: number;
+            endLine: number;
+            hasFoldableBefore: boolean;
+            hasFoldableAfter: boolean;
+          }> = [];
+          let lastLineFoldable = false;
+          lineCounter = 0;
+          visit(tree, 'element', (element) => {
+            if (
+              Array.isArray(element.properties?.className) &&
+              element.properties?.className?.[0] === 'line'
+            ) {
+              lineCounter++;
+
+              if (contextLineSet.has(lineCounter)) {
+                // Context line
+                if (lineCounter == 1 || lastLineFoldable) {
+                  contextBlocks.push({
+                    startLine: lineCounter,
+                    endLine: lineCounter,
+                    hasFoldableBefore: lineCounter == 1 ? false : true,
+                    hasFoldableAfter: false,
+                  });
+                }
+
+                lastLineFoldable = false;
+              } else {
+                // Foldable line
+                if (contextBlocks.length && !lastLineFoldable) {
+                  const lastContextBlock =
+                    contextBlocks[contextBlocks.length - 1];
+                  lastContextBlock.endLine = lineCounter - 1;
+                  lastContextBlock.hasFoldableAfter = true;
+                }
+
+                lastLineFoldable = true;
+              }
+
+              if (lineCounter == lineSize && !lastLineFoldable) {
+                if (contextBlocks.length) {
+                  const lastContextBlock =
+                    contextBlocks[contextBlocks.length - 1];
+                  lastContextBlock.endLine = lineCounter;
+                }
+              }
+            }
+          });
+          //console.log('contextBlocks:', contextBlocks);
+
+          // Build addDots sets
+          const foldLineSet = new Set();
+          const dotsBeforeLine = new Map(); // line -> numFoldLines
+          const dotsAfterLine = new Map(); // line -> numFoldLines
+
+          for (let i = 0; i < contextBlocks.length; i++) {
+            if (contextBlocks[i].hasFoldableBefore) {
+              const foldStart = i == 0 ? 1 : contextBlocks[i - 1].endLine + 1;
+              const foldEnd = contextBlocks[i].startLine - 1;
+              const numFoldLines = foldEnd - foldStart + 1;
+
+              if (numFoldLines > foldThreshold) {
+                for (let i = foldStart; i <= foldEnd; i++) {
+                  foldLineSet.add(i);
+                }
+                dotsBeforeLine.set(contextBlocks[i].startLine, numFoldLines);
+              }
+            }
+
+            if (
+              i == contextBlocks.length - 1 &&
+              contextBlocks[i].hasFoldableAfter
+            ) {
+              const foldStart = contextBlocks[i].endLine + 1;
+              const foldEnd = lineSize;
+
+              const numFoldLines = foldEnd - foldStart + 1;
+
+              if (numFoldLines > foldThreshold) {
+                for (let i = foldStart; i <= foldEnd; i++) {
+                  foldLineSet.add(i);
+                }
+                dotsAfterLine.set(contextBlocks[i].endLine, numFoldLines);
+              }
+            }
+          }
+
+          //console.log('dotsBeforeLine:', dotsBeforeLine);
+          //console.log('dotsAfterLine:', dotsAfterLine);
+
+          // Add classNames to style the lines
+          lineCounter = 0;
+          visit(tree, 'element', (element) => {
+            if (
+              Array.isArray(element.properties?.className) &&
+              element.properties?.className?.[0] === 'line'
+            ) {
+              lineCounter++;
+
+              if (foldLineSet.has(lineCounter)) {
+                //console.log('add foldable to line', lineCounter);
+                element.properties.className.push('foldable');
+              }
+
+              if (dotsBeforeLine.has(lineCounter)) {
+                //console.log(
+                //  'add add-dots-before to',
+                //  lineCounter,
+                //  dotsBeforeLine.get(lineCounter)
+                //);
+                element.properties.className.push('add-dots-before');
+                element.properties.style =
+                  '--num-lines-before: ' +
+                  dotsBeforeLine.get(lineCounter) +
+                  ';';
+              }
+
+              if (dotsAfterLine.has(lineCounter)) {
+                //console.log(
+                //  'add add-dots-after to',
+                //  lineCounter,
+                //  dotsAfterLine.get(lineCounter)
+                //);
+                element.properties.className.push('add-dots-after');
+                element.properties.style =
+                  '--num-lines-after: ' + dotsAfterLine.get(lineCounter) + ';';
+              }
+            }
+          });
+
+          lineCounter = 0;
 
           visit(tree, 'element', (element) => {
             if (
