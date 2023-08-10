@@ -1380,12 +1380,11 @@ material:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="material.rs | Full glass material" {2,87-93,115-117}
+    ```rust filename="material.rs | Full glass material" {4,86-92,114-116}
     use crate::color::Color;
-    use crate::common;
     use crate::hittable::HitRecord;
     use crate::ray::Ray;
-    use crate::vec3;
+    use crate::{common, vec3};
 
     pub trait Material {
         fn scatter(

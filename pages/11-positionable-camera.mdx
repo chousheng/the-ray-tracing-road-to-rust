@@ -620,7 +620,7 @@ We'll change back to the prior scene, and use the new viewpoint:
 
         // Camera
 
-        Camera cam(
+        Camera cam( //
             Point3(-2.0, 2.0, 1.0),
             Point3(0.0, 0.0, -1.0),
             Vec3(0.0, 1.0, 0.0),
@@ -789,7 +789,7 @@ And we can change field of view:
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="main.cpp | Change field of view" {63}
+    ```cpp filename="main.cpp | Change field of view" {59-61}
     #include <iostream>
 
     #include "camera.h"
@@ -848,13 +848,9 @@ And we can change field of view:
 
         // Camera
 
-        Camera cam(
-            Point3(-2.0, 2.0, 1.0),
-            Point3(0.0, 0.0, -1.0),
-            Vec3(0.0, 1.0, 0.0),
-            20.0,
-            ASPECT_RATIO
-        );
+        Camera
+            cam(Point3(-2.0, 2.0, 1.0), Point3(0.0, 0.0, -1.0), Vec3(0.0, 1.0, 0.0), 20.0, ASPECT_RATIO
+            );
 
         // Render
 

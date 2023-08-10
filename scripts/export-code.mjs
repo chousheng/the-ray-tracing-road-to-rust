@@ -1,4 +1,4 @@
-import { exec, execSync } from "node:child_process";
+import { execSync } from "node:child_process";
 import fs from "node:fs";
 
 import { simpleGit } from "simple-git";
@@ -14,12 +14,14 @@ const exportCodeFromMdxToGit = async () => {
   fs.mkdirSync(EXPORT_FOLDER, { recursive: true }, () => {});
 
   const starterRepoPathByLang = {
-    rust: "https://github.com/chousheng/ray-tracing-starter-rust.git",
-    cpp: "https://github.com/chousheng/ray-tracing-starter-cpp.git",
+    rust: "../../ray-tracing-starter-rust",
+    cpp: "../../ray-tracing-starter-cpp",
   };
 
-  const ADD_CARGO_DEP_AND_COMMIT = true;
-  const WRITE_CODE_AND_COMMIT = true;
+  const ADD_CARGO_DEP_AND_COMMIT = false;
+  const WRITE_CODE = true;
+  const FORMAT_CODE = true;
+  const COMMIT_CODE = true;
   const GEN_IMAGE = true;
 
   for (let lang in listingsByLang) {
@@ -46,12 +48,23 @@ const exportCodeFromMdxToGit = async () => {
         await git.add(".").commit(`Add ${listing.addCargoDep} to Cargo`);
       }
 
-      if (WRITE_CODE_AND_COMMIT) {
+      if (WRITE_CODE) {
         fs.writeFileSync(
           base + "/src/" + listing.filename,
           listing.code + "\n",
           () => {},
         );
+      }
+
+      if (FORMAT_CODE) {
+        if (lang == "rust") {
+          execSync(`cd ${base}; cargo +nightly fmt`);
+        } else if (lang == "cpp") {
+          execSync(`cd ${base}; clang-format -i src/*`)
+        }
+      }
+
+      if (COMMIT_CODE) {
         await git.add(".").commit(`Listing: ${listing.title}`);
       }
 
