@@ -30,6 +30,10 @@ export const parseMdAstNodeMeta = (node) => {
     genImage: false,
   };
 
+  if (!node.meta) {
+    return meta;
+  }
+
   let m = node.meta.match(/^filename="(\S+) \| ([^"]*)"(.*)$/);
   if (m) {
     meta.filename = m[1];
