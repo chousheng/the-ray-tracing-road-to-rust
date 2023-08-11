@@ -2,8 +2,10 @@ import { execSync } from "node:child_process";
 import fs from "node:fs";
 
 import { simpleGit } from "simple-git";
+import slugify from "slugify";
 
 import { getMdxListingsByLang } from "./util.mjs";
+
 
 const exportCodeFromMdxToGit = async () => {
   let listingsByLang = getMdxListingsByLang();
@@ -23,7 +25,8 @@ const exportCodeFromMdxToGit = async () => {
   const FORMAT_CODE = true;
   const COMMIT_CODE = true;
   const COMPILE_CODE = true;
-  const GEN_IMAGE = false;
+  const GEN_IMAGE = true;
+  const ADD_SLUGIFY_IMAGE_TITLE = true;
 
   for (let lang in listingsByLang) {
     console.log(`[${lang}]`);
@@ -78,12 +81,18 @@ const exportCodeFromMdxToGit = async () => {
         }
       }
 
-      if (GEN_IMAGE && listing.genImage) {
-        console.log(`Generating image: image${i}.ppm`);
+      if (GEN_IMAGE && listing.genImage && listing.title != "Final scene") {
+        let filename = `image${i}`;
+        if (ADD_SLUGIFY_IMAGE_TITLE) {
+          filename += "-" + slugify(listing.title, {remove: /[*+~.()'"!:@]/g});
+        }
+        filename += ".ppm";
+
+        console.log(`Generating image: ${filename}`);
         if (lang == "rust") {
-          execSync(`cd ${base}; cargo run --release > image${i}.ppm`);
+          execSync(`cd ${base}; cargo run --release > ${filename}`);
         } else if (lang=="cpp") {
-          execSync(`cd ${base}; make run-release > image${i}.ppm`);
+          execSync(`cd ${base}; make run-release > ${filename}`);
         }
         ++i;
       }
