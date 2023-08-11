@@ -804,10 +804,10 @@ Now we'll update the scene to change the left and center spheres to glass:
             return Color(0.0, 0.0, 0.0);
         }
 
-        HitRecord rec;
+        auto rec = HitRecord();
         if (world.hit(r, 0.001, INFINITY, rec)) {
-            Ray scattered;
-            Color attenuation;
+            auto scattered = Ray();
+            auto attenuation = Color();
             if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
                 return attenuation * ray_color(scattered, world, depth - 1);
             }
@@ -830,7 +830,7 @@ Now we'll update the scene to change the left and center spheres to glass:
 
         // World
 
-        HittableList world;
+        auto world = HittableList();
         auto material_ground = std::make_shared<Lambertian>(Color(0.8, 0.8, 0.0));
         auto material_center = std::make_shared<Dielectric>(1.5);
         auto material_left = std::make_shared<Dielectric>(1.5);
@@ -843,17 +843,17 @@ Now we'll update the scene to change the left and center spheres to glass:
 
         // Camera
 
-        Camera cam;
+        auto cam = Camera();
 
         // Render
 
         std::cout << "P3\n" << IMAGE_WIDTH << ' ' << IMAGE_HEIGHT << "\n255\n";
 
-        for (int j = IMAGE_HEIGHT - 1; j >= 0; --j) {
+        for (auto j = IMAGE_HEIGHT - 1; j >= 0; --j) {
             std::cerr << "\rScanlines remaining: " << j << ' ';
-            for (int i = 0; i < IMAGE_WIDTH; ++i) {
-                Color pixel_color(0.0, 0.0, 0.0);
-                for (int s = 0; s < SAMPLES_PER_PIXEL; s++) {
+            for (auto i = 0; i < IMAGE_WIDTH; ++i) {
+                auto pixel_color = Color(0.0, 0.0, 0.0);
+                for (auto s = 0; s < SAMPLES_PER_PIXEL; ++s) {
                     auto u = (i + random_double()) / (IMAGE_WIDTH - 1);
                     auto v = (j + random_double()) / (IMAGE_HEIGHT - 1);
                     auto r = cam.get_ray(u, v);
@@ -1300,10 +1300,10 @@ parameters:
             return Color(0.0, 0.0, 0.0);
         }
 
-        HitRecord rec;
+        auto rec = HitRecord();
         if (world.hit(r, 0.001, INFINITY, rec)) {
-            Ray scattered;
-            Color attenuation;
+            auto scattered = Ray();
+            auto attenuation = Color();
             if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
                 return attenuation * ray_color(scattered, world, depth - 1);
             }
@@ -1326,7 +1326,7 @@ parameters:
 
         // World
 
-        HittableList world;
+        auto world = HittableList();
         auto material_ground = std::make_shared<Lambertian>(Color(0.8, 0.8, 0.0));
         auto material_center = std::make_shared<Lambertian>(Color(0.1, 0.2, 0.5));
         auto material_left = std::make_shared<Dielectric>(1.5);
@@ -1339,17 +1339,17 @@ parameters:
 
         // Camera
 
-        Camera cam;
+        auto cam = Camera();
 
         // Render
 
         std::cout << "P3\n" << IMAGE_WIDTH << ' ' << IMAGE_HEIGHT << "\n255\n";
 
-        for (int j = IMAGE_HEIGHT - 1; j >= 0; --j) {
+        for (auto j = IMAGE_HEIGHT - 1; j >= 0; --j) {
             std::cerr << "\rScanlines remaining: " << j << ' ';
-            for (int i = 0; i < IMAGE_WIDTH; ++i) {
-                Color pixel_color(0.0, 0.0, 0.0);
-                for (int s = 0; s < SAMPLES_PER_PIXEL; s++) {
+            for (auto i = 0; i < IMAGE_WIDTH; ++i) {
+                auto pixel_color = Color(0.0, 0.0, 0.0);
+                for (auto s = 0; s < SAMPLES_PER_PIXEL; ++s) {
                     auto u = (i + random_double()) / (IMAGE_WIDTH - 1);
                     auto v = (j + random_double()) / (IMAGE_HEIGHT - 1);
                     auto r = cam.get_ray(u, v);
@@ -1771,10 +1771,10 @@ make a hollow glass sphere:
             return Color(0.0, 0.0, 0.0);
         }
 
-        HitRecord rec;
+        auto rec = HitRecord();
         if (world.hit(r, 0.001, INFINITY, rec)) {
-            Ray scattered;
-            Color attenuation;
+            auto scattered = Ray();
+            auto attenuation = Color();
             if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
                 return attenuation * ray_color(scattered, world, depth - 1);
             }
@@ -1797,7 +1797,7 @@ make a hollow glass sphere:
 
         // World
 
-        HittableList world;
+        auto world = HittableList();
         auto material_ground = std::make_shared<Lambertian>(Color(0.8, 0.8, 0.0));
         auto material_center = std::make_shared<Lambertian>(Color(0.1, 0.2, 0.5));
         auto material_left = std::make_shared<Dielectric>(1.5);
@@ -1811,17 +1811,17 @@ make a hollow glass sphere:
 
         // Camera
 
-        Camera cam;
+        auto cam = Camera();
 
         // Render
 
         std::cout << "P3\n" << IMAGE_WIDTH << ' ' << IMAGE_HEIGHT << "\n255\n";
 
-        for (int j = IMAGE_HEIGHT - 1; j >= 0; --j) {
+        for (auto j = IMAGE_HEIGHT - 1; j >= 0; --j) {
             std::cerr << "\rScanlines remaining: " << j << ' ';
-            for (int i = 0; i < IMAGE_WIDTH; ++i) {
-                Color pixel_color(0.0, 0.0, 0.0);
-                for (int s = 0; s < SAMPLES_PER_PIXEL; s++) {
+            for (auto i = 0; i < IMAGE_WIDTH; ++i) {
+                auto pixel_color = Color(0.0, 0.0, 0.0);
+                for (auto s = 0; s < SAMPLES_PER_PIXEL; ++s) {
                     auto u = (i + random_double()) / (IMAGE_WIDTH - 1);
                     auto v = (j + random_double()) / (IMAGE_HEIGHT - 1);
                     auto r = cam.get_ray(u, v);

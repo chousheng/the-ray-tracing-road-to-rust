@@ -155,12 +155,12 @@ let us compute and visualize $\mathbf{n}$:
 
         std::cout << "P3\n" << IMAGE_WIDTH << ' ' << IMAGE_HEIGHT << "\n255\n";
 
-        for (int j = IMAGE_HEIGHT - 1; j >= 0; --j) {
+        for (auto j = IMAGE_HEIGHT - 1; j >= 0; --j) {
             std::cerr << "\rScanlines remaining: " << j << ' ';
-            for (int i = 0; i < IMAGE_WIDTH; ++i) {
+            for (auto i = 0; i < IMAGE_WIDTH; ++i) {
                 auto u = static_cast<double>(i) / (IMAGE_WIDTH - 1);
                 auto v = static_cast<double>(j) / (IMAGE_HEIGHT - 1);
-                Ray r(origin, lower_left_corner + u * horizontal + v * vertical - origin);
+                auto r = Ray(origin, lower_left_corner + u * horizontal + v * vertical - origin);
                 auto pixel_color = ray_color(r);
                 write_color(std::cout, pixel_color);
             }
@@ -356,12 +356,12 @@ Using these observations, we can now simplify the sphere-intersection code to th
 
         std::cout << "P3\n" << IMAGE_WIDTH << ' ' << IMAGE_HEIGHT << "\n255\n";
 
-        for (int j = IMAGE_HEIGHT - 1; j >= 0; --j) {
+        for (auto j = IMAGE_HEIGHT - 1; j >= 0; --j) {
             std::cerr << "\rScanlines remaining: " << j << ' ';
-            for (int i = 0; i < IMAGE_WIDTH; ++i) {
+            for (auto i = 0; i < IMAGE_WIDTH; ++i) {
                 auto u = static_cast<double>(i) / (IMAGE_WIDTH - 1);
                 auto v = static_cast<double>(j) / (IMAGE_HEIGHT - 1);
-                Ray r(origin, lower_left_corner + u * horizontal + v * vertical - origin);
+                auto r = Ray(origin, lower_left_corner + u * horizontal + v * vertical - origin);
                 auto pixel_color = ray_color(r);
                 write_color(std::cout, pixel_color);
             }
@@ -862,7 +862,7 @@ that stores a list of `hittable`s:
     };
 
     inline bool HittableList::hit(const Ray &r, double t_min, double t_max, HitRecord &rec) const {
-        HitRecord temp_rec;
+        auto temp_rec = HitRecord();
         auto hit_anything = false;
         auto closet_so_far = t_max;
 
@@ -1071,7 +1071,7 @@ And the new main:
     #include "vec3.h"
 
     Color ray_color(const Ray &r, const Hittable &world) {
-        HitRecord rec;
+        auto rec = HitRecord();
         if (world.hit(r, 0.0, INFINITY, rec)) {
             return 0.5 * (rec.normal + Color(1.0, 1.0, 1.0));
         }
@@ -1090,7 +1090,7 @@ And the new main:
 
         // World
 
-        HittableList world;
+        auto world = HittableList();
         world.add(std::make_unique<Sphere>(Point3(0.0, 0.0, -1.0), 0.5));
         world.add(std::make_unique<Sphere>(Point3(0.0, -100.5, -1.0), 100.0));
 
@@ -1110,12 +1110,12 @@ And the new main:
 
         std::cout << "P3\n" << IMAGE_WIDTH << ' ' << IMAGE_HEIGHT << "\n255\n";
 
-        for (int j = IMAGE_HEIGHT - 1; j >= 0; --j) {
+        for (auto j = IMAGE_HEIGHT - 1; j >= 0; --j) {
             std::cerr << "\rScanlines remaining: " << j << ' ';
-            for (int i = 0; i < IMAGE_WIDTH; ++i) {
+            for (auto i = 0; i < IMAGE_WIDTH; ++i) {
                 auto u = static_cast<double>(i) / (IMAGE_WIDTH - 1);
                 auto v = static_cast<double>(j) / (IMAGE_HEIGHT - 1);
-                Ray r(origin, lower_left_corner + u * horizontal + v * vertical - origin);
+                auto r = Ray(origin, lower_left_corner + u * horizontal + v * vertical - origin);
                 auto pixel_color = ray_color(r, world);
                 write_color(std::cout, pixel_color);
             }

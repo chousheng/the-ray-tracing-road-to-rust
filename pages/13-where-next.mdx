@@ -192,10 +192,10 @@ First let's make the image on the cover of this book -- lots of random spheres:
             return Color(0.0, 0.0, 0.0);
         }
 
-        HitRecord rec;
+        auto rec = HitRecord();
         if (world.hit(r, 0.001, INFINITY, rec)) {
-            Ray scattered;
-            Color attenuation;
+            auto scattered = Ray();
+            auto attenuation = Color();
             if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
                 return attenuation * ray_color(scattered, world, depth - 1);
             }
@@ -208,7 +208,7 @@ First let's make the image on the cover of this book -- lots of random spheres:
     }
 
     HittableList random_scene() {
-        HittableList world;
+        auto world = HittableList();
 
         auto ground_material = std::make_shared<Lambertian>(Color(0.5, 0.5, 0.5));
         world.add(std::make_unique<Sphere>(Point3(0.0, -1000.0, 0.0), 1000.0, ground_material));
@@ -216,7 +216,7 @@ First let's make the image on the cover of this book -- lots of random spheres:
         for (int a = -11; a < 11; ++a) {
             for (int b = -11; b < 11; ++b) {
                 auto choose_mat = random_double();
-                Point3 center(a + 0.9 * random_double(), 0.2, b + 0.9 * random_double());
+                auto center = Point3(a + 0.9 * random_double(), 0.2, b + 0.9 * random_double());
 
                 if ((center - Point3(4.0, 0.2, 0.0)).length() > 0.9) {
                     if (choose_mat < 0.8) {
@@ -266,23 +266,23 @@ First let's make the image on the cover of this book -- lots of random spheres:
 
         // Camera
 
-        Point3 lookfrom(13.0, 2.0, 3.0);
-        Point3 lookat(0.0, 0.0, 0.0);
-        Vec3 vup(0.0, 1.0, 0.0);
+        auto lookfrom = Point3(13.0, 2.0, 3.0);
+        auto lookat = Point3(0.0, 0.0, 0.0);
+        auto vup = Vec3(0.0, 1.0, 0.0);
         auto dist_to_focus = 10.0;
         auto aperture = 0.1;
 
-        Camera cam(lookfrom, lookat, vup, 20.0, ASPECT_RATIO, aperture, dist_to_focus);
+        auto cam = Camera(lookfrom, lookat, vup, 20.0, ASPECT_RATIO, aperture, dist_to_focus);
 
         // Render
 
         std::cout << "P3\n" << IMAGE_WIDTH << ' ' << IMAGE_HEIGHT << "\n255\n";
 
-        for (int j = IMAGE_HEIGHT - 1; j >= 0; --j) {
+        for (auto j = IMAGE_HEIGHT - 1; j >= 0; --j) {
             std::cerr << "\rScanlines remaining: " << j << ' ';
-            for (int i = 0; i < IMAGE_WIDTH; ++i) {
-                Color pixel_color(0.0, 0.0, 0.0);
-                for (int s = 0; s < SAMPLES_PER_PIXEL; s++) {
+            for (auto i = 0; i < IMAGE_WIDTH; ++i) {
+                auto pixel_color = Color(0.0, 0.0, 0.0);
+                for (auto s = 0; s < SAMPLES_PER_PIXEL; ++s) {
                     auto u = (i + random_double()) / (IMAGE_WIDTH - 1);
                     auto v = (j + random_double()) / (IMAGE_HEIGHT - 1);
                     auto r = cam.get_ray(u, v);

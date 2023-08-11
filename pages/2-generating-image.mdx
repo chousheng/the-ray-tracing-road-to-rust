@@ -52,8 +52,8 @@ Let's make some code to output such a thing:
 
         std::cout << "P3\n" << IMAGE_WIDTH << ' ' << IMAGE_HEIGHT << "\n255\n";
 
-        for (int j = IMAGE_HEIGHT - 1; j >= 0; --j) {
-            for (int i = 0; i < IMAGE_WIDTH; ++i) {
+        for (auto j = IMAGE_HEIGHT - 1; j >= 0; --j) {
+            for (auto i = 0; i < IMAGE_WIDTH; ++i) {
                 auto r = static_cast<double>(i) / (IMAGE_WIDTH - 1);
                 auto g = static_cast<double>(j) / (IMAGE_HEIGHT - 1);
                 auto b = 0.25;
@@ -174,9 +174,9 @@ Our program outputs the image to the standard output stream, so leave that alone
 
         std::cout << "P3\n" << IMAGE_WIDTH << ' ' << IMAGE_HEIGHT << "\n255\n";
 
-        for (int j = IMAGE_HEIGHT - 1; j >= 0; --j) {
+        for (auto j = IMAGE_HEIGHT - 1; j >= 0; --j) {
             std::cerr << "\rScanlines remaining: " << j << ' ';
-            for (int i = 0; i < IMAGE_WIDTH; ++i) {
+            for (auto i = 0; i < IMAGE_WIDTH; ++i) {
                 auto r = static_cast<double>(i) / (IMAGE_WIDTH - 1);
                 auto g = static_cast<double>(j) / (IMAGE_HEIGHT - 1);
                 auto b = 0.25;
