@@ -213,8 +213,8 @@ First let's make the image on the cover of this book -- lots of random spheres:
         auto ground_material = std::make_shared<Lambertian>(Color(0.5, 0.5, 0.5));
         world.add(std::make_unique<Sphere>(Point3(0.0, -1000.0, 0.0), 1000.0, ground_material));
 
-        for (int a = -11; a < 11; ++a) {
-            for (int b = -11; b < 11; ++b) {
+        for (auto a = -11; a < 11; ++a) {
+            for (auto b = -11; b < 11; ++b) {
                 auto choose_mat = random_double();
                 auto center = Point3(a + 0.9 * random_double(), 0.2, b + 0.9 * random_double());
 

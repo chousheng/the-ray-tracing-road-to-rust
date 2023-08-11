@@ -90,8 +90,8 @@ If you want to use this, you can obtain a random number with the conditions we n
     #include <random>
 
     inline double random_double() {
-        static std::uniform_real_distribution<double> distribution(0.0, 1.0);
-        static std::mt19937 generator;
+        thread_local std::uniform_real_distribution<double> distribution(0.0, 1.0);
+        thread_local std::mt19937 generator;
         return distribution(generator);
     }
 ```
@@ -235,7 +235,7 @@ samples) when writing out the color. In addition, we'll add a handy utility func
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="common.h | The clamp() utility function" {20-21,30-39}
+    ```cpp filename="common.h | The clamp() utility function" {30-39}
     #ifndef COMMON_H
     #define COMMON_H
 
@@ -255,8 +255,8 @@ samples) when writing out the color. In addition, we'll add a handy utility func
     }
 
     inline double random_double() {
-        static std::uniform_real_distribution<double> distribution(0.0, 1.0);
-        static std::mt19937 generator;
+        thread_local std::uniform_real_distribution<double> distribution(0.0, 1.0);
+        thread_local std::mt19937 generator;
         // Return a random real in [0.0, 1.0)
         return distribution(generator);
     }
