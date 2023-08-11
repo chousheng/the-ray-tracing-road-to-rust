@@ -420,7 +420,7 @@ defocus disk of radius zero (no blur at all), so all rays originated at the disk
     }
 
     inline Vec3 random_in_hemisphere(Vec3 normal) {
-        Vec3 in_unit_sphere = random_in_unit_sphere();
+        auto in_unit_sphere = random_in_unit_sphere();
         if (dot(in_unit_sphere, normal) > 0.0) {
             // In the same hemisphere as the normal
             return in_unit_sphere;
@@ -561,8 +561,8 @@ defocus disk of radius zero (no blur at all), so all rays originated at the disk
         }
 
         Ray get_ray(double s, double t) const {
-            Vec3 rd = lens_radius * random_in_unit_disk();
-            Vec3 offset = u * rd.x() + v * rd.y();
+            auto rd = lens_radius * random_in_unit_disk();
+            auto offset = u * rd.x() + v * rd.y();
 
             return Ray(
                 origin + offset,
@@ -620,7 +620,7 @@ Using a big aperture:
         }
 
         let mut rec = HitRecord::new();
-        if world.hit(r, 0.001, f64::INFINITY, &mut rec) {
+        if world.hit(r, 0.001, common::INFINITY, &mut rec) {
             let mut scattered = Ray::default();
             let mut attenuation = Color::default();
             if rec
@@ -658,27 +658,27 @@ Using a big aperture:
         let material_right = Rc::new(Metal::new(Color::new(0.8, 0.6, 0.2), 0.0));
 
         world.add(Box::new(Sphere::new(
-            Vec3::new(0.0, -100.5, -1.0),
+            Point3::new(0.0, -100.5, -1.0),
             100.0,
             material_ground,
         )));
         world.add(Box::new(Sphere::new(
-            Vec3::new(0.0, 0.0, -1.0),
+            Point3::new(0.0, 0.0, -1.0),
             0.5,
             material_center,
         )));
         world.add(Box::new(Sphere::new(
-            Vec3::new(-1.0, 0.0, -1.0),
+            Point3::new(-1.0, 0.0, -1.0),
             0.5,
             material_left.clone(),
         )));
         world.add(Box::new(Sphere::new(
-            Vec3::new(-1.0, 0.0, -1.0),
+            Point3::new(-1.0, 0.0, -1.0),
             -0.45,
             material_left,
         )));
         world.add(Box::new(Sphere::new(
-            Vec3::new(1.0, 0.0, -1.0),
+            Point3::new(1.0, 0.0, -1.0),
             0.5,
             material_right,
         )));

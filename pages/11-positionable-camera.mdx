@@ -132,7 +132,7 @@ When calling it with camera `cam(90, aspect_ratio)` and these spheres:
     use material::Lambertian;
     use ray::Ray;
     use sphere::Sphere;
-    use vec3::Vec3;
+    use vec3::Point3;
 
     fn ray_color(r: &Ray, world: &dyn Hittable, depth: i32) -> Color {
         // If we've exceeded the ray bounce limit, no more light is gathered
@@ -141,7 +141,7 @@ When calling it with camera `cam(90, aspect_ratio)` and these spheres:
         }
 
         let mut rec = HitRecord::new();
-        if world.hit(r, 0.001, f64::INFINITY, &mut rec) {
+        if world.hit(r, 0.001, common::INFINITY, &mut rec) {
             let mut scattered = Ray::default();
             let mut attenuation = Color::default();
             if rec
@@ -178,12 +178,12 @@ When calling it with camera `cam(90, aspect_ratio)` and these spheres:
         let material_right = Rc::new(Lambertian::new(Color::new(1.0, 0.0, 0.0)));
 
         world.add(Box::new(Sphere::new(
-            Vec3::new(-r, 0.0, -1.0),
+            Point3::new(-r, 0.0, -1.0),
             r,
             material_left,
         )));
         world.add(Box::new(Sphere::new(
-            Vec3::new(r, 0.0, -1.0),
+            Point3::new(r, 0.0, -1.0),
             r,
             material_right,
         )));
@@ -464,7 +464,7 @@ We'll change back to the prior scene, and use the new viewpoint:
         }
 
         let mut rec = HitRecord::new();
-        if world.hit(r, 0.001, f64::INFINITY, &mut rec) {
+        if world.hit(r, 0.001, common::INFINITY, &mut rec) {
             let mut scattered = Ray::default();
             let mut attenuation = Color::default();
             if rec
@@ -502,27 +502,27 @@ We'll change back to the prior scene, and use the new viewpoint:
         let material_right = Rc::new(Metal::new(Color::new(0.8, 0.6, 0.2), 0.0));
 
         world.add(Box::new(Sphere::new(
-            Vec3::new(0.0, -100.5, -1.0),
+            Point3::new(0.0, -100.5, -1.0),
             100.0,
             material_ground,
         )));
         world.add(Box::new(Sphere::new(
-            Vec3::new(0.0, 0.0, -1.0),
+            Point3::new(0.0, 0.0, -1.0),
             0.5,
             material_center,
         )));
         world.add(Box::new(Sphere::new(
-            Vec3::new(-1.0, 0.0, -1.0),
+            Point3::new(-1.0, 0.0, -1.0),
             0.5,
             material_left.clone(),
         )));
         world.add(Box::new(Sphere::new(
-            Vec3::new(-1.0, 0.0, -1.0),
+            Point3::new(-1.0, 0.0, -1.0),
             -0.45,
             material_left,
         )));
         world.add(Box::new(Sphere::new(
-            Vec3::new(1.0, 0.0, -1.0),
+            Point3::new(1.0, 0.0, -1.0),
             0.5,
             material_right,
         )));
@@ -692,7 +692,7 @@ And we can change field of view:
         }
 
         let mut rec = HitRecord::new();
-        if world.hit(r, 0.001, f64::INFINITY, &mut rec) {
+        if world.hit(r, 0.001, common::INFINITY, &mut rec) {
             let mut scattered = Ray::default();
             let mut attenuation = Color::default();
             if rec
@@ -730,27 +730,27 @@ And we can change field of view:
         let material_right = Rc::new(Metal::new(Color::new(0.8, 0.6, 0.2), 0.0));
 
         world.add(Box::new(Sphere::new(
-            Vec3::new(0.0, -100.5, -1.0),
+            Point3::new(0.0, -100.5, -1.0),
             100.0,
             material_ground,
         )));
         world.add(Box::new(Sphere::new(
-            Vec3::new(0.0, 0.0, -1.0),
+            Point3::new(0.0, 0.0, -1.0),
             0.5,
             material_center,
         )));
         world.add(Box::new(Sphere::new(
-            Vec3::new(-1.0, 0.0, -1.0),
+            Point3::new(-1.0, 0.0, -1.0),
             0.5,
             material_left.clone(),
         )));
         world.add(Box::new(Sphere::new(
-            Vec3::new(-1.0, 0.0, -1.0),
+            Point3::new(-1.0, 0.0, -1.0),
             -0.45,
             material_left,
         )));
         world.add(Box::new(Sphere::new(
-            Vec3::new(1.0, 0.0, -1.0),
+            Point3::new(1.0, 0.0, -1.0),
             0.5,
             material_right,
         )));

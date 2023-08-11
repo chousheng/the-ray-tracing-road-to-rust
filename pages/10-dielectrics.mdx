@@ -426,7 +426,7 @@ When we combine them back together, we can write a function to calculate $\mathb
     }
 
     inline Vec3 random_in_hemisphere(Vec3 normal) {
-        Vec3 in_unit_sphere = random_in_unit_sphere();
+        auto in_unit_sphere = random_in_unit_sphere();
         if (dot(in_unit_sphere, normal) > 0.0) {
             // In the same hemisphere as the normal
             return in_unit_sphere;
@@ -532,7 +532,7 @@ And the dielectric material that always refracts is:
     }
 
     pub struct Dielectric {
-        ir: f64, // Index of Refraction
+        ir: f64, // Index of refraction
     }
 
     impl Dielectric {
@@ -647,7 +647,7 @@ And the dielectric material that always refracts is:
             Color &attenuation,
             Ray &scattered
         ) const override {
-            double refraction_ratio = rec.front_face ? (1.0 / ir) : ir;
+            auto refraction_ratio = rec.front_face ? (1.0 / ir) : ir;
 
             Vec3 unit_direction = unit_vector(r_in.direction());
             Vec3 refracted = refract(unit_direction, rec.normal, refraction_ratio);
@@ -691,7 +691,7 @@ Now we'll update the scene to change the left and center spheres to glass:
     use material::{Dielectric, Lambertian, Metal};
     use ray::Ray;
     use sphere::Sphere;
-    use vec3::Vec3;
+    use vec3::Point3;
 
     fn ray_color(r: &Ray, world: &dyn Hittable, depth: i32) -> Color {
         // If we've exceeded the ray bounce limit, no more light is gathered
@@ -700,7 +700,7 @@ Now we'll update the scene to change the left and center spheres to glass:
         }
 
         let mut rec = HitRecord::new();
-        if world.hit(r, 0.001, f64::INFINITY, &mut rec) {
+        if world.hit(r, 0.001, common::INFINITY, &mut rec) {
             let mut scattered = Ray::default();
             let mut attenuation = Color::default();
             if rec
@@ -738,22 +738,22 @@ Now we'll update the scene to change the left and center spheres to glass:
         let material_right = Rc::new(Metal::new(Color::new(0.8, 0.6, 0.2), 1.0));
 
         world.add(Box::new(Sphere::new(
-            Vec3::new(0.0, -100.5, -1.0),
+            Point3::new(0.0, -100.5, -1.0),
             100.0,
             material_ground,
         )));
         world.add(Box::new(Sphere::new(
-            Vec3::new(0.0, 0.0, -1.0),
+            Point3::new(0.0, 0.0, -1.0),
             0.5,
             material_center,
         )));
         world.add(Box::new(Sphere::new(
-            Vec3::new(-1.0, 0.0, -1.0),
+            Point3::new(-1.0, 0.0, -1.0),
             0.5,
             material_left,
         )));
         world.add(Box::new(Sphere::new(
-            Vec3::new(1.0, 0.0, -1.0),
+            Point3::new(1.0, 0.0, -1.0),
             0.5,
             material_right,
         )));
@@ -917,8 +917,8 @@ and
 $\cos\theta = \mathbf{R} \cdot \mathbf{n}$
 
 ```cpp filename="Determining if the ray can refract"
-    double cos_theta = fmin(dot(-unit_direction, rec.normal), 1.0);
-    double sin_theta = sqrt(1.0 - cos_theta*cos_theta);
+    auto cos_theta = fmin(dot(-unit_direction, rec.normal), 1.0);
+    auto sin_theta = sqrt(1.0 - cos_theta*cos_theta);
 
     if (refraction_ratio * sin_theta > 1.0) {
         // Must Reflect
@@ -1010,7 +1010,7 @@ And the dielectric material that always refracts (when possible) is:
     }
 
     pub struct Dielectric {
-        ir: f64, // Index of Refraction
+        ir: f64, // Index of refraction
     }
 
     impl Dielectric {
@@ -1133,14 +1133,14 @@ And the dielectric material that always refracts (when possible) is:
             Color &attenuation,
             Ray &scattered
         ) const override {
-            double refraction_ratio = rec.front_face ? (1.0 / ir) : ir;
+            auto refraction_ratio = rec.front_face ? (1.0 / ir) : ir;
 
             Vec3 unit_direction = unit_vector(r_in.direction());
-            double cos_theta = fmin(dot(-unit_direction, rec.normal), 1.0);
-            double sin_theta = sqrt(1.0 - cos_theta * cos_theta);
+            auto cos_theta = fmin(dot(-unit_direction, rec.normal), 1.0);
+            auto sin_theta = sqrt(1.0 - cos_theta * cos_theta);
 
             Vec3 direction;
-            bool cannot_refract = refraction_ratio * sin_theta > 1.0;
+            let cannot_refract = refraction_ratio * sin_theta > 1.0;
             if (cannot_refract) {
                 direction = reflect(unit_direction, rec.normal);
             } else {
@@ -1187,7 +1187,7 @@ parameters:
     use material::{Dielectric, Lambertian, Metal};
     use ray::Ray;
     use sphere::Sphere;
-    use vec3::Vec3;
+    use vec3::Point3;
 
     fn ray_color(r: &Ray, world: &dyn Hittable, depth: i32) -> Color {
         // If we've exceeded the ray bounce limit, no more light is gathered
@@ -1196,7 +1196,7 @@ parameters:
         }
 
         let mut rec = HitRecord::new();
-        if world.hit(r, 0.001, f64::INFINITY, &mut rec) {
+        if world.hit(r, 0.001, common::INFINITY, &mut rec) {
             let mut scattered = Ray::default();
             let mut attenuation = Color::default();
             if rec
@@ -1234,22 +1234,22 @@ parameters:
         let material_right = Rc::new(Metal::new(Color::new(0.8, 0.6, 0.2), 0.0));
 
         world.add(Box::new(Sphere::new(
-            Vec3::new(0.0, -100.5, -1.0),
+            Point3::new(0.0, -100.5, -1.0),
             100.0,
             material_ground,
         )));
         world.add(Box::new(Sphere::new(
-            Vec3::new(0.0, 0.0, -1.0),
+            Point3::new(0.0, 0.0, -1.0),
             0.5,
             material_center,
         )));
         world.add(Box::new(Sphere::new(
-            Vec3::new(-1.0, 0.0, -1.0),
+            Point3::new(-1.0, 0.0, -1.0),
             0.5,
             material_left,
         )));
         world.add(Box::new(Sphere::new(
-            Vec3::new(1.0, 0.0, -1.0),
+            Point3::new(1.0, 0.0, -1.0),
             0.5,
             material_right,
         )));
@@ -1457,7 +1457,7 @@ material:
     }
 
     pub struct Dielectric {
-        ir: f64, // Index of Refraction
+        ir: f64, // Index of refraction
     }
 
     impl Dielectric {
@@ -1511,7 +1511,7 @@ material:
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="material.h | Full glass material" {86,98-104}
+    ```cpp filename="material.h | Full glass material" {85-86,98-104}
     #ifndef MATERIAL_H
     #define MATERIAL_H
 
@@ -1589,14 +1589,14 @@ material:
             Color &attenuation,
             Ray &scattered
         ) const override {
-            double refraction_ratio = rec.front_face ? (1.0 / ir) : ir;
+            auto refraction_ratio = rec.front_face ? (1.0 / ir) : ir;
 
             Vec3 unit_direction = unit_vector(r_in.direction());
-            double cos_theta = fmin(dot(-unit_direction, rec.normal), 1.0);
-            double sin_theta = sqrt(1.0 - cos_theta * cos_theta);
+            auto cos_theta = fmin(dot(-unit_direction, rec.normal), 1.0);
+            auto sin_theta = sqrt(1.0 - cos_theta * cos_theta);
 
             Vec3 direction;
-            bool cannot_refract = refraction_ratio * sin_theta > 1.0;
+            auto cannot_refract = refraction_ratio * sin_theta > 1.0;
             if (cannot_refract || reflectance(cos_theta, refraction_ratio) > random_double()) {
                 direction = reflect(unit_direction, rec.normal);
             } else {
@@ -1653,7 +1653,7 @@ make a hollow glass sphere:
     use material::{Dielectric, Lambertian, Metal};
     use ray::Ray;
     use sphere::Sphere;
-    use vec3::Vec3;
+    use vec3::Point3;
 
     fn ray_color(r: &Ray, world: &dyn Hittable, depth: i32) -> Color {
         // If we've exceeded the ray bounce limit, no more light is gathered
@@ -1662,7 +1662,7 @@ make a hollow glass sphere:
         }
 
         let mut rec = HitRecord::new();
-        if world.hit(r, 0.001, f64::INFINITY, &mut rec) {
+        if world.hit(r, 0.001, common::INFINITY, &mut rec) {
             let mut scattered = Ray::default();
             let mut attenuation = Color::default();
             if rec
@@ -1700,27 +1700,27 @@ make a hollow glass sphere:
         let material_right = Rc::new(Metal::new(Color::new(0.8, 0.6, 0.2), 0.0));
 
         world.add(Box::new(Sphere::new(
-            Vec3::new(0.0, -100.5, -1.0),
+            Point3::new(0.0, -100.5, -1.0),
             100.0,
             material_ground,
         )));
         world.add(Box::new(Sphere::new(
-            Vec3::new(0.0, 0.0, -1.0),
+            Point3::new(0.0, 0.0, -1.0),
             0.5,
             material_center,
         )));
         world.add(Box::new(Sphere::new(
-            Vec3::new(-1.0, 0.0, -1.0),
+            Point3::new(-1.0, 0.0, -1.0),
             0.5,
             material_left.clone(),
         )));
         world.add(Box::new(Sphere::new(
-            Vec3::new(-1.0, 0.0, -1.0),
+            Point3::new(-1.0, 0.0, -1.0),
             -0.4,
             material_left,
         )));
         world.add(Box::new(Sphere::new(
-            Vec3::new(1.0, 0.0, -1.0),
+            Point3::new(1.0, 0.0, -1.0),
             0.5,
             material_right,
         )));

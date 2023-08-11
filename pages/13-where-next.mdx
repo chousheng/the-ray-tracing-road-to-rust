@@ -36,7 +36,7 @@ First let's make the image on the cover of this book -- lots of random spheres:
         }
 
         let mut rec = HitRecord::new();
-        if world.hit(r, 0.001, f64::INFINITY, &mut rec) {
+        if world.hit(r, 0.001, common::INFINITY, &mut rec) {
             let mut scattered = Ray::default();
             let mut attenuation = Color::default();
             if rec
@@ -60,7 +60,7 @@ First let's make the image on the cover of this book -- lots of random spheres:
 
         let ground_material = Rc::new(Lambertian::new(Color::new(0.5, 0.5, 0.5)));
         world.add(Box::new(Sphere::new(
-            Vec3::new(0.0, -1000.0, 0.0),
+            Point3::new(0.0, -1000.0, 0.0),
             1000.0,
             ground_material,
         )));
@@ -174,7 +174,7 @@ First let's make the image on the cover of this book -- lots of random spheres:
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="main.cpp | Final scene" {32-75,80-81,83,87,91-92,94-95}
+    ```cpp filename="main.cpp | Final scene" {32-75,80-81,83,88,92-93,95-96}
     #include <iostream>
 
     #include "camera.h"
@@ -261,6 +261,7 @@ First let's make the image on the cover of this book -- lots of random spheres:
         const int MAX_DEPTH = 50;
 
         // World
+
         auto world = random_scene();
 
         // Camera

@@ -693,7 +693,7 @@ Then update the `ray_color()` function to use the new random direction generator
     use hittable_list::HittableList;
     use ray::Ray;
     use sphere::Sphere;
-    use vec3::Vec3;
+    use vec3::Point3;
 
     fn ray_color(r: &Ray, world: &dyn Hittable) -> Color {
         let mut rec = HitRecord::new();
@@ -718,8 +718,8 @@ Then update the `ray_color()` function to use the new random direction generator
         // World
 
         let mut world = HittableList::new();
-        world.add(Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5)));
-        world.add(Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0)));
+        world.add(Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
+        world.add(Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)));
 
         // Camera
 
@@ -764,7 +764,7 @@ Then update the `ray_color()` function to use the new random direction generator
     Color ray_color(const Ray &r, const Hittable &world) {
         HitRecord rec;
         if (world.hit(r, 0.0, INFINITY, rec)) {
-            Point3 target = rec.p + rec.normal + random_in_unit_sphere();
+            auto target = rec.p + rec.normal + random_in_unit_sphere();
             return 0.5 * ray_color(Ray(rec.p, target - rec.p), world);
         }
 
@@ -844,7 +844,7 @@ depth, returning no light contribution at the maximum depth:
     use hittable_list::HittableList;
     use ray::Ray;
     use sphere::Sphere;
-    use vec3::Vec3;
+    use vec3::Point3;
 
     fn ray_color(r: &Ray, world: &dyn Hittable, depth: i32) -> Color {
         // If we've exceeded the ray bounce limit, no more light is gathered
@@ -875,8 +875,8 @@ depth, returning no light contribution at the maximum depth:
         // World
 
         let mut world = HittableList::new();
-        world.add(Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5)));
-        world.add(Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0)));
+        world.add(Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
+        world.add(Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)));
 
         // Camera
 
@@ -926,7 +926,7 @@ depth, returning no light contribution at the maximum depth:
 
         HitRecord rec;
         if (world.hit(r, 0.0, INFINITY, rec)) {
-            Point3 target = rec.p + rec.normal + random_in_unit_sphere();
+            auto target = rec.p + rec.normal + random_in_unit_sphere();
             return 0.5 * ray_color(Ray(rec.p, target - rec.p), world, depth - 1);
         }
 
@@ -1095,7 +1095,7 @@ point approximation the sphere intersector gives us. So we need to ignore hits v
     use hittable_list::HittableList;
     use ray::Ray;
     use sphere::Sphere;
-    use vec3::Vec3;
+    use vec3::Point3;
 
     fn ray_color(r: &Ray, world: &dyn Hittable, depth: i32) -> Color {
         // If we've exceeded the ray bounce limit, no more light is gathered
@@ -1126,8 +1126,8 @@ point approximation the sphere intersector gives us. So we need to ignore hits v
         // World
 
         let mut world = HittableList::new();
-        world.add(Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5)));
-        world.add(Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0)));
+        world.add(Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
+        world.add(Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)));
 
         // Camera
 
@@ -1177,7 +1177,7 @@ point approximation the sphere intersector gives us. So we need to ignore hits v
 
         HitRecord rec;
         if (world.hit(r, 0.001, INFINITY, rec)) {
-            Point3 target = rec.p + rec.normal + random_in_unit_sphere();
+            auto target = rec.p + rec.normal + random_in_unit_sphere();
             return 0.5 * ray_color(Ray(rec.p, target - rec.p), world, depth - 1);
         }
 
@@ -1605,7 +1605,7 @@ function.
     use hittable_list::HittableList;
     use ray::Ray;
     use sphere::Sphere;
-    use vec3::Vec3;
+    use vec3::Point3;
 
     fn ray_color(r: &Ray, world: &dyn Hittable, depth: i32) -> Color {
         // If we've exceeded the ray bounce limit, no more light is gathered
@@ -1636,8 +1636,8 @@ function.
         // World
 
         let mut world = HittableList::new();
-        world.add(Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5)));
-        world.add(Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0)));
+        world.add(Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
+        world.add(Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)));
 
         // Camera
 
@@ -1687,7 +1687,7 @@ function.
 
         HitRecord rec;
         if (world.hit(r, 0.001, INFINITY, rec)) {
-            Point3 target = rec.p + rec.normal + random_unit_vector();
+            auto target = rec.p + rec.normal + random_unit_vector();
             return 0.5 * ray_color(Ray(rec.p, target - rec.p), world, depth - 1);
         }
 
@@ -2116,7 +2116,7 @@ this diffuse method (before adopting Lambertian diffuse).
     }
 
     inline Vec3 random_in_hemisphere(Vec3 normal) {
-        Vec3 in_unit_sphere = random_in_unit_sphere();
+        auto in_unit_sphere = random_in_unit_sphere();
         if (dot(in_unit_sphere, normal) > 0.0) {
             // In the same hemisphere as the normal
             return in_unit_sphere;
@@ -2152,7 +2152,7 @@ Plugging the new formula into the `ray_color()` function:
     use hittable_list::HittableList;
     use ray::Ray;
     use sphere::Sphere;
-    use vec3::Vec3;
+    use vec3::Point3;
 
     fn ray_color(r: &Ray, world: &dyn Hittable, depth: i32) -> Color {
         // If we've exceeded the ray bounce limit, no more light is gathered
@@ -2183,8 +2183,8 @@ Plugging the new formula into the `ray_color()` function:
         // World
 
         let mut world = HittableList::new();
-        world.add(Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5)));
-        world.add(Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0)));
+        world.add(Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
+        world.add(Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)));
 
         // Camera
 
@@ -2234,7 +2234,7 @@ Plugging the new formula into the `ray_color()` function:
 
         HitRecord rec;
         if (world.hit(r, 0.001, INFINITY, rec)) {
-            Point3 target = rec.p + random_in_hemisphere(rec.normal);
+            auto target = rec.p + random_in_hemisphere(rec.normal);
             return 0.5 * ray_color(Ray(rec.p, target - rec.p), world, depth - 1);
         }
 

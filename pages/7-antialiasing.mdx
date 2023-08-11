@@ -66,8 +66,8 @@ number as desired with the following code snippet, added to `rtweekend.h`:
     }
 
     inline double random_double() {
-        static std::uniform_real_distribution<double> distribution(0.0, 1.0);
-        static std::mt19937 generator;
+        thread_local std::uniform_real_distribution<double> distribution(0.0, 1.0);
+        thread_local std::mt19937 generator;
         // Return a random real in [0.0, 1.0)
         return distribution(generator);
     }
@@ -235,7 +235,7 @@ samples) when writing out the color. In addition, we'll add a handy utility func
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="common.h | The clamp() utility function" {30-39}
+    ```cpp filename="common.h | The clamp() utility function" {20-21,30-39}
     #ifndef COMMON_H
     #define COMMON_H
 
@@ -373,7 +373,7 @@ Main is also changed:
     use hittable_list::HittableList;
     use ray::Ray;
     use sphere::Sphere;
-    use vec3::Vec3;
+    use vec3::Point3;
 
     fn ray_color(r: &Ray, world: &dyn Hittable) -> Color {
         let mut rec = HitRecord::new();
@@ -397,8 +397,8 @@ Main is also changed:
         // World
 
         let mut world = HittableList::new();
-        world.add(Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5)));
-        world.add(Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0)));
+        world.add(Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
+        world.add(Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)));
 
         // Camera
 
