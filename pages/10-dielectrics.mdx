@@ -704,7 +704,7 @@ Now we'll update the scene to change the left and center spheres to glass:
             let mut scattered = Ray::default();
             let mut attenuation = Color::default();
             if rec
-                .mat_ptr
+                .mat
                 .as_ref()
                 .unwrap()
                 .scatter(r, &rec, &mut attenuation, &mut scattered)
@@ -808,7 +808,7 @@ Now we'll update the scene to change the left and center spheres to glass:
         if (world.hit(r, 0.001, INFINITY, rec)) {
             auto scattered = Ray();
             auto attenuation = Color();
-            if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
+            if (rec.mat->scatter(r, rec, attenuation, scattered)) {
                 return attenuation * ray_color(scattered, world, depth - 1);
             }
             return Color(0.0, 0.0, 0.0);
@@ -1200,7 +1200,7 @@ parameters:
             let mut scattered = Ray::default();
             let mut attenuation = Color::default();
             if rec
-                .mat_ptr
+                .mat
                 .as_ref()
                 .unwrap()
                 .scatter(r, &rec, &mut attenuation, &mut scattered)
@@ -1304,7 +1304,7 @@ parameters:
         if (world.hit(r, 0.001, INFINITY, rec)) {
             auto scattered = Ray();
             auto attenuation = Color();
-            if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
+            if (rec.mat->scatter(r, rec, attenuation, scattered)) {
                 return attenuation * ray_color(scattered, world, depth - 1);
             }
             return Color(0.0, 0.0, 0.0);
@@ -1666,7 +1666,7 @@ make a hollow glass sphere:
             let mut scattered = Ray::default();
             let mut attenuation = Color::default();
             if rec
-                .mat_ptr
+                .mat
                 .as_ref()
                 .unwrap()
                 .scatter(r, &rec, &mut attenuation, &mut scattered)
@@ -1775,7 +1775,7 @@ make a hollow glass sphere:
         if (world.hit(r, 0.001, INFINITY, rec)) {
             auto scattered = Ray();
             auto attenuation = Color();
-            if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
+            if (rec.mat->scatter(r, rec, attenuation, scattered)) {
                 return attenuation * ray_color(scattered, world, depth - 1);
             }
             return Color(0.0, 0.0, 0.0);

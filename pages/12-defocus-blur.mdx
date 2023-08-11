@@ -624,7 +624,7 @@ Using a big aperture:
             let mut scattered = Ray::default();
             let mut attenuation = Color::default();
             if rec
-                .mat_ptr
+                .mat
                 .as_ref()
                 .unwrap()
                 .scatter(r, &rec, &mut attenuation, &mut scattered)
@@ -747,7 +747,7 @@ Using a big aperture:
         if (world.hit(r, 0.001, INFINITY, rec)) {
             auto scattered = Ray();
             auto attenuation = Color();
-            if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
+            if (rec.mat->scatter(r, rec, attenuation, scattered)) {
                 return attenuation * ray_color(scattered, world, depth - 1);
             }
             return Color(0.0, 0.0, 0.0);

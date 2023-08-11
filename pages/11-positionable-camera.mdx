@@ -145,7 +145,7 @@ When calling it with camera `cam(90, aspect_ratio)` and these spheres:
             let mut scattered = Ray::default();
             let mut attenuation = Color::default();
             if rec
-                .mat_ptr
+                .mat
                 .as_ref()
                 .unwrap()
                 .scatter(r, &rec, &mut attenuation, &mut scattered)
@@ -238,7 +238,7 @@ When calling it with camera `cam(90, aspect_ratio)` and these spheres:
         if (world.hit(r, 0.001, INFINITY, rec)) {
             auto scattered = Ray();
             auto attenuation = Color();
-            if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
+            if (rec.mat->scatter(r, rec, attenuation, scattered)) {
                 return attenuation * ray_color(scattered, world, depth - 1);
             }
             return Color(0.0, 0.0, 0.0);
@@ -468,7 +468,7 @@ We'll change back to the prior scene, and use the new viewpoint:
             let mut scattered = Ray::default();
             let mut attenuation = Color::default();
             if rec
-                .mat_ptr
+                .mat
                 .as_ref()
                 .unwrap()
                 .scatter(r, &rec, &mut attenuation, &mut scattered)
@@ -583,7 +583,7 @@ We'll change back to the prior scene, and use the new viewpoint:
         if (world.hit(r, 0.001, INFINITY, rec)) {
             auto scattered = Ray();
             auto attenuation = Color();
-            if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
+            if (rec.mat->scatter(r, rec, attenuation, scattered)) {
                 return attenuation * ray_color(scattered, world, depth - 1);
             }
             return Color(0.0, 0.0, 0.0);
@@ -696,7 +696,7 @@ And we can change field of view:
             let mut scattered = Ray::default();
             let mut attenuation = Color::default();
             if rec
-                .mat_ptr
+                .mat
                 .as_ref()
                 .unwrap()
                 .scatter(r, &rec, &mut attenuation, &mut scattered)
@@ -811,7 +811,7 @@ And we can change field of view:
         if (world.hit(r, 0.001, INFINITY, rec)) {
             auto scattered = Ray();
             auto attenuation = Color();
-            if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
+            if (rec.mat->scatter(r, rec, attenuation, scattered)) {
                 return attenuation * ray_color(scattered, world, depth - 1);
             }
             return Color(0.0, 0.0, 0.0);

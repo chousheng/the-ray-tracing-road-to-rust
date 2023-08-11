@@ -78,7 +78,7 @@ that the pointer is to a class, which the "class material" in the hittable class
     pub struct HitRecord {
         pub p: Point3,
         pub normal: Vec3,
-        pub mat_ptr: Option<Rc<dyn Material>>,
+        pub mat: Option<Rc<dyn Material>>,
         pub t: f64,
         pub front_face: bool,
     }
@@ -126,7 +126,7 @@ that the pointer is to a class, which the "class material" in the hittable class
 
         Point3 p;
         Vec3 normal;
-        std::shared_ptr<Material> mat_ptr;
+        std::shared_ptr<Material> mat;
         double t = 0.0;
         bool front_face = false;
     };
@@ -167,7 +167,7 @@ within `hit_record`. See the highlighted lines below:
     pub struct Sphere {
         center: Point3,
         radius: f64,
-        mat_ptr: Rc<dyn Material>,
+        mat: Rc<dyn Material>,
     }
 
     impl Sphere {
@@ -175,7 +175,7 @@ within `hit_record`. See the highlighted lines below:
             Sphere {
                 center: cen,
                 radius: r,
-                mat_ptr: m,
+                mat: m,
             }
         }
     }
@@ -206,7 +206,7 @@ within `hit_record`. See the highlighted lines below:
             rec.p = r.at(rec.t);
             let outward_normal = (rec.p - self.center) / self.radius;
             rec.set_face_normal(r, outward_normal);
-            rec.mat_ptr = Some(self.mat_ptr.clone());
+            rec.mat = Some(self.mat.clone());
 
             true
         }
@@ -228,14 +228,14 @@ within `hit_record`. See the highlighted lines below:
     class Sphere : public Hittable {
     public:
         Sphere(Point3 cen, double r, const std::shared_ptr<Material> &m)
-            : center{cen}, radius{r}, mat_ptr{m} {};
+            : center{cen}, radius{r}, mat{m} {};
 
         bool hit(const Ray &r, double t_min, double t_max, HitRecord &rec) const override;
 
     private:
         Point3 center;
         double radius;
-        std::shared_ptr<Material> mat_ptr;
+        std::shared_ptr<Material> mat;
     };
 
     inline bool Sphere::hit(const Ray &r, double t_min, double t_max, HitRecord &rec) const {
@@ -263,7 +263,7 @@ within `hit_record`. See the highlighted lines below:
         rec.p = r.at(rec.t);
         auto outward_normal = (rec.p - center) / radius;
         rec.set_face_normal(r, outward_normal);
-        rec.mat_ptr = mat_ptr;
+        rec.mat = mat;
 
         return true;
     }
@@ -1420,7 +1420,7 @@ We need to modify the `ray_color()` function to use this:
             let mut scattered = Ray::default();
             let mut attenuation = Color::default();
             if rec
-                .mat_ptr
+                .mat
                 .as_ref()
                 .unwrap()
                 .scatter(r, &rec, &mut attenuation, &mut scattered)
@@ -1500,7 +1500,7 @@ We need to modify the `ray_color()` function to use this:
         if (world.hit(r, 0.001, INFINITY, rec)) {
             auto scattered = Ray();
             auto attenuation = Color();
-            if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
+            if (rec.mat->scatter(r, rec, attenuation, scattered)) {
                 return attenuation * ray_color(scattered, world, depth - 1);
             }
             return Color(0.0, 0.0, 0.0);
@@ -1596,7 +1596,7 @@ Now let's add some metal spheres to our scene:
             let mut scattered = Ray::default();
             let mut attenuation = Color::default();
             if rec
-                .mat_ptr
+                .mat
                 .as_ref()
                 .unwrap()
                 .scatter(r, &rec, &mut attenuation, &mut scattered)
@@ -1700,7 +1700,7 @@ Now let's add some metal spheres to our scene:
         if (world.hit(r, 0.001, INFINITY, rec)) {
             auto scattered = Ray();
             auto attenuation = Color();
-            if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
+            if (rec.mat->scatter(r, rec, attenuation, scattered)) {
                 return attenuation * ray_color(scattered, world, depth - 1);
             }
             return Color(0.0, 0.0, 0.0);
@@ -1971,7 +1971,7 @@ We can try that out by adding fuzziness 0.3 and 1.0 to the metals:
             let mut scattered = Ray::default();
             let mut attenuation = Color::default();
             if rec
-                .mat_ptr
+                .mat
                 .as_ref()
                 .unwrap()
                 .scatter(r, &rec, &mut attenuation, &mut scattered)
@@ -2075,7 +2075,7 @@ We can try that out by adding fuzziness 0.3 and 1.0 to the metals:
         if (world.hit(r, 0.001, INFINITY, rec)) {
             auto scattered = Ray();
             auto attenuation = Color();
-            if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
+            if (rec.mat->scatter(r, rec, attenuation, scattered)) {
                 return attenuation * ray_color(scattered, world, depth - 1);
             }
             return Color(0.0, 0.0, 0.0);
