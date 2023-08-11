@@ -18,11 +18,12 @@ const exportCodeFromMdxToGit = async () => {
     cpp: "../../ray-tracing-starter-cpp",
   };
 
-  const ADD_CARGO_DEP_AND_COMMIT = false;
+  const ADD_CARGO_DEP_AND_COMMIT = true;
   const WRITE_CODE = true;
   const FORMAT_CODE = true;
   const COMMIT_CODE = true;
-  const GEN_IMAGE = true;
+  const COMPILE_CODE = true;
+  const GEN_IMAGE = false;
 
   for (let lang in listingsByLang) {
     console.log(`[${lang}]`);
@@ -66,6 +67,15 @@ const exportCodeFromMdxToGit = async () => {
 
       if (COMMIT_CODE) {
         await git.add(".").commit(`Listing: ${listing.title}`);
+      }
+
+      if (COMPILE_CODE && listing.genImage) {
+        console.log(`Compiling`);
+        if (lang == "rust") {
+          execSync(`cd ${base}; cargo build --release`);
+        } else if (lang=="cpp") {
+          execSync(`cd ${base}; make build-release`);
+        }
       }
 
       if (GEN_IMAGE && listing.genImage) {
