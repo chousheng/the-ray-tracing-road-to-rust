@@ -58,9 +58,9 @@ Let's make some code to output such a thing:
                 auto g = static_cast<double>(j) / (IMAGE_HEIGHT - 1);
                 auto b = 0.25;
 
-                int ir = static_cast<int>(255.999 * r);
-                int ig = static_cast<int>(255.999 * g);
-                int ib = static_cast<int>(255.999 * b);
+                auto ir = static_cast<int>(255.999 * r);
+                auto ig = static_cast<int>(255.999 * g);
+                auto ib = static_cast<int>(255.999 * b);
 
                 std::cout << ir << ' ' << ig << ' ' << ib << '\n';
             }
@@ -181,9 +181,9 @@ Our program outputs the image to the standard output stream, so leave that alone
                 auto g = static_cast<double>(j) / (IMAGE_HEIGHT - 1);
                 auto b = 0.25;
 
-                int ir = static_cast<int>(255.999 * r);
-                int ig = static_cast<int>(255.999 * g);
-                int ib = static_cast<int>(255.999 * b);
+                auto ir = static_cast<int>(255.999 * r);
+                auto ig = static_cast<int>(255.999 * g);
+                auto ib = static_cast<int>(255.999 * b);
 
                 std::cout << ir << ' ' << ig << ' ' << ib << '\n';
             }

@@ -108,7 +108,7 @@ let us compute and visualize $\mathbf{n}$:
     #include "vec3.h"
 
     double hit_sphere(Point3 center, double radius, const Ray &r) {
-        Vec3 oc = r.origin() - center;
+        auto oc = r.origin() - center;
         auto a = dot(r.direction(), r.direction());
         auto b = 2.0 * dot(oc, r.direction());
         auto c = dot(oc, oc) - radius * radius;
@@ -123,11 +123,11 @@ let us compute and visualize $\mathbf{n}$:
     Color ray_color(const Ray &r) {
         auto t = hit_sphere(Point3(0.0, 0.0, -1.0), 0.5, r);
         if (t > 0.0) {
-            Vec3 n = unit_vector(r.at(t) - Vec3(0.0, 0.0, -1.0));
+            auto n = unit_vector(r.at(t) - Vec3(0.0, 0.0, -1.0));
             return 0.5 * Color(n.x() + 1.0, n.y() + 1.0, n.z() + 1.0);
         }
 
-        Vec3 unit_direction = unit_vector(r.direction());
+        auto unit_direction = unit_vector(r.direction());
         t = 0.5 * (unit_direction.y() + 1.0);
         return (1.0 - t) * Color(1.0, 1.0, 1.0) + t * Color(0.5, 0.7, 1.0);
     }
@@ -161,7 +161,7 @@ let us compute and visualize $\mathbf{n}$:
                 auto u = static_cast<double>(i) / (IMAGE_WIDTH - 1);
                 auto v = static_cast<double>(j) / (IMAGE_HEIGHT - 1);
                 Ray r(origin, lower_left_corner + u * horizontal + v * vertical - origin);
-                Color pixel_color = ray_color(r);
+                auto pixel_color = ray_color(r);
                 write_color(std::cout, pixel_color);
             }
         }
@@ -309,7 +309,7 @@ Using these observations, we can now simplify the sphere-intersection code to th
     #include "vec3.h"
 
     double hit_sphere(Point3 center, double radius, const Ray &r) {
-        Vec3 oc = r.origin() - center;
+        auto oc = r.origin() - center;
         auto a = r.direction().length_squared();
         auto half_b = dot(oc, r.direction());
         auto c = oc.length_squared() - radius * radius;
@@ -324,11 +324,11 @@ Using these observations, we can now simplify the sphere-intersection code to th
     Color ray_color(const Ray &r) {
         auto t = hit_sphere(Point3(0.0, 0.0, -1.0), 0.5, r);
         if (t > 0.0) {
-            Vec3 n = unit_vector(r.at(t) - Vec3(0.0, 0.0, -1.0));
+            auto n = unit_vector(r.at(t) - Vec3(0.0, 0.0, -1.0));
             return 0.5 * Color(n.x() + 1.0, n.y() + 1.0, n.z() + 1.0);
         }
 
-        Vec3 unit_direction = unit_vector(r.direction());
+        auto unit_direction = unit_vector(r.direction());
         t = 0.5 * (unit_direction.y() + 1.0);
         return (1.0 - t) * Color(1.0, 1.0, 1.0) + t * Color(0.5, 0.7, 1.0);
     }
@@ -362,7 +362,7 @@ Using these observations, we can now simplify the sphere-intersection code to th
                 auto u = static_cast<double>(i) / (IMAGE_WIDTH - 1);
                 auto v = static_cast<double>(j) / (IMAGE_HEIGHT - 1);
                 Ray r(origin, lower_left_corner + u * horizontal + v * vertical - origin);
-                Color pixel_color = ray_color(r);
+                auto pixel_color = ray_color(r);
                 write_color(std::cout, pixel_color);
             }
         }
@@ -520,7 +520,7 @@ And here's the sphere:
     };
 
     inline bool Sphere::hit(const Ray &r, double t_min, double t_max, HitRecord &rec) const {
-        Vec3 oc = r.origin() - center;
+        auto oc = r.origin() - center;
         auto a = r.direction().length_squared();
         auto half_b = dot(oc, r.direction());
         auto c = oc.length_squared() - radius * radius;
@@ -758,7 +758,7 @@ And then we add the surface side determination to the class:
     };
 
     inline bool Sphere::hit(const Ray &r, double t_min, double t_max, HitRecord &rec) const {
-        Vec3 oc = r.origin() - center;
+        auto oc = r.origin() - center;
         auto a = r.direction().length_squared();
         auto half_b = dot(oc, r.direction());
         auto c = oc.length_squared() - radius * radius;
@@ -780,7 +780,7 @@ And then we add the surface side determination to the class:
 
         rec.t = root;
         rec.p = r.at(rec.t);
-        Vec3 outward_normal = (rec.p - center) / radius;
+        auto outward_normal = (rec.p - center) / radius;
         rec.set_face_normal(r, outward_normal);
 
         return true;
@@ -1076,7 +1076,7 @@ And the new main:
             return 0.5 * (rec.normal + Color(1.0, 1.0, 1.0));
         }
 
-        Vec3 unit_direction = unit_vector(r.direction());
+        auto unit_direction = unit_vector(r.direction());
         auto t = 0.5 * (unit_direction.y() + 1.0);
         return (1.0 - t) * Color(1.0, 1.0, 1.0) + t * Color(0.5, 0.7, 1.0);
     }
@@ -1116,7 +1116,7 @@ And the new main:
                 auto u = static_cast<double>(i) / (IMAGE_WIDTH - 1);
                 auto v = static_cast<double>(j) / (IMAGE_HEIGHT - 1);
                 Ray r(origin, lower_left_corner + u * horizontal + v * vertical - origin);
-                Color pixel_color = ray_color(r, world);
+                auto pixel_color = ray_color(r, world);
                 write_color(std::cout, pixel_color);
             }
         }

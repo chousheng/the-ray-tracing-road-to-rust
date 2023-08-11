@@ -446,7 +446,7 @@ Main is also changed:
             return 0.5 * (rec.normal + Color(1.0, 1.0, 1.0));
         }
 
-        Vec3 unit_direction = unit_vector(r.direction());
+        auto unit_direction = unit_vector(r.direction());
         auto t = 0.5 * (unit_direction.y() + 1.0);
         return (1.0 - t) * Color(1.0, 1.0, 1.0) + t * Color(0.5, 0.7, 1.0);
     }
@@ -480,7 +480,7 @@ Main is also changed:
                 for (int s = 0; s < SAMPLES_PER_PIXEL; s++) {
                     auto u = (i + random_double()) / (IMAGE_WIDTH - 1);
                     auto v = (j + random_double()) / (IMAGE_HEIGHT - 1);
-                    Ray r = cam.get_ray(u, v);
+                    auto r = cam.get_ray(u, v);
                     pixel_color += ray_color(r, world);
                 }
                 write_color(std::cout, pixel_color, SAMPLES_PER_PIXEL);

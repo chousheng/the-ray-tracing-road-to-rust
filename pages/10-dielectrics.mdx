@@ -441,8 +441,8 @@ When we combine them back together, we can write a function to calculate $\mathb
 
     inline Vec3 refract(const Vec3 &uv, const Vec3 &n, double etai_over_etat) {
         auto cos_theta = fmin(dot(-uv, n), 1.0);
-        Vec3 r_out_perp = etai_over_etat * (uv + cos_theta * n);
-        Vec3 r_out_parallel = -sqrt(fabs(1.0 - r_out_perp.length_squared())) * n;
+        auto r_out_perp = etai_over_etat * (uv + cos_theta * n);
+        auto r_out_parallel = -sqrt(fabs(1.0 - r_out_perp.length_squared())) * n;
         return r_out_perp + r_out_parallel;
     }
 
@@ -626,7 +626,7 @@ And the dielectric material that always refracts is:
             Color &attenuation,
             Ray &scattered
         ) const override {
-            Vec3 reflected = reflect(unit_vector(r_in.direction()), rec.normal);
+            auto reflected = reflect(unit_vector(r_in.direction()), rec.normal);
             scattered = Ray(rec.p, reflected + fuzz * random_in_unit_sphere());
             attenuation = albedo;
             return dot(scattered.direction(), rec.normal) > 0.0;
@@ -649,8 +649,8 @@ And the dielectric material that always refracts is:
         ) const override {
             auto refraction_ratio = rec.front_face ? (1.0 / ir) : ir;
 
-            Vec3 unit_direction = unit_vector(r_in.direction());
-            Vec3 refracted = refract(unit_direction, rec.normal, refraction_ratio);
+            auto unit_direction = unit_vector(r_in.direction());
+            auto refracted = refract(unit_direction, rec.normal, refraction_ratio);
 
             attenuation = Color(1.0, 1.0, 1.0);
             scattered = Ray(rec.p, refracted);
@@ -814,7 +814,7 @@ Now we'll update the scene to change the left and center spheres to glass:
             return Color(0.0, 0.0, 0.0);
         }
 
-        Vec3 unit_direction = unit_vector(r.direction());
+        auto unit_direction = unit_vector(r.direction());
         auto t = 0.5 * (unit_direction.y() + 1.0);
         return (1.0 - t) * Color(1.0, 1.0, 1.0) + t * Color(0.5, 0.7, 1.0);
     }
@@ -856,7 +856,7 @@ Now we'll update the scene to change the left and center spheres to glass:
                 for (int s = 0; s < SAMPLES_PER_PIXEL; s++) {
                     auto u = (i + random_double()) / (IMAGE_WIDTH - 1);
                     auto v = (j + random_double()) / (IMAGE_HEIGHT - 1);
-                    Ray r = cam.get_ray(u, v);
+                    auto r = cam.get_ray(u, v);
                     pixel_color += ray_color(r, world, MAX_DEPTH);
                 }
                 write_color(std::cout, pixel_color, SAMPLES_PER_PIXEL);
@@ -1112,7 +1112,7 @@ And the dielectric material that always refracts (when possible) is:
             Color &attenuation,
             Ray &scattered
         ) const override {
-            Vec3 reflected = reflect(unit_vector(r_in.direction()), rec.normal);
+            auto reflected = reflect(unit_vector(r_in.direction()), rec.normal);
             scattered = Ray(rec.p, reflected + fuzz * random_in_unit_sphere());
             attenuation = albedo;
             return dot(scattered.direction(), rec.normal) > 0.0;
@@ -1135,7 +1135,7 @@ And the dielectric material that always refracts (when possible) is:
         ) const override {
             auto refraction_ratio = rec.front_face ? (1.0 / ir) : ir;
 
-            Vec3 unit_direction = unit_vector(r_in.direction());
+            auto unit_direction = unit_vector(r_in.direction());
             auto cos_theta = fmin(dot(-unit_direction, rec.normal), 1.0);
             auto sin_theta = sqrt(1.0 - cos_theta * cos_theta);
 
@@ -1310,7 +1310,7 @@ parameters:
             return Color(0.0, 0.0, 0.0);
         }
 
-        Vec3 unit_direction = unit_vector(r.direction());
+        auto unit_direction = unit_vector(r.direction());
         auto t = 0.5 * (unit_direction.y() + 1.0);
         return (1.0 - t) * Color(1.0, 1.0, 1.0) + t * Color(0.5, 0.7, 1.0);
     }
@@ -1352,7 +1352,7 @@ parameters:
                 for (int s = 0; s < SAMPLES_PER_PIXEL; s++) {
                     auto u = (i + random_double()) / (IMAGE_WIDTH - 1);
                     auto v = (j + random_double()) / (IMAGE_HEIGHT - 1);
-                    Ray r = cam.get_ray(u, v);
+                    auto r = cam.get_ray(u, v);
                     pixel_color += ray_color(r, world, MAX_DEPTH);
                 }
                 write_color(std::cout, pixel_color, SAMPLES_PER_PIXEL);
@@ -1568,7 +1568,7 @@ material:
             Color &attenuation,
             Ray &scattered
         ) const override {
-            Vec3 reflected = reflect(unit_vector(r_in.direction()), rec.normal);
+            auto reflected = reflect(unit_vector(r_in.direction()), rec.normal);
             scattered = Ray(rec.p, reflected + fuzz * random_in_unit_sphere());
             attenuation = albedo;
             return dot(scattered.direction(), rec.normal) > 0.0;
@@ -1591,7 +1591,7 @@ material:
         ) const override {
             auto refraction_ratio = rec.front_face ? (1.0 / ir) : ir;
 
-            Vec3 unit_direction = unit_vector(r_in.direction());
+            auto unit_direction = unit_vector(r_in.direction());
             auto cos_theta = fmin(dot(-unit_direction, rec.normal), 1.0);
             auto sin_theta = sqrt(1.0 - cos_theta * cos_theta);
 
@@ -1781,7 +1781,7 @@ make a hollow glass sphere:
             return Color(0.0, 0.0, 0.0);
         }
 
-        Vec3 unit_direction = unit_vector(r.direction());
+        auto unit_direction = unit_vector(r.direction());
         auto t = 0.5 * (unit_direction.y() + 1.0);
         return (1.0 - t) * Color(1.0, 1.0, 1.0) + t * Color(0.5, 0.7, 1.0);
     }
@@ -1824,7 +1824,7 @@ make a hollow glass sphere:
                 for (int s = 0; s < SAMPLES_PER_PIXEL; s++) {
                     auto u = (i + random_double()) / (IMAGE_WIDTH - 1);
                     auto v = (j + random_double()) / (IMAGE_HEIGHT - 1);
-                    Ray r = cam.get_ray(u, v);
+                    auto r = cam.get_ray(u, v);
                     pixel_color += ray_color(r, world, MAX_DEPTH);
                 }
                 write_color(std::cout, pixel_color, SAMPLES_PER_PIXEL);
