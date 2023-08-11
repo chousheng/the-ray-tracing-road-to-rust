@@ -826,7 +826,7 @@ depth, returning no light contribution at the maximum depth:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="main.rs | ray_color() with depth limiting" {19-24,29,44,68}
+    ```rust filename="main.rs | ray_color() with depth limiting" {19-24,29,44,68} genImage
     mod camera;
     mod color;
     mod common;
@@ -906,7 +906,7 @@ depth, returning no light contribution at the maximum depth:
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="main.cpp | ray_color() with depth limiting" {11-16,21,36,60}
+    ```cpp filename="main.cpp | ray_color() with depth limiting" {11-16,21,36,60} genImage
     #include <iostream>
 
     #include "camera.h"
@@ -997,7 +997,7 @@ square-root:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="color.rs | write_color(), with gamma correction" {14,16-18}
+    ```rust filename="color.rs | write_color(), with gamma correction" {14,16-18} genImage
     use std::io::Write;
 
     use crate::common;
@@ -1031,7 +1031,7 @@ square-root:
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="color.h | write_color(), with gamma correction" {17,19-21}
+    ```cpp filename="color.h | write_color(), with gamma correction" {17,19-21} genImage
     #ifndef COLOR_H
     #define COLOR_H
 
@@ -1587,7 +1587,7 @@ function.
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="main.rs | ray_color() with replacement diffuse" {28}
+    ```rust filename="main.rs | ray_color() with replacement diffuse" {28} genImage
     mod camera;
     mod color;
     mod common;
@@ -1667,7 +1667,7 @@ function.
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="main.cpp | ray_color() with replacement diffuse" {20}
+    ```cpp filename="main.cpp | ray_color() with replacement diffuse" {20} genImage
     #include <iostream>
 
     #include "camera.h"
@@ -2134,7 +2134,7 @@ Plugging the new formula into the `ray_color()` function:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="main.rs | ray_color() with hemispherical scattering" {28}
+    ```rust filename="main.rs | ray_color() with hemispherical scattering" {28} genImage
     mod camera;
     mod color;
     mod common;
@@ -2214,7 +2214,7 @@ Plugging the new formula into the `ray_color()` function:
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="main.cpp | ray_color() with hemispherical scattering" {20}
+    ```cpp filename="main.cpp | ray_color() with hemispherical scattering" {20} genImage
     #include <iostream>
 
     #include "camera.h"

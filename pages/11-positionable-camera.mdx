@@ -111,7 +111,7 @@ When calling it with camera `cam(90, aspect_ratio)` and these spheres:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="main.rs | Scene with wide-angle camera" {18,60,63-64,67-68,72-73,79}
+    ```rust filename="main.rs | Scene with wide-angle camera" {18,60,63-64,67-68,72-73,79} genImage
     mod camera;
     mod color;
     mod common;
@@ -216,7 +216,7 @@ When calling it with camera `cam(90, aspect_ratio)` and these spheres:
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="main.cpp | Scene with wide-angle camera" {44,46,47-51,55}
+    ```cpp filename="main.cpp | Scene with wide-angle camera" {44,46,47-51,55} genImage
     #include <iostream>
 
     #include "camera.h"
@@ -434,7 +434,7 @@ We'll change back to the prior scene, and use the new viewpoint:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="main.rs | Scene with alternate viewpoint" {18,21,59,62-65,68-84,88-89,95-101}
+    ```rust filename="main.rs | Scene with alternate viewpoint" {18,21,59,62-65,68-84,88-89,95-101} genImage
     mod camera;
     mod color;
     mod common;
@@ -561,7 +561,7 @@ We'll change back to the prior scene, and use the new viewpoint:
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="main.cpp | Scene with alternate viewpoint" {43,46-49,51-55,59-65}
+    ```cpp filename="main.cpp | Scene with alternate viewpoint" {43,46-49,51-55,59-65} genImage
     #include <iostream>
 
     #include "camera.h"
@@ -662,7 +662,7 @@ And we can change field of view:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="main.rs | Change field of view" {99}
+    ```rust filename="main.rs | Change field of view" {99} genImage
     mod camera;
     mod color;
     mod common;
@@ -789,7 +789,7 @@ And we can change field of view:
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="main.cpp | Change field of view" {59-61}
+    ```cpp filename="main.cpp | Change field of view" {59-61} genImage
     #include <iostream>
 
     #include "camera.h"

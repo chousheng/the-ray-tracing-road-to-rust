@@ -6,7 +6,7 @@ First let's make the image on the cover of this book -- lots of random spheres:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="main.rs | Final scene" {48-111,116-117,119,124,128-129,131-132}
+    ```rust filename="main.rs | Final scene" {48-111,116-117,119,124,128-129,131-132} genImage
     mod camera;
     mod color;
     mod common;
@@ -27,7 +27,7 @@ First let's make the image on the cover of this book -- lots of random spheres:
     use material::{Dielectric, Lambertian, Metal};
     use ray::Ray;
     use sphere::Sphere;
-    use vec3::{Point3, Vec3};
+    use vec3::Point3;
 
     fn ray_color(r: &Ray, world: &dyn Hittable, depth: i32) -> Color {
         // If we've exceeded the ray bounce limit, no more light is gathered
@@ -174,7 +174,7 @@ First let's make the image on the cover of this book -- lots of random spheres:
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="main.cpp | Final scene" {32-75,80-81,83,88,92-93,95-96}
+    ```cpp filename="main.cpp | Final scene" {32-75,80-81,83,88,92-93,95-96} genImage
     #include <iostream>
 
     #include "camera.h"

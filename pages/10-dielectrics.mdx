@@ -670,7 +670,7 @@ Now we'll update the scene to change the left and center spheres to glass:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="main.rs | Changing left and center spheres to glass" {18,63-64}
+    ```rust filename="main.rs | Changing left and center spheres to glass" {18,63-64} genImage
     mod camera;
     mod color;
     mod common;
@@ -786,7 +786,7 @@ Now we'll update the scene to change the left and center spheres to glass:
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="main.cpp | Changing left and center spheres to glass" {46-47}
+    ```cpp filename="main.cpp | Changing left and center spheres to glass" {46-47} genImage
     #include <iostream>
 
     #include "camera.h"
@@ -1140,7 +1140,7 @@ And the dielectric material that always refracts (when possible) is:
             auto sin_theta = sqrt(1.0 - cos_theta * cos_theta);
 
             Vec3 direction;
-            let cannot_refract = refraction_ratio * sin_theta > 1.0;
+            auto cannot_refract = refraction_ratio * sin_theta > 1.0;
             if (cannot_refract) {
                 direction = reflect(unit_direction, rec.normal);
             } else {
@@ -1166,7 +1166,7 @@ parameters:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="main.rs | Scene with dielectric and shiny sphere" {63,65}
+    ```rust filename="main.rs | Scene with dielectric and shiny sphere" {63,65} genImage
     mod camera;
     mod color;
     mod common;
@@ -1282,7 +1282,7 @@ parameters:
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="main.cpp | Scene with dielectric and shiny sphere" {46,48}
+    ```cpp filename="main.cpp | Scene with dielectric and shiny sphere" {46,48} genImage
     #include <iostream>
 
     #include "camera.h"
@@ -1632,7 +1632,7 @@ make a hollow glass sphere:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="main.rs | Scene with hollow glass sphere" {80-84}
+    ```rust filename="main.rs | Scene with hollow glass sphere" {80-84} genImage
     mod camera;
     mod color;
     mod common;
@@ -1753,7 +1753,7 @@ make a hollow glass sphere:
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="main.cpp | Scene with hollow glass sphere" {53}
+    ```cpp filename="main.cpp | Scene with hollow glass sphere" {53} genImage
     #include <iostream>
 
     #include "camera.h"

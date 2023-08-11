@@ -590,7 +590,7 @@ Using a big aperture:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="main.rs | Scene camera with depth-of-field" {94-99,102-104,107-108}
+    ```rust filename="main.rs | Scene camera with depth-of-field" {94-99,102-104,107-108} genImage
     mod camera;
     mod color;
     mod common;
@@ -611,7 +611,7 @@ Using a big aperture:
     use material::{Dielectric, Lambertian, Metal};
     use ray::Ray;
     use sphere::Sphere;
-    use vec3::{Point3, Vec3};
+    use vec3::Point3;
 
     fn ray_color(r: &Ray, world: &dyn Hittable, depth: i32) -> Color {
         // If we've exceeded the ray bounce limit, no more light is gathered
@@ -725,7 +725,7 @@ Using a big aperture:
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="main.cpp | Scene camera with depth-of-field" {59-65}
+    ```cpp filename="main.cpp | Scene camera with depth-of-field" {59-65} genImage
     #include <iostream>
 
     #include "camera.h"

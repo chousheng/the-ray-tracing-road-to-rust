@@ -21,7 +21,7 @@ let us compute and visualize $\mathbf{n}$:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="main.rs | Rendering surface normals on a sphere" {11,17-21,25-28}
+    ```rust filename="main.rs | Rendering surface normals on a sphere" {11,17-21,25-28} genImage
     mod color;
     mod ray;
     mod vec3;
@@ -100,7 +100,7 @@ let us compute and visualize $\mathbf{n}$:
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="main.cpp | Rendering surface normals on a sphere" {7,13-17,21-24,28}
+    ```cpp filename="main.cpp | Rendering surface normals on a sphere" {7,13-17,21-24,28} genImage
     #include <iostream>
 
     #include "color.h"
@@ -939,7 +939,7 @@ file.
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="common.rs | The common module" {1-10}
+    ```rust filename="common.rs | The common module" {1-10} genImage
     // Constants
 
     pub use std::f64::consts::PI;
@@ -1059,7 +1059,7 @@ And the new main:
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="main.cpp | The new main with Hittables" {4-6,8,11-14,18,28-33,57}
+    ```cpp filename="main.cpp | The new main with Hittables" {4-6,8,11-14,18,28-33,57} genImage
     #include <iostream>
 
     #include "color.h"
