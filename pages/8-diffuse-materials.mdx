@@ -698,8 +698,8 @@ Then update the `ray_color()` function to use the new random direction generator
     fn ray_color(r: &Ray, world: &dyn Hittable) -> Color {
         let mut rec = HitRecord::new();
         if world.hit(r, 0.0, common::INFINITY, &mut rec) {
-            let target = rec.p + rec.normal + vec3::random_in_unit_sphere();
-            return 0.5 * ray_color(&Ray::new(rec.p, target - rec.p), world);
+            let direction = rec.normal + vec3::random_in_unit_sphere();
+            return 0.5 * ray_color(&Ray::new(rec.p, direction), world);
         }
 
         let unit_direction = vec3::unit_vector(r.direction());
@@ -764,8 +764,8 @@ Then update the `ray_color()` function to use the new random direction generator
     Color ray_color(const Ray &r, const Hittable &world) {
         auto rec = HitRecord();
         if (world.hit(r, 0.0, INFINITY, rec)) {
-            auto target = rec.p + rec.normal + random_in_unit_sphere();
-            return 0.5 * ray_color(Ray(rec.p, target - rec.p), world);
+            auto direction = rec.normal + random_in_unit_sphere();
+            return 0.5 * ray_color(Ray(rec.p, direction), world);
         }
 
         auto unit_direction = unit_vector(r.direction());
@@ -854,8 +854,8 @@ depth, returning no light contribution at the maximum depth:
 
         let mut rec = HitRecord::new();
         if world.hit(r, 0.0, common::INFINITY, &mut rec) {
-            let target = rec.p + rec.normal + vec3::random_in_unit_sphere();
-            return 0.5 * ray_color(&Ray::new(rec.p, target - rec.p), world, depth - 1);
+            let direction = rec.normal + vec3::random_in_unit_sphere();
+            return 0.5 * ray_color(&Ray::new(rec.p, direction), world, depth - 1);
         }
 
         let unit_direction = vec3::unit_vector(r.direction());
@@ -926,8 +926,8 @@ depth, returning no light contribution at the maximum depth:
 
         auto rec = HitRecord();
         if (world.hit(r, 0.0, INFINITY, rec)) {
-            auto target = rec.p + rec.normal + random_in_unit_sphere();
-            return 0.5 * ray_color(Ray(rec.p, target - rec.p), world, depth - 1);
+            auto direction = rec.normal + random_in_unit_sphere();
+            return 0.5 * ray_color(Ray(rec.p, direction), world, depth - 1);
         }
 
         auto unit_direction = unit_vector(r.direction());
@@ -1105,8 +1105,8 @@ point approximation the sphere intersector gives us. So we need to ignore hits v
 
         let mut rec = HitRecord::new();
         if world.hit(r, 0.001, common::INFINITY, &mut rec) {
-            let target = rec.p + rec.normal + vec3::random_in_unit_sphere();
-            return 0.5 * ray_color(&Ray::new(rec.p, target - rec.p), world, depth - 1);
+            let direction = rec.normal + vec3::random_in_unit_sphere();
+            return 0.5 * ray_color(&Ray::new(rec.p, direction), world, depth - 1);
         }
 
         let unit_direction = vec3::unit_vector(r.direction());
@@ -1177,8 +1177,8 @@ point approximation the sphere intersector gives us. So we need to ignore hits v
 
         auto rec = HitRecord();
         if (world.hit(r, 0.001, INFINITY, rec)) {
-            auto target = rec.p + rec.normal + random_in_unit_sphere();
-            return 0.5 * ray_color(Ray(rec.p, target - rec.p), world, depth - 1);
+            auto direction = rec.normal + random_in_unit_sphere();
+            return 0.5 * ray_color(Ray(rec.p, direction), world, depth - 1);
         }
 
         auto unit_direction = unit_vector(r.direction());
@@ -1615,8 +1615,8 @@ function.
 
         let mut rec = HitRecord::new();
         if world.hit(r, 0.001, common::INFINITY, &mut rec) {
-            let target = rec.p + rec.normal + vec3::random_unit_vector();
-            return 0.5 * ray_color(&Ray::new(rec.p, target - rec.p), world, depth - 1);
+            let direction = rec.normal + vec3::random_unit_vector();
+            return 0.5 * ray_color(&Ray::new(rec.p, direction), world, depth - 1);
         }
 
         let unit_direction = vec3::unit_vector(r.direction());
@@ -1687,8 +1687,8 @@ function.
 
         auto rec = HitRecord();
         if (world.hit(r, 0.001, INFINITY, rec)) {
-            auto target = rec.p + rec.normal + random_unit_vector();
-            return 0.5 * ray_color(Ray(rec.p, target - rec.p), world, depth - 1);
+            auto direction = rec.normal + random_unit_vector();
+            return 0.5 * ray_color(Ray(rec.p, direction), world, depth - 1);
         }
 
         auto unit_direction = unit_vector(r.direction());
