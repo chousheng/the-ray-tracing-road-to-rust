@@ -423,7 +423,7 @@ defocus disk of radius zero (no blur at all), so all rays originated at the disk
         return v - 2.0 * dot(v, n) * n;
     }
 
-    inline Vec3 refract(const Vec3 &uv, const Vec3 &n, double etai_over_etat) {
+    inline Vec3 refract(Vec3 uv, Vec3 n, double etai_over_etat) {
         auto cos_theta = fmin(dot(-uv, n), 1.0);
         auto r_out_perp = etai_over_etat * (uv + cos_theta * n);
         auto r_out_parallel = -sqrt(fabs(1.0 - r_out_perp.length_squared())) * n;

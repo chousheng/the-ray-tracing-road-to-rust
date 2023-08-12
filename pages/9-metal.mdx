@@ -207,7 +207,6 @@ within `hit_record`. See the highlighted lines below:
             let outward_normal = (rec.p - self.center) / self.radius;
             rec.set_face_normal(r, outward_normal);
             rec.mat = Some(self.mat.clone());
-
             true
         }
     }
@@ -264,7 +263,6 @@ within `hit_record`. See the highlighted lines below:
         auto outward_normal = (rec.p - center) / radius;
         rec.set_face_normal(r, outward_normal);
         rec.mat = mat;
-
         return true;
     }
 
@@ -281,7 +279,7 @@ it could be a mixture of those strategies. For Lambertian materials we get this 
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="material.rs | The Lambertian Material struct" {4,15-39}
+    ```rust filename="material.rs | The Lambertian Material struct" {4,15-40}
     use crate::color::Color;
     use crate::hittable::HitRecord;
     use crate::ray::Ray;
@@ -316,6 +314,7 @@ it could be a mixture of those strategies. For Lambertian materials we get this 
             scattered: &mut Ray,
         ) -> bool {
             let mut scatter_direction = rec.normal + vec3::random_unit_vector();
+
             *scattered = Ray::new(rec.p, scatter_direction);
             *attenuation = self.albedo;
             true
@@ -325,7 +324,7 @@ it could be a mixture of those strategies. For Lambertian materials we get this 
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="material.h | The Lambertian Material class" {19-38}
+    ```cpp filename="material.h | The Lambertian Material class" {19-39}
     #ifndef MATERIAL_H
     #define MATERIAL_H
 
@@ -356,6 +355,7 @@ it could be a mixture of those strategies. For Lambertian materials we get this 
             Ray &scattered
         ) const override {
             auto scatter_direction = rec.normal + random_unit_vector();
+
             scattered = Ray(rec.p, scatter_direction);
             attenuation = albedo;
             return true;
@@ -728,7 +728,7 @@ the vector is very close to zero in all dimensions.
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="material.rs | Lambertian scatter, bullet-proof" {35-40}
+    ```rust filename="material.rs | Lambertian scatter, bullet-proof" {35-39}
     use crate::color::Color;
     use crate::hittable::HitRecord;
     use crate::ray::Ray;
@@ -778,7 +778,7 @@ the vector is very close to zero in all dimensions.
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="material.h | Lambertian scatter, bullet-proof" {31-36}
+    ```cpp filename="material.h | Lambertian scatter, bullet-proof" {31-35}
     #ifndef MATERIAL_H
     #define MATERIAL_H
 

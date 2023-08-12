@@ -449,7 +449,7 @@ And here's the sphere:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="sphere.rs | The Sphere struct" {1-47}
+    ```rust filename="sphere.rs | The Sphere struct" {1-46}
     use crate::hittable::{HitRecord, Hittable};
     use crate::ray::Ray;
     use crate::vec3::{self, Point3};
@@ -493,7 +493,6 @@ And here's the sphere:
             rec.t = root;
             rec.p = r.at(rec.t);
             rec.normal = (rec.p - center) / radius;
-
             true
         }
     }
@@ -501,7 +500,7 @@ And here's the sphere:
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="sphere.h | The Sphere class" {1-46}
+    ```cpp filename="sphere.h | The Sphere class" {1-45}
     #ifndef SPHERE_H
     #define SPHERE_H
 
@@ -543,7 +542,6 @@ And here's the sphere:
         rec.t = root;
         rec.p = r.at(rec.t);
         rec.normal = (rec.p - center) / radius;
-
         return true;
     }
 
@@ -731,7 +729,6 @@ And then we add the surface side determination to the class:
             rec.p = r.at(rec.t);
             let outward_normal = (rec.p - self.center) / self.radius;
             rec.set_face_normal(r, outward_normal);
-
             true
         }
     }
@@ -782,7 +779,6 @@ And then we add the surface side determination to the class:
         rec.p = r.at(rec.t);
         auto outward_normal = (rec.p - center) / radius;
         rec.set_face_normal(r, outward_normal);
-
         return true;
     }
 
