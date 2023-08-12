@@ -565,21 +565,11 @@ the vector is very close to zero in all dimensions.
     pub fn random_unit_vector() -> Vec3 {
         unit_vector(random_in_unit_sphere())
     }
-
-    pub fn random_in_hemisphere(normal: Vec3) -> Vec3 {
-        let in_unit_sphere = random_in_unit_sphere();
-        if dot(in_unit_sphere, normal) > 0.0 {
-            // In the same hemisphere as the normal
-            in_unit_sphere
-        } else {
-            -in_unit_sphere
-        }
-    }
     ```
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="vec3.h | The vec3::near_zero() method" {47-52}
+    ```cpp filename="vec3.h | The vec3::near_zero() method" {47-52,151-160}
     #ifndef VEC3_H
     #define VEC3_H
 
@@ -862,7 +852,7 @@ is a unit vector, but $\mathbf{v}$ may not be. The length of $\mathbf{b}$ should
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="vec3.rs | Vec3 reflection function" {192-195}
+    ```rust filename="vec3.rs | Vec3 reflection function" {182-185}
     use std::fmt::{Display, Formatter, Result};
     use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub};
 
@@ -1043,16 +1033,6 @@ is a unit vector, but $\mathbf{v}$ may not be. The length of $\mathbf{b}$ should
 
     pub fn random_unit_vector() -> Vec3 {
         unit_vector(random_in_unit_sphere())
-    }
-
-    pub fn random_in_hemisphere(normal: Vec3) -> Vec3 {
-        let in_unit_sphere = random_in_unit_sphere();
-        if dot(in_unit_sphere, normal) > 0.0 {
-            // In the same hemisphere as the normal
-            in_unit_sphere
-        } else {
-            -in_unit_sphere
-        }
     }
 
     pub fn reflect(v: Vec3, n: Vec3) -> Vec3 {

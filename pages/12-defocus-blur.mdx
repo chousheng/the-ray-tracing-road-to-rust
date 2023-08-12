@@ -46,7 +46,7 @@ defocus disk of radius zero (no blur at all), so all rays originated at the disk
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="vec3.rs | Generate random point inside unit disk" {192-205}
+    ```rust filename="vec3.rs | Generate random point inside unit disk" {182-195}
     use std::fmt::{Display, Formatter, Result};
     use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub};
 
@@ -227,16 +227,6 @@ defocus disk of radius zero (no blur at all), so all rays originated at the disk
 
     pub fn random_unit_vector() -> Vec3 {
         unit_vector(random_in_unit_sphere())
-    }
-
-    pub fn random_in_hemisphere(normal: Vec3) -> Vec3 {
-        let in_unit_sphere = random_in_unit_sphere();
-        if dot(in_unit_sphere, normal) > 0.0 {
-            // In the same hemisphere as the normal
-            in_unit_sphere
-        } else {
-            -in_unit_sphere
-        }
     }
 
     pub fn random_in_unit_disk() -> Vec3 {

@@ -66,7 +66,7 @@ When we combine them back together, we can write a function to calculate $\mathb
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="vec3.rs | Refraction function" {196-202}
+    ```rust filename="vec3.rs | Refraction function" {186-192}
     use std::fmt::{Display, Formatter, Result};
     use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub};
 
@@ -247,16 +247,6 @@ When we combine them back together, we can write a function to calculate $\mathb
 
     pub fn random_unit_vector() -> Vec3 {
         unit_vector(random_in_unit_sphere())
-    }
-
-    pub fn random_in_hemisphere(normal: Vec3) -> Vec3 {
-        let in_unit_sphere = random_in_unit_sphere();
-        if dot(in_unit_sphere, normal) > 0.0 {
-            // In the same hemisphere as the normal
-            in_unit_sphere
-        } else {
-            -in_unit_sphere
-        }
     }
 
     pub fn reflect(v: Vec3, n: Vec3) -> Vec3 {
