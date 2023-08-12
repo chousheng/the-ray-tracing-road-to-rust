@@ -77,7 +77,7 @@ const exportCodeFromMdxToGit = async () => {
         if (lang == "rust") {
           execSync(`cd ${base}; cargo build --release`);
         } else if (lang=="cpp") {
-          execSync(`cd ${base}; make build-release`);
+          execSync(`cd ${base}; make clean; make build-release`);
         }
       }
 
