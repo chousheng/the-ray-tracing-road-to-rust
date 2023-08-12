@@ -1237,7 +1237,7 @@ The metal material just reflects rays using that formula:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="material.rs | Metal Material with reflectance function" {46-70}
+    ```rust filename="material.rs | Metal Material with reflectance function" {46-71}
     use crate::color::Color;
     use crate::hittable::HitRecord;
     use crate::ray::Ray;
@@ -1303,6 +1303,7 @@ The metal material just reflects rays using that formula:
             scattered: &mut Ray,
         ) -> bool {
             let reflected = vec3::reflect(vec3::unit_vector(r_in.direction()), rec.normal);
+
             *scattered = Ray::new(rec.p, reflected);
             *attenuation = self.albedo;
             vec3::dot(scattered.direction(), rec.normal) > 0.0
@@ -1312,7 +1313,7 @@ The metal material just reflects rays using that formula:
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="material.h | Metal Material with reflectance function" {7,46-65}
+    ```cpp filename="material.h | Metal Material with reflectance function" {7,46-66}
     #ifndef MATERIAL_H
     #define MATERIAL_H
 
@@ -1370,6 +1371,7 @@ The metal material just reflects rays using that formula:
             Ray &scattered
         ) const override {
             auto reflected = reflect(unit_vector(r_in.direction()), rec.normal);
+
             scattered = Ray(rec.p, reflected);
             attenuation = albedo;
             return dot(scattered.direction(), rec.normal) > 0.0;
@@ -1781,7 +1783,7 @@ absorb those.
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="material.rs | Metal Material fuzziness" {49,53-57,70}
+    ```rust filename="material.rs | Metal Material fuzziness" {49,53-57,71}
     use crate::color::Color;
     use crate::hittable::HitRecord;
     use crate::ray::Ray;
@@ -1851,6 +1853,7 @@ absorb those.
             scattered: &mut Ray,
         ) -> bool {
             let reflected = vec3::reflect(vec3::unit_vector(r_in.direction()), rec.normal);
+
             *scattered = Ray::new(rec.p, reflected + self.fuzz * vec3::random_in_unit_sphere());
             *attenuation = self.albedo;
             vec3::dot(scattered.direction(), rec.normal) > 0.0
@@ -1860,7 +1863,7 @@ absorb those.
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="material.h | Metal Material fuzziness" {49,58,65}
+    ```cpp filename="material.h | Metal Material fuzziness" {49,59,66}
     #ifndef MATERIAL_H
     #define MATERIAL_H
 
@@ -1918,6 +1921,7 @@ absorb those.
             Ray &scattered
         ) const override {
             auto reflected = reflect(unit_vector(r_in.direction()), rec.normal);
+
             scattered = Ray(rec.p, reflected + fuzz * random_in_unit_sphere());
             attenuation = albedo;
             return dot(scattered.direction(), rec.normal) > 0.0;

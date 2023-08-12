@@ -455,7 +455,7 @@ And the dielectric material that always refracts is:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="material.rs | Dielectric Material struct that always refracts" {75-109}
+    ```rust filename="material.rs | Dielectric Material struct that always refracts" {76-110}
     use crate::color::Color;
     use crate::hittable::HitRecord;
     use crate::ray::Ray;
@@ -525,6 +525,7 @@ And the dielectric material that always refracts is:
             scattered: &mut Ray,
         ) -> bool {
             let reflected = vec3::reflect(vec3::unit_vector(r_in.direction()), rec.normal);
+
             *scattered = Ray::new(rec.p, reflected + self.fuzz * vec3::random_in_unit_sphere());
             *attenuation = self.albedo;
             vec3::dot(scattered.direction(), rec.normal) > 0.0
@@ -569,7 +570,7 @@ And the dielectric material that always refracts is:
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="material.h | Dielectric Material class that always refracts" {67-90}
+    ```cpp filename="material.h | Dielectric Material class that always refracts" {68-91}
     #ifndef MATERIAL_H
     #define MATERIAL_H
 
@@ -627,6 +628,7 @@ And the dielectric material that always refracts is:
             Ray &scattered
         ) const override {
             auto reflected = reflect(unit_vector(r_in.direction()), rec.normal);
+
             scattered = Ray(rec.p, reflected + fuzz * random_in_unit_sphere());
             attenuation = albedo;
             return dot(scattered.direction(), rec.normal) > 0.0;
@@ -933,7 +935,7 @@ And the dielectric material that always refracts (when possible) is:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="material.rs | Dielectric Material struct with reflection" {103-111,114}
+    ```rust filename="material.rs | Dielectric Material struct with reflection" {104-112,115}
     use crate::color::Color;
     use crate::hittable::HitRecord;
     use crate::ray::Ray;
@@ -1003,6 +1005,7 @@ And the dielectric material that always refracts (when possible) is:
             scattered: &mut Ray,
         ) -> bool {
             let reflected = vec3::reflect(vec3::unit_vector(r_in.direction()), rec.normal);
+
             *scattered = Ray::new(rec.p, reflected + self.fuzz * vec3::random_in_unit_sphere());
             *attenuation = self.albedo;
             vec3::dot(scattered.direction(), rec.normal) > 0.0
@@ -1055,7 +1058,7 @@ And the dielectric material that always refracts (when possible) is:
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="material.h | Dielectric Material class with reflection" {81-90,93}
+    ```cpp filename="material.h | Dielectric Material class with reflection" {82-87,90}
     #ifndef MATERIAL_H
     #define MATERIAL_H
 
@@ -1113,6 +1116,7 @@ And the dielectric material that always refracts (when possible) is:
             Ray &scattered
         ) const override {
             auto reflected = reflect(unit_vector(r_in.direction()), rec.normal);
+
             scattered = Ray(rec.p, reflected + fuzz * random_in_unit_sphere());
             attenuation = albedo;
             return dot(scattered.direction(), rec.normal) > 0.0;
@@ -1139,13 +1143,9 @@ And the dielectric material that always refracts (when possible) is:
             auto cos_theta = fmin(dot(-unit_direction, rec.normal), 1.0);
             auto sin_theta = sqrt(1.0 - cos_theta * cos_theta);
 
-            Vec3 direction;
             auto cannot_refract = refraction_ratio * sin_theta > 1.0;
-            if (cannot_refract) {
-                direction = reflect(unit_direction, rec.normal);
-            } else {
-                direction = refract(unit_direction, rec.normal, refraction_ratio);
-            }
+            auto direction = cannot_refract ? reflect(unit_direction, rec.normal)
+                                            : refract(unit_direction, rec.normal, refraction_ratio);
 
             attenuation = Color(1.0, 1.0, 1.0);
             scattered = Ray(rec.p, direction);
@@ -1380,7 +1380,7 @@ material:
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="material.rs | Full glass material" {4,86-92,114-116}
+    ```rust filename="material.rs | Full glass material" {4,87-93,115-117}
     use crate::color::Color;
     use crate::hittable::HitRecord;
     use crate::ray::Ray;
@@ -1450,6 +1450,7 @@ material:
             scattered: &mut Ray,
         ) -> bool {
             let reflected = vec3::reflect(vec3::unit_vector(r_in.direction()), rec.normal);
+
             *scattered = Ray::new(rec.p, reflected + self.fuzz * vec3::random_in_unit_sphere());
             *attenuation = self.albedo;
             vec3::dot(scattered.direction(), rec.normal) > 0.0
@@ -1511,7 +1512,7 @@ material:
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="material.h | Full glass material" {86,98-104}
+    ```cpp filename="material.h | Full glass material" {86-89,97-103}
     #ifndef MATERIAL_H
     #define MATERIAL_H
 
@@ -1569,6 +1570,7 @@ material:
             Ray &scattered
         ) const override {
             auto reflected = reflect(unit_vector(r_in.direction()), rec.normal);
+
             scattered = Ray(rec.p, reflected + fuzz * random_in_unit_sphere());
             attenuation = albedo;
             return dot(scattered.direction(), rec.normal) > 0.0;
@@ -1595,13 +1597,11 @@ material:
             auto cos_theta = fmin(dot(-unit_direction, rec.normal), 1.0);
             auto sin_theta = sqrt(1.0 - cos_theta * cos_theta);
 
-            Vec3 direction;
             auto cannot_refract = refraction_ratio * sin_theta > 1.0;
-            if (cannot_refract || reflectance(cos_theta, refraction_ratio) > random_double()) {
-                direction = reflect(unit_direction, rec.normal);
-            } else {
-                direction = refract(unit_direction, rec.normal, refraction_ratio);
-            }
+            auto direction =
+                cannot_refract || reflectance(cos_theta, refraction_ratio) > random_double()
+                ? reflect(unit_direction, rec.normal)
+                : refract(unit_direction, rec.normal, refraction_ratio);
 
             attenuation = Color(1.0, 1.0, 1.0);
             scattered = Ray(rec.p, direction);
