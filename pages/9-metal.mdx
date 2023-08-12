@@ -443,7 +443,7 @@ the vector is very close to zero in all dimensions.
     }
 
     // Type alias
-    pub type Point3 = Vec3; // 3D point
+    pub type Point3 = Vec3;
 
     // Output formatting
     impl Display for Vec3 {
@@ -579,7 +579,7 @@ the vector is very close to zero in all dimensions.
   </Tab>
 
   <Tab label="C++">
-    ```cpp filename="vec3.h | The vec3::near_zero() method" {73-78}
+    ```cpp filename="vec3.h | The vec3::near_zero() method" {47-52}
     #ifndef VEC3_H
     #define VEC3_H
 
@@ -619,6 +619,20 @@ the vector is very close to zero in all dimensions.
             return e[2];
         }
 
+        double length() const {
+            return std::sqrt(length_squared());
+        }
+
+        double length_squared() const {
+            return e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
+        }
+
+        bool near_zero() const {
+            const double EPS = 1e-8;
+            // Return true if the vector is close to zero in all dimensions
+            return fabs(e[0]) < EPS && fabs(e[1]) < EPS && fabs(e[2]) < EPS;
+        }
+
         // -Vec3
         Vec3 operator-() const {
             return Vec3(-e[0], -e[1], -e[2]);
@@ -645,26 +659,12 @@ the vector is very close to zero in all dimensions.
             return *this *= 1.0 / t;
         }
 
-        double length() const {
-            return std::sqrt(length_squared());
-        }
-
-        double length_squared() const {
-            return e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
-        }
-
-        bool near_zero() const {
-            const double EPS = 1e-8;
-            // Return true if the vector is close to zero in all dimensions
-            return fabs(e[0]) < EPS && fabs(e[1]) < EPS && fabs(e[2]) < EPS;
-        }
-
     private:
         std::array<double, 3> e = {0.0, 0.0, 0.0};
     };
 
     // Type alias
-    using Point3 = Vec3; // 3D point
+    using Point3 = Vec3;
 
     // Output formatting
     inline std::ostream &operator<<(std::ostream &out, Vec3 v) {
@@ -922,7 +922,7 @@ is a unit vector, but $\mathbf{v}$ may not be. The length of $\mathbf{b}$ should
     }
 
     // Type alias
-    pub type Point3 = Vec3; // 3D point
+    pub type Point3 = Vec3;
 
     // Output formatting
     impl Display for Vec3 {
@@ -1102,6 +1102,20 @@ is a unit vector, but $\mathbf{v}$ may not be. The length of $\mathbf{b}$ should
             return e[2];
         }
 
+        double length() const {
+            return std::sqrt(length_squared());
+        }
+
+        double length_squared() const {
+            return e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
+        }
+
+        bool near_zero() const {
+            const double EPS = 1e-8;
+            // Return true if the vector is close to zero in all dimensions
+            return fabs(e[0]) < EPS && fabs(e[1]) < EPS && fabs(e[2]) < EPS;
+        }
+
         // -Vec3
         Vec3 operator-() const {
             return Vec3(-e[0], -e[1], -e[2]);
@@ -1128,26 +1142,12 @@ is a unit vector, but $\mathbf{v}$ may not be. The length of $\mathbf{b}$ should
             return *this *= 1.0 / t;
         }
 
-        double length() const {
-            return std::sqrt(length_squared());
-        }
-
-        double length_squared() const {
-            return e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
-        }
-
-        bool near_zero() const {
-            const double EPS = 1e-8;
-            // Return true if the vector is close to zero in all dimensions
-            return fabs(e[0]) < EPS && fabs(e[1]) < EPS && fabs(e[2]) < EPS;
-        }
-
     private:
         std::array<double, 3> e = {0.0, 0.0, 0.0};
     };
 
     // Type alias
-    using Point3 = Vec3; // 3D point
+    using Point3 = Vec3;
 
     // Output formatting
     inline std::ostream &operator<<(std::ostream &out, Vec3 v) {

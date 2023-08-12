@@ -37,7 +37,7 @@ Here's the basic part of the `Vec3` struct:
     }
 
     // Type alias
-    pub type Point3 = Vec3; // 3D point
+    pub type Point3 = Vec3;
     ```
   </Tab>
 
@@ -71,7 +71,7 @@ Here's the basic part of the `Vec3` struct:
     };
 
     // Type alias
-    using Point3 = Vec3; // 3D point
+    using Point3 = Vec3;
 
     #endif
     ```
@@ -122,7 +122,7 @@ The other part of `Vec3` contains vector utility functions:
     }
 
     // Type alias
-    pub type Point3 = Vec3; // 3D point
+    pub type Point3 = Vec3;
 
     // Output formatting
     impl Display for Vec3 {
@@ -260,6 +260,14 @@ The other part of `Vec3` contains vector utility functions:
             return e[2];
         }
 
+        double length() const {
+            return std::sqrt(length_squared());
+        }
+
+        double length_squared() const {
+            return e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
+        }
+
         // -Vec3
         Vec3 operator-() const {
             return Vec3(-e[0], -e[1], -e[2]);
@@ -286,20 +294,12 @@ The other part of `Vec3` contains vector utility functions:
             return *this *= 1.0 / t;
         }
 
-        double length() const {
-            return std::sqrt(length_squared());
-        }
-
-        double length_squared() const {
-            return e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
-        }
-
     private:
         std::array<double, 3> e = {0.0, 0.0, 0.0};
     };
 
     // Type alias
-    using Point3 = Vec3; // 3D point
+    using Point3 = Vec3;
 
     // Output formatting
     inline std::ostream &operator<<(std::ostream &out, Vec3 v) {
@@ -369,7 +369,7 @@ Using our new `Color` (alias `Vec3`), we'll create a utility function to write a
     use crate::vec3::Vec3;
 
     // Type alias
-    pub type Color = Vec3; // RGB color
+    pub type Color = Vec3;
 
     pub fn write_color(out: &mut impl Write, pixel_color: Color) {
         // Write the translated [0, 255] value of each color component
@@ -391,7 +391,7 @@ Using our new `Color` (alias `Vec3`), we'll create a utility function to write a
     #include "vec3.h"
 
     // Type alias
-    using Color = Vec3; // RGB color
+    using Color = Vec3;
 
     inline void write_color(std::ostream &out, Color pixel_color) {
         // Write the translated [0, 255] value of each color component
