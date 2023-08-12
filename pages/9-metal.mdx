@@ -721,16 +721,6 @@ the vector is very close to zero in all dimensions.
         return unit_vector(random_in_unit_sphere());
     }
 
-    inline Vec3 random_in_hemisphere(Vec3 normal) {
-        auto in_unit_sphere = random_in_unit_sphere();
-        if (dot(in_unit_sphere, normal) > 0.0) {
-            // In the same hemisphere as the normal
-            return in_unit_sphere;
-        } else {
-            return -in_unit_sphere;
-        }
-    }
-
     #endif
     ```
   </Tab>
@@ -1192,16 +1182,6 @@ is a unit vector, but $\mathbf{v}$ may not be. The length of $\mathbf{b}$ should
 
     inline Vec3 random_unit_vector() {
         return unit_vector(random_in_unit_sphere());
-    }
-
-    inline Vec3 random_in_hemisphere(Vec3 normal) {
-        auto in_unit_sphere = random_in_unit_sphere();
-        if (dot(in_unit_sphere, normal) > 0.0) {
-            // In the same hemisphere as the normal
-            return in_unit_sphere;
-        } else {
-            return -in_unit_sphere;
-        }
     }
 
     inline Vec3 reflect(Vec3 v, Vec3 n) {

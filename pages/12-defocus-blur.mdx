@@ -409,16 +409,6 @@ defocus disk of radius zero (no blur at all), so all rays originated at the disk
         return unit_vector(random_in_unit_sphere());
     }
 
-    inline Vec3 random_in_hemisphere(Vec3 normal) {
-        auto in_unit_sphere = random_in_unit_sphere();
-        if (dot(in_unit_sphere, normal) > 0.0) {
-            // In the same hemisphere as the normal
-            return in_unit_sphere;
-        } else {
-            return -in_unit_sphere;
-        }
-    }
-
     inline Vec3 random_in_unit_disk() {
         while (true) {
             auto p = Vec3(random_double_range(-1.0, 1.0), random_double_range(-1.0, 1.0), 0.0);

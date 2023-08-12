@@ -415,16 +415,6 @@ When we combine them back together, we can write a function to calculate $\mathb
         return unit_vector(random_in_unit_sphere());
     }
 
-    inline Vec3 random_in_hemisphere(Vec3 normal) {
-        auto in_unit_sphere = random_in_unit_sphere();
-        if (dot(in_unit_sphere, normal) > 0.0) {
-            // In the same hemisphere as the normal
-            return in_unit_sphere;
-        } else {
-            return -in_unit_sphere;
-        }
-    }
-
     inline Vec3 reflect(Vec3 v, Vec3 n) {
         return v - 2.0 * dot(v, n) * n;
     }
