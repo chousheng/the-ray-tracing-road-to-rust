@@ -21,3 +21,11 @@ html:not([data-nextra-word-wrap]) .line.add-dots-after::after {
     content: "... (" counter(num-lines-after) " lines)";
     display: block;
 }
+
+/* 
+Temporary hack to fix the nextra (theme-switch) menu's 1px border causing the
+side bar to be 1px scrollable when scrolling the main article area
+*/
+.nx-sticky.nx-bottom-0.nx-border-t {
+    height: var(--nextra-menu-height)
+}
