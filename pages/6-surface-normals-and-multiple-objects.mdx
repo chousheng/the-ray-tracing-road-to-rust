@@ -1,23 +1,10 @@
 ## Shading with Surface Normals
 
-First, let's get ourselves a surface normal so we can shade. This is a vector that is perpendicular
-to the surface at the point of intersection. There are two design decisions to make for normals.
-The first is whether these normals are unit length. That is convenient for shading so I will say
-yes, but I won't enforce that in the code. This could allow subtle bugs, so be aware this is
-personal preference as are most design decisions like that. For a sphere, the outward normal is in
-the direction of the hit point minus the center:
+First, let's get ourselves a surface normal so we can shade. This is a vector that is perpendicular to the surface at the point of intersection. There are two design decisions to make for normals.  The first is whether these normals are unit length. That is convenient for shading so I will say yes, but I won't enforce that in the code. This could allow subtle bugs, so be aware this is personal preference as are most design decisions like that. For a sphere, the outward normal is in the direction of the hit point minus the center:
 
 ![Figure \[sphere-normal\]: Sphere surface-normal geometry](../images/fig-1.05-sphere-normal.jpg)
 
-On the earth, this implies that the vector from the earth's center to you points straight up. Let's
-throw that into the code now, and shade it. We don't have any lights or anything yet, so let's just
-visualize the normals with a color map. A common trick used for visualizing normals (because it's
-easy and somewhat intuitive to assume $\mathbf{n}$ is a unit length vector -- so each
-component is between -1 and 1) is to map each component to the interval from 0 to 1, and then map
-x/y/z to r/g/b. For the normal, we need the hit point, not just whether we hit or not. We only have
-one sphere in the scene, and it's directly in front of the camera, so we won't worry about negative
-values of $t$ yet. We'll just assume the closest hit point (smallest $t$). These changes in the code
-let us compute and visualize $\mathbf{n}$:
+On the earth, this implies that the vector from the earth's center to you points straight up. Let's throw that into the code now, and shade it. We don't have any lights or anything yet, so let's just visualize the normals with a color map. A common trick used for visualizing normals (because it's easy and somewhat intuitive to assume $\mathbf{n}$ is a unit length vector -- so each component is between -1 and 1) is to map each component to the interval from 0 to 1, and then map x/y/z to r/g/b. For the normal, we need the hit point, not just whether we hit or not. We only have one sphere in the scene, and it's directly in front of the camera, so we won't worry about negative values of $t$ yet. We'll just assume the closest hit point (smallest $t$). These changes in the code let us compute and visualize $\mathbf{n}$:
 
 <Tabs>
   <Tab label="Rust">
@@ -199,8 +186,7 @@ double hit_sphere(const point3& center, double radius, const ray& r) {
 
 First, recall that a vector dotted with itself is equal to the squared length of that vector.
 
-Second, notice how the equation for `b` has a factor of two in it. Consider what happens to the
-quadratic equation if $b = 2h$:
+Second, notice how the equation for `b` has a factor of two in it. Consider what happens to the quadratic equation if $b = 2h$:
 
 $$
 \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
@@ -377,21 +363,9 @@ Using these observations, we can now simplify the sphere-intersection code to th
 
 ## An Abstraction for Hittable Objects
 
-Now, how about several spheres? While it is tempting to have an array of spheres, a very clean
-solution is the make an "abstract class" for anything a ray might hit, and make both a sphere and a
-list of spheres just something you can hit. What that class should be called is something of a
-quandary -- calling it an "object" would be good if not for "object oriented" programming. "Surface"
-is often used, with the weakness being maybe we will want volumes. "hittable" emphasizes the member
-function that unites them. I don't love any of these, but I will go with "hittable".
+Now, how about several spheres? While it is tempting to have an array of spheres, a very clean solution is the make an "abstract class" for anything a ray might hit, and make both a sphere and a list of spheres just something you can hit. What that class should be called is something of a quandary -- calling it an "object" would be good if not for "object oriented" programming. "Surface" is often used, with the weakness being maybe we will want volumes. "hittable" emphasizes the member function that unites them. I don't love any of these, but I will go with "hittable".
 
-This `hittable` abstract class will have a hit function that takes in a ray. Most ray tracers have
-found it convenient to add a valid interval for hits $t_{min}$ to $t_{max}$, so the hit only
-"counts" if $t_{min} < t < t_{max}$. For the initial rays this is positive $t$, but as we will see,
-it can help some details in the code to have an interval $t_{min}$ to $t_{max}$. One design question
-is whether to do things like compute the normal if we hit something. We might end up hitting
-something closer as we do our search, and we will only need the normal of the closest thing. I will
-go with the simple solution and compute a bundle of stuff I will store in some structure. Here's
-the abstract class:
+This `hittable` abstract class will have a hit function that takes in a ray. Most ray tracers have found it convenient to add a valid interval for hits $t_{min}$ to $t_{max}$, so the hit only "counts" if $t_{min} < t < t_{max}$. For the initial rays this is positive $t$, but as we will see, it can help some details in the code to have an interval $t_{min}$ to $t_{max}$. One design question is whether to do things like compute the normal if we hit something. We might end up hitting something closer as we do our search, and we will only need the normal of the closest thing. I will go with the simple solution and compute a bundle of stuff I will store in some structure. Here's the abstract class:
 
 <Tabs>
   <Tab label="Rust">
@@ -552,27 +526,13 @@ And here's the sphere:
 
 ## Front Faces Versus Back Faces
 
-The second design decision for normals is whether they should always point out. At present, the
-normal found will always be in the direction of the center to the intersection point (the normal
-points out). If the ray intersects the sphere from the outside, the normal points against the ray.
-If the ray intersects the sphere from the inside, the normal (which always points out) points with
-the ray. Alternatively, we can have the normal always point against the ray. If the ray is outside
-the sphere, the normal will point outward, but if the ray is inside the sphere, the normal will
-point inward.
+The second design decision for normals is whether they should always point out. At present, the normal found will always be in the direction of the center to the intersection point (the normal points out). If the ray intersects the sphere from the outside, the normal points against the ray.  If the ray intersects the sphere from the inside, the normal (which always points out) points with the ray. Alternatively, we can have the normal always point against the ray. If the ray is outside the sphere, the normal will point outward, but if the ray is inside the sphere, the normal will point inward.
 
 ![Figure \[normal-sides\]: Possible directions for sphere surface-normal geometry](../images/fig-1.06-normal-sides.jpg)
 
-We need to choose one of these possibilities because we will eventually want to determine which
-side of the surface that the ray is coming from. This is important for objects that are rendered
-differently on each side, like the text on a two-sided sheet of paper, or for objects that have an
-inside and an outside, like glass balls.
+We need to choose one of these possibilities because we will eventually want to determine which side of the surface that the ray is coming from. This is important for objects that are rendered differently on each side, like the text on a two-sided sheet of paper, or for objects that have an inside and an outside, like glass balls.
 
-If we decide to have the normals always point out, then we will need to determine which side the
-ray is on when we color it. We can figure this out by comparing the ray with the normal. If the ray
-and the normal face in the same direction, the ray is inside the object, if the ray and the normal
-face in the opposite direction, then the ray is outside the object. This can be determined by
-taking the dot product of the two vectors, where if their dot is positive, the ray is inside the
-sphere.
+If we decide to have the normals always point out, then we will need to determine which side the ray is on when we color it. We can figure this out by comparing the ray with the normal. If the ray and the normal face in the same direction, the ray is inside the object, if the ray and the normal face in the opposite direction, then the ray is outside the object. This can be determined by taking the dot product of the two vectors, where if their dot is positive, the ray is inside the sphere.
 
 ```cpp filename="Comparing the ray and the normal"
 if (dot(ray_direction, outward_normal) > 0.0) {
@@ -584,9 +544,7 @@ if (dot(ray_direction, outward_normal) > 0.0) {
 }
 ```
 
-If we decide to have the normals always point against the ray, we won't be able to use the dot
-product to determine which side of the surface the ray is on. Instead, we would need to store that
-information:
+If we decide to have the normals always point against the ray, we won't be able to use the dot product to determine which side of the surface the ray is on. Instead, we would need to store that information:
 
 ```cpp filename="Remembering the side of the surface"
 bool front_face;
@@ -601,12 +559,7 @@ if (dot(ray_direction, outward_normal) > 0.0) {
 }
 ```
 
-We can set things up so that normals always point "outward" from the surface, or always point
-against the incident ray. This decision is determined by whether you want to determine the side of
-the surface at the time of geometry intersection or at the time of coloring. In this book we have
-more material types than we have geometry types, so we'll go for less work and put the determination
-at geometry time. This is simply a matter of preference, and you'll see both implementations in the
-literature.
+We can set things up so that normals always point "outward" from the surface, or always point against the incident ray. This decision is determined by whether you want to determine the side of the surface at the time of geometry intersection or at the time of coloring. In this book we have more material types than we have geometry types, so we'll go for less work and put the determination at geometry time. This is simply a matter of preference, and you'll see both implementations in the literature.
 
 We add the `front_face` bool to the `hit_record` struct. We'll also add a function to solve this
 calculation for us.
@@ -789,8 +742,7 @@ And then we add the surface side determination to the class:
 
 ## A List of Hittable Objects
 
-We have a generic object called a `hittable` that the ray can intersect with. We now add a class
-that stores a list of `hittable`s:
+We have a generic object called a `hittable` that the ray can intersect with. We now add a class that stores a list of `hittable`s:
 
 <Tabs>
   <Tab label="Rust">
@@ -880,13 +832,9 @@ that stores a list of `hittable`s:
 
 ## Some New C++ Features
 
-The `hittable_list` class code uses two C++ features that may trip you up if you're not normally a
-C++ programmer: `vector` and `shared_ptr`.
+The `hittable_list` class code uses two C++ features that may trip you up if you're not normally a C++ programmer: `vector` and `shared_ptr`.
 
-`shared_ptr<type>` is a pointer to some allocated type, with reference-counting semantics.
-Every time you assign its value to another shared pointer (usually with a simple assignment), the
-reference count is incremented. As shared pointers go out of scope (like at the end of a block or
-function), the reference count is decremented. Once the count goes to zero, the object is deleted.
+`shared_ptr<type>` is a pointer to some allocated type, with reference-counting semantics.  Every time you assign its value to another shared pointer (usually with a simple assignment), the reference count is incremented. As shared pointers go out of scope (like at the end of a block or function), the reference count is decremented. Once the count goes to zero, the object is deleted.
 
 Typically, a shared pointer is first initialized with a newly-allocated object, something like this:
 
@@ -899,8 +847,7 @@ shared_ptr<sphere> sphere_ptr = make_shared<sphere>(point3(0,0,0), 1.0);
 `make_shared<thing>(thing_constructor_params ...)` allocates a new instance of type `thing`, using
 the constructor parameters. It returns a `shared_ptr<thing>`.
 
-Since the type can be automatically deduced by the return type of `make_shared<type>(...)`, the
-above lines can be more simply expressed using C++'s `auto` type specifier:
+Since the type can be automatically deduced by the return type of `make_shared<type>(...)`, the above lines can be more simply expressed using C++'s `auto` type specifier:
 
 ```cpp filename="An example allocation using shared_ptr with auto type"
 auto double_ptr = make_shared<double>(0.37);
@@ -908,30 +855,19 @@ auto vec3_ptr   = make_shared<vec3>(1.414214, 2.718281, 1.618034);
 auto sphere_ptr = make_shared<sphere>(point3(0,0,0), 1.0);
 ```
 
-We'll use shared pointers in our code, because it allows multiple geometries to share a common
-instance (for example, a bunch of spheres that all use the same texture map material), and because
-it makes memory management automatic and easier to reason about.
+We'll use shared pointers in our code, because it allows multiple geometries to share a common instance (for example, a bunch of spheres that all use the same texture map material), and because it makes memory management automatic and easier to reason about.
 
 `std::shared_ptr` is included with the `<memory>` header.
 
-The second C++ feature you may be unfamiliar with is `std::vector`. This is a generic array-like
-collection of an arbitrary type. Above, we use a collection of pointers to `hittable`. `std::vector`
-automatically grows as more values are added: `objects.push_back(object)` adds a value to the end of
-the `std::vector` member variable `objects`.
+The second C++ feature you may be unfamiliar with is `std::vector`. This is a generic array-like collection of an arbitrary type. Above, we use a collection of pointers to `hittable`. `std::vector` automatically grows as more values are added: `objects.push_back(object)` adds a value to the end of the `std::vector` member variable `objects`.
 
 `std::vector` is included with the `<vector>` header.
 
-Finally, the `using` statements in listing \[hittable-list-initial] tell the compiler that we'll be
-getting `shared_ptr` and `make_shared` from the `std` library, so we don't need to prefex these with
-`std::` every time we reference them.
+Finally, the `using` statements in listing \[hittable-list-initial] tell the compiler that we'll be getting `shared_ptr` and `make_shared` from the `std` library, so we don't need to prefex these with `std::` every time we reference them.
 
 ## Common Constants and Utility Functions
 
-We need some math constants that we conveniently define in their own header file. For now we only
-need infinity, but we will also throw our own definition of pi in there, which we will need later.
-There is no standard portable definition of pi, so we just define our own constant for it. We'll
-throw common useful constants and future utility functions in `rtweekend.h`, our general main header
-file.
+We need some math constants that we conveniently define in their own header file. For now we only need infinity, but we will also throw our own definition of pi in there, which we will need later.  There is no standard portable definition of pi, so we just define our own constant for it. We'll throw common useful constants and future utility functions in `rtweekend.h`, our general main header file.
 
 <Tabs>
   <Tab label="Rust">
@@ -1125,7 +1061,6 @@ And the new main:
   </Tab>
 </Tabs>
 
-This yields a picture that is really just a visualization of where the spheres are along with their
-surface normal. This is often a great way to look at your model for flaws and characteristics.
+This yields a picture that is really just a visualization of where the spheres are along with their surface normal. This is often a great way to look at your model for flaws and characteristics.
 
 ![Image 5: Resulting render of normals-colored sphere with ground](../images/img-1.05-normals-sphere-ground.png)
