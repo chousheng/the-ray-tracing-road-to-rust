@@ -2,12 +2,15 @@
 
 ## An Abstract Class for Materials
 
-If we want different objects to have different materials, we have a design decision. We could have a universal material with lots of parameters and different material types just zero out some of those parameters. This is not a bad approach. Or we could have an abstract material class that encapsulates behavior. I am a fan of the latter approach. For our program the material needs to do two things:
+If we want different objects to have different materials, we have a design decision. We could have a universal material with lots of parameters and different material types just zero out some of those parameters. Or we could have an abstract Material trait that encapsulates behavior. We'll adopt the latter approach.
 
-1.  Produce a scattered ray (or say it absorbed the incident ray).
-2.  If scattered, say how much the ray should be attenuated.
+For our program the material needs to do two things:
 
-This suggests the abstract class:
+1. Produce a scattered ray (or say it absorbed the incident ray).
+
+2. If scattered, say how much the ray should be attenuated.
+
+This suggests:
 
 <Tabs>
   <Tab label="Rust">
@@ -56,7 +59,7 @@ This suggests the abstract class:
 
 ## A Data Structure to Describe Ray-Object Intersections
 
-The `hit_record` is to avoid a bunch of arguments so we can stuff whatever info we want in there.  You can use arguments instead; it's a matter of taste. Hittables and materials need to know each other so there is some circularity of the references. In C++ you just need to alert the compiler that the pointer is to a class, which the "class material" in the hittable class below does:
+The `HitRecord` is to avoid a bunch of arguments so we can stuff whatever info we want in there.  You can use arguments instead; it's a matter of taste.
 
 <Tabs>
   <Tab label="Rust">
@@ -136,9 +139,9 @@ The `hit_record` is to avoid a bunch of arguments so we can stuff whatever info 
   </Tab>
 </Tabs>
 
-What we have set up here is that material will tell us how rays interact with the surface.  `hit_record` is just a way to stuff a bunch of arguments into a struct so we can send them as a group. When a ray hits a surface (a particular sphere for example), the material pointer in the `hit_record` will be set to point at the material pointer the sphere was given when it was set up in `main()` when we start. When the `ray_color()` routine gets the `hit_record` it can call member functions of the material pointer to find out what ray, if any, is scattered.
+What we have set up here is that `Material` will tell us how rays interact with the surface. `HitRecord` is just a way to stuff a bunch of arguments into a struct so we can send them as a group. When a ray hits a surface (a particular sphere for example), the material pointer in the `HitRecord` will be set to point at the material pointer the sphere was given when it was set up in `main()` when we start. When the `ray_color()` routine gets the `HitRecord` it can call member functions of the material pointer to find out what ray, if any, is scattered.
 
-To achieve this, we must have a reference to the material for our sphere class to returned within `hit_record`. See the highlighted lines below:
+To achieve this, we must have a pointer to the material for our `Sphere` struct to return within `HitRecord`. See the highlighted lines below:
 
 <Tabs>
   <Tab label="Rust">
@@ -359,7 +362,7 @@ Note we could just as well only scatter with some probability $p$ and have atten
 
 If you read the code above carefully, you'll notice a small chance of mischief. If the random unit vector we generate is exactly opposite the normal vector, the two will sum to zero, which will result in a zero scatter direction vector. This leads to bad scenarios later on (infinities and NaNs), so we need to intercept the condition before we pass it on.
 
-In service of this, we'll create a new vector method -- `vec3::near_zero()` -- that returns true if the vector is very close to zero in all dimensions.
+In service of this, we'll create a new vector method -- `Vec3::near_zero()` -- that returns true if the vector is very close to zero in all dimensions.
 
 <Tabs>
   <Tab label="Rust">
