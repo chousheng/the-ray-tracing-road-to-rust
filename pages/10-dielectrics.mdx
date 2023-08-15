@@ -875,19 +875,7 @@ $$
 \frac{1.5}{1.0} \cdot \sin\theta > 1.0
 $$
 
-the equality between the two sides of the equation is broken, and a solution cannot exist. If a solution does not exist, the glass cannot refract, and therefore must reflect the ray:
-
-```cpp filename="Determining if the ray can refract"
-    if (refraction_ratio * sin_theta > 1.0) {
-        // Must Reflect
-        ...
-    } else {
-        // Can Refract
-        ...
-    }
-```
-
-Here all the light is reflected, and because in practice that is usually inside solid objects, it is called "total internal reflection". This is why sometimes the water-air boundary acts as a perfect mirror when you are submerged.
+the equality between the two sides of the equation is broken, and a solution cannot exist. If a solution does not exist, the glass cannot refract, and therefore must reflect the ray. Here all the light is reflected. It is called "total internal reflection" because in practice that is usually inside solid objects. This is why sometimes the water-air boundary acts as a perfect mirror when you are submerged.
 
 We can solve for `sin_theta` using the trigonometric qualities:
 
@@ -901,20 +889,7 @@ $$
 \cos\theta = \mathbf{R} \cdot \mathbf{n}
 $$
 
-```cpp filename="Determining if the ray can refract"
-    auto cos_theta = fmin(dot(-unit_direction, rec.normal), 1.0);
-    auto sin_theta = sqrt(1.0 - cos_theta*cos_theta);
-
-    if (refraction_ratio * sin_theta > 1.0) {
-        // Must Reflect
-        ...
-    } else {
-        // Can Refract
-        ...
-    }
-```
-
-And the dielectric material that always refracts (when possible) is:
+And the dielectric material that always refracts when possible is:
 
 <Tabs>
   <Tab label="Rust">
