@@ -8,11 +8,11 @@ Diffuse objects that don't emit light merely take on the color of their surround
 
 ![Figure \[light-bounce\]: Light ray bounces](../images/fig-1.08-light-bounce.jpg)
 
-They also might be absorbed rather than reflected. The darker the surface, the more likely absorption is. (That's why it is dark!) Really any algorithm that randomizes direction will produce surfaces that look matte. One of the simplest ways to do this turns out to be exactly correct for ideal diffuse surfaces. (I used to do it as a lazy hack that approximates mathematically ideal Lambertian.)
+They also might be absorbed rather than reflected. The darker the surface, the more likely absorption is. (That's why it is dark!) Really any algorithm that randomizes direction will produce surfaces that look matte.
 
-(Reader Vassillen Chizhov proved that the lazy hack is indeed just a lazy hack and is inaccurate.  The correct representation of ideal Lambertian isn't much more work, and is presented at the end of the chapter.)
+There are two unit radius spheres tangent to the hit point $p$ of a surface. These two spheres have a center of $(\mathbf{P} + \mathbf{n})$ and $(\mathbf{P} - \mathbf{n})$, where $\mathbf{n}$ is the normal of the surface. The sphere with a center at $(\mathbf{P} - \mathbf{n})$ is considered *inside* the surface, whereas the sphere with center $(\mathbf{P} + \mathbf{n})$ is considered *outside* the surface.
 
-There are two unit radius spheres tangent to the hit point $p$ of a surface. These two spheres have a center of $(\mathbf{P} + \mathbf{n})$ and $(\mathbf{P} - \mathbf{n})$, where $\mathbf{n}$ is the normal of the surface. The sphere with a center at $(\mathbf{P} - \mathbf{n})$ is considered *inside* the surface, whereas the sphere with center $(\mathbf{P} + \mathbf{n})$ is considered *outside* the surface. Select the tangent unit radius sphere that is on the same side of the surface as the ray origin. Pick a random point $\mathbf{S}$ inside this unit radius sphere and send a ray from the hit point $\mathbf{P}$ to the random point $\mathbf{S}$ (this is the vector $(\mathbf{S}-\mathbf{P})$):
+Let's select the tangent unit radius sphere that is on the same side of the surface as the ray origin. Pick a random point $\mathbf{S}$ inside this unit radius sphere and send a ray from the hit point $\mathbf{P}$ to the random point $\mathbf{S}$ (this is the vector $(\mathbf{S}-\mathbf{P})$):
 
 ![Figure \[rand-vec\]: Generating a random diffuse bounce ray](../images/fig-1.09-rand-vec.jpg)
 
@@ -1204,7 +1204,7 @@ This gets rid of the shadow acne problem. Yes it is really called that.
 
 The rejection method presented here produces random points in the unit ball offset along the surface normal. This corresponds to picking directions on the hemisphere with high probability close to the normal, and a lower probability of scattering rays at grazing angles. This distribution scales by the $\cos^3 (\phi)$ where $\phi$ is the angle from the normal. This is useful since light arriving at shallow angles spreads over a larger area, and thus has a lower contribution to the final color.
 
-However, we are interested in a Lambertian distribution, which has a distribution of $\cos (\phi)$ True Lambertian has the probability higher for ray scattering close to the normal, but the distribution is more uniform. This is achieved by picking random points on the surface of the unit sphere, offset along the surface normal. Picking random points on the unit sphere can be achieved by picking random points *in* the unit sphere, and then normalizing those.
+However, we are interested in a Lambertian distribution, which has a distribution of $\cos (\phi)$ True Lambertian has the probability higher for ray scattering close to the normal, but the distribution is more uniform. This is achieved by picking random points *on* the surface of the unit sphere, offset along the surface normal. Picking random points *on* the unit sphere can be achieved by picking random points *in* the unit sphere, and then normalizing those.
 
 <Tabs>
   <Tab label="Rust">
