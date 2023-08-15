@@ -1,35 +1,42 @@
 # Dielectrics
 
-Clear materials such as water, glass, and diamonds are dielectrics. When a light ray hits them, it
-splits into a reflected ray and a refracted (transmitted) ray. We'll handle that by randomly
-choosing between reflection or refraction, and only generating one scattered ray per interaction.
+Clear materials such as water, glass, and diamonds are dielectrics. When a light ray hits them, it splits into a reflected ray and a refracted (transmitted) ray. We'll handle that by randomly choosing between reflection or refraction, and only generating one scattered ray per interaction.
 
 ## Snell's Law
 
 The refraction is described by Snell's law:
 
-$\eta \cdot \sin\theta = \eta' \cdot \sin\theta'$
+$$
+\eta \cdot \sin\theta = \eta' \cdot \sin\theta'
+$$
 
-Where $\theta$ and $\theta'$ are the angles from the normal, and $\eta$ and $\eta'$ (pronounced
-"eta" and "eta prime") are the refractive indices (typically air = 1.0, glass = 1.3–1.7, diamond =
-2.4). The geometry is:
+Where $\theta$ and $\theta'$ are the angles from the normal, and $\eta$ and $\eta'$ (pronounced "eta" and "eta prime") are the refractive indices (typically air = 1.0, glass = 1.3–1.7, diamond = 2.4). The geometry is:
 
 ![Figure \[refraction\]: Ray refraction](../images/fig-1.13-refraction.jpg)
 
 In order to determine the direction of the refracted ray, we have to solve for $\sin\theta'$:
 
-$\sin\theta' = \frac{\eta}{\eta'} \cdot \sin\theta$
+$$
+\sin\theta' = \frac{\eta}{\eta'} \cdot \sin\theta
+$$
 
 On the refracted side of the surface there is a refracted ray $\mathbf{R'}$ and a normal
 $\mathbf{n'}$, and there exists an angle, $\theta'$, between them. We can split $\mathbf{R'}$ into
 the parts of the ray that are perpendicular to $\mathbf{n'}$ and parallel to $\mathbf{n'}$:
 
-$\mathbf{R'} = \mathbf{R'}_{\bot} + \mathbf{R'}_{\parallel}$
+$$
+\mathbf{R'} = \mathbf{R'}_{\bot} + \mathbf{R'}_{\parallel}
+$$
 
 If we solve for $\mathbf{R'}_{\bot}$ and $\mathbf{R'}_{\parallel}$ we get:
 
-$\mathbf{R'}_{\bot} = \frac{\eta}{\eta'} (\mathbf{R} + \cos\theta \mathbf{n})$
-$\mathbf{R'}_{\parallel} = -\sqrt{1 - |\mathbf{R'}\_{\bot}|^2} \mathbf{n}$
+$$
+\mathbf{R'}_{\bot} = \frac{\eta}{\eta'} (\mathbf{R} + \cos\theta \mathbf{n})
+$$
+
+$$
+\mathbf{R'}_{\parallel} = -\sqrt{1 - |\mathbf{R'}_{\bot}|^2} \mathbf{n}
+$$
 
 You can go ahead and prove this for yourself if you want, but we will treat it as fact and move on.
 The rest of the book will not require you to understand the proof.
@@ -37,17 +44,20 @@ The rest of the book will not require you to understand the proof.
 We still need to solve for $\cos\theta$. It is well known that the dot product of two vectors can
 be explained in terms of the cosine of the angle between them:
 
-$\mathbf{a} \cdot \mathbf{b} = |\mathbf{a}| |\mathbf{b}| \cos\theta$
+$$
+\mathbf{a} \cdot \mathbf{b} = |\mathbf{a}| |\mathbf{b}| \cos\theta
+$$
 
 If we restrict $\mathbf{a}$ and $\mathbf{b}$ to be unit vectors:
 
-$\mathbf{a} \cdot \mathbf{b} = \cos\theta$
+$$
+\mathbf{a} \cdot \mathbf{b} = \cos\theta
+$$
 
 We can now rewrite $\mathbf{R'}_{\bot}$ in terms of known quantities:
 
 $$
-\mathbf{R'}_{\bot} =
-   \frac{\eta}{\eta'} (\mathbf{R} + (\mathbf{-R} \cdot \mathbf{n}) \mathbf{n})
+\mathbf{R'}_{\bot} = \frac{\eta}{\eta'} (\mathbf{R} + (\mathbf{-R} \cdot \mathbf{n}) \mathbf{n})
 $$
 
 When we combine them back together, we can write a function to calculate $\mathbf{R'}$:
@@ -847,22 +857,25 @@ This gives us the following result:
 
 ## Total Internal Reflection
 
-That definitely doesn't look right. One troublesome practical issue is that when the ray is in the
-material with the higher refractive index, there is no real solution to Snell's law, and thus there
-is no refraction possible. If we refer back to Snell's law and the derivation of $\sin\theta'$:
+That definitely doesn't look right. One troublesome practical issue is that when the ray is in the material with the higher refractive index, there is no real solution to Snell's law, and thus there is no refraction possible. If we refer back to Snell's law and the derivation of $\sin\theta'$:
 
-$\sin\theta' = \frac{\eta}{\eta'} \cdot \sin\theta$
+$$
+\sin\theta' = \frac{\eta}{\eta'} \cdot \sin\theta
+$$
 
 If the ray is inside glass and outside is air ($\eta = 1.5$ and $\eta' = 1.0$):
 
-$\sin\theta' = \frac{1.5}{1.0} \cdot \sin\theta$
+$$
+\sin\theta' = \frac{1.5}{1.0} \cdot \sin\theta
+$$
 
 The value of $\sin\theta'$ cannot be greater than 1. So, if,
 
-$\frac{1.5}{1.0} \cdot \sin\theta > 1.0$,
+$$
+\frac{1.5}{1.0} \cdot \sin\theta > 1.0
+$$
 
-the equality between the two sides of the equation is broken, and a solution cannot exist. If a
-solution does not exist, the glass cannot refract, and therefore must reflect the ray:
+the equality between the two sides of the equation is broken, and a solution cannot exist. If a solution does not exist, the glass cannot refract, and therefore must reflect the ray:
 
 ```cpp filename="Determining if the ray can refract"
     if (refraction_ratio * sin_theta > 1.0) {
@@ -874,17 +887,19 @@ solution does not exist, the glass cannot refract, and therefore must reflect th
     }
 ```
 
-Here all the light is reflected, and because in practice that is usually inside solid objects, it
-is called "total internal reflection". This is why sometimes the water-air boundary acts as a
-perfect mirror when you are submerged.
+Here all the light is reflected, and because in practice that is usually inside solid objects, it is called "total internal reflection". This is why sometimes the water-air boundary acts as a perfect mirror when you are submerged.
 
 We can solve for `sin_theta` using the trigonometric qualities:
 
-$\sin\theta = \sqrt{1 - \cos^2\theta}$
+$$
+\sin\theta = \sqrt{1 - \cos^2\theta}
+$$
 
 and
 
-$\cos\theta = \mathbf{R} \cdot \mathbf{n}$
+$$
+\cos\theta = \mathbf{R} \cdot \mathbf{n}
+$$
 
 ```cpp filename="Determining if the ray can refract"
     auto cos_theta = fmin(dot(-unit_direction, rec.normal), 1.0);
@@ -1129,8 +1144,7 @@ And the dielectric material that always refracts (when possible) is:
   </Tab>
 </Tabs>
 
-Attenuation is always 1 -- the glass surface absorbs nothing. If we try that out with these
-parameters:
+Attenuation is always 1 -- the glass surface absorbs nothing. If we try that out with these parameters:
 
 <Tabs>
   <Tab label="Rust">
@@ -1341,10 +1355,7 @@ We get:
 
 ## Schlick Approximation
 
-Now real glass has reflectivity that varies with angle -- look at a window at a steep angle and it
-becomes a mirror. There is a big ugly equation for that, but almost everybody uses a cheap and
-surprisingly accurate polynomial approximation by Christophe Schlick. This yields our full glass
-material:
+Now real glass has reflectivity that varies with angle -- look at a window at a steep angle and it becomes a mirror. There is a big ugly equation for that, but almost everybody uses a cheap and surprisingly accurate polynomial approximation by Christophe Schlick. This yields our full glass material:
 
 <Tabs>
   <Tab label="Rust">
@@ -1594,9 +1605,7 @@ material:
 
 ## Modeling a Hollow Glass Sphere
 
-An interesting and easy trick with dielectric spheres is to note that if you use a negative radius,
-the geometry is unaffected, but the surface normal points inward. This can be used as a bubble to
-make a hollow glass sphere:
+An interesting and easy trick with dielectric spheres is to note that if you use a negative radius, the geometry is unaffected, but the surface normal points inward. This can be used as a bubble to make a hollow glass sphere:
 
 <Tabs>
   <Tab label="Rust">

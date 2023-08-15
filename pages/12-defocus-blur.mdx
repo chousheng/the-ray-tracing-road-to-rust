@@ -1,48 +1,26 @@
 # Defocus Blur
 
-Now our final feature: defocus blur. Note, all photographers will call it "depth of field" so be
-aware of only using "defocus blur" among friends.
+Now our final feature: defocus blur. Note, all photographers will call it "depth of field" so be aware of only using "defocus blur" among friends.
 
-The reason we defocus blur in real cameras is because they need a big hole (rather than just a
-pinhole) to gather light. This would defocus everything, but if we stick a lens in the hole, there
-will be a certain distance where everything is in focus. You can think of a lens this way: all light
-rays coming *from* a specific point at the focus distance -- and that hit the lens -- will be bent
-back *to* a single point on the image sensor.
+The reason we defocus blur in real cameras is because they need a big hole (rather than just a pinhole) to gather light. This would defocus everything, but if we stick a lens in the hole, there will be a certain distance where everything is in focus. You can think of a lens this way: all light rays coming *from* a specific point at the focus distance -- and that hit the lens -- will be bent back *to* a single point on the image sensor.
 
-We call the distance between the projection point and the plane where everything is in perfect focus
-the *focus distance*. Be aware that the focus distance is not the same as the focal length -- the
-*focal length* is the distance between the projection point and the image plane.
+We call the distance between the projection point and the plane where everything is in perfect focus the *focus distance*. Be aware that the focus distance is not the same as the focal length -- the *focal length* is the distance between the projection point and the image plane.
 
-In a physical camera, the focus distance is controlled by the distance between the lens and the
-film/sensor. That is why you see the lens move relative to the camera when you change what is in
-focus (that may happen in your phone camera too, but the sensor moves). The "aperture" is a hole to
-control how big the lens is effectively. For a real camera, if you need more light you make the
-aperture bigger, and will get more defocus blur. For our virtual camera, we can have a perfect
-sensor and never need more light, so we only have an aperture when we want defocus blur.
+In a physical camera, the focus distance is controlled by the distance between the lens and the film/sensor. That is why you see the lens move relative to the camera when you change what is in focus (that may happen in your phone camera too, but the sensor moves). The "aperture" is a hole to control how big the lens is effectively. For a real camera, if you need more light you make the aperture bigger, and will get more defocus blur. For our virtual camera, we can have a perfect sensor and never need more light, so we only have an aperture when we want defocus blur.
 
 ## A Thin Lens Approximation
 
-A real camera has a complicated compound lens. For our code we could simulate the order: sensor,
-then lens, then aperture. Then we could figure out where to send the rays, and flip the image after
-it's computed (the image is projected upside down on the film). Graphics people, however, usually
-use a thin lens approximation:
+A real camera has a complicated compound lens. For our code we could simulate the order: sensor, then lens, then aperture. Then we could figure out where to send the rays, and flip the image after it's computed (the image is projected upside down on the film). Graphics people, however, usually use a thin lens approximation:
 
 ![Figure \[cam-lens\]: Camera lens model](../images/fig-1.17-cam-lens.jpg)
 
-We don't need to simulate any of the inside of the camera. For the purposes of rendering an image
-outside the camera, that would be unnecessary complexity. Instead, I usually start rays from the
-lens, and send them toward the focus plane (`focus_dist` away from the lens), where everything on
-that plane is in perfect focus.
+We don't need to simulate any of the inside of the camera. For the purposes of rendering an image outside the camera, that would be unnecessary complexity. Instead, I usually start rays from the lens, and send them toward the focus plane (`focus_dist` away from the lens), where everything on that plane is in perfect focus.
 
 ![Figure \[cam-film-plane\]: Camera focus plane](../images/fig-1.18-cam-film-plane.jpg)
 
 ## Generating Sample Rays
 
-Normally, all scene rays originate from the `lookfrom` point. In order to accomplish defocus blur,
-generate random scene rays originating from inside a disk centered at the `lookfrom` point. The
-larger the radius, the greater the defocus blur. You can think of our original camera as having a
-defocus disk of radius zero (no blur at all), so all rays originated at the disk center
-(`lookfrom`).
+Normally, all scene rays originate from the `lookfrom` point. In order to accomplish defocus blur, generate random scene rays originating from inside a disk centered at the `lookfrom` point. The larger the radius, the greater the defocus blur. You can think of our original camera as having a defocus disk of radius zero (no blur at all), so all rays originated at the disk center (`lookfrom`).
 
 <Tabs>
   <Tab label="Rust">

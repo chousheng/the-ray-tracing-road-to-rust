@@ -1,15 +1,10 @@
 # Positionable Camera
 
-Cameras, like dielectrics, are a pain to debug. So I always develop mine incrementally. First, let's
-allow an adjustable field of view (*fov*). This is the angle you see through the portal. Since our
-image is not square, the fov is different horizontally and vertically. I always use vertical fov. I
-also usually specify it in degrees and change to radians inside a constructor -- a matter of
-personal taste.
+Cameras, like dielectrics, are a pain to debug. So I always develop mine incrementally. First, let's allow an adjustable field of view (*fov*). This is the angle you see through the portal. Since our image is not square, the fov is different horizontally and vertically. I always use vertical fov. I also usually specify it in degrees and change to radians inside a constructor -- a matter of personal taste.
 
 ## Camera Viewing Geometry
 
-I first keep the rays coming from the origin and heading to the $z = -1$ plane. We could make it the
-$z = -2$ plane, or whatever, as long as we made $h$ a ratio to that distance. Here is our setup:
+I first keep the rays coming from the origin and heading to the $z = -1$ plane. We could make it the $z = -2$ plane, or whatever, as long as we made $h$ a ratio to that distance. Here is our setup:
 
 ![Figure \[cam-view-geom\]: Camera viewing geometry](../images/fig-1.14-cam-view-geom.jpg)
 
@@ -305,28 +300,17 @@ gives:
 
 ## Positioning and Orienting the Camera
 
-To get an arbitrary viewpoint, let's first name the points we care about. We'll call the position
-where we place the camera *lookfrom*, and the point we look at *lookat*. (Later, if you want, you
-could define a direction to look in instead of a point to look at.)
+To get an arbitrary viewpoint, let's first name the points we care about. We'll call the position where we place the camera *lookfrom*, and the point we look at *lookat*. (Later, if you want, you could define a direction to look in instead of a point to look at.)
 
-We also need a way to specify the roll, or sideways tilt, of the camera: the rotation around the
-lookat-lookfrom axis. Another way to think about it is that even if you keep `lookfrom` and `lookat`
-constant, you can still rotate your head around your nose. What we need is a way to specify an "up"
-vector for the camera. This up vector should lie in the plane orthogonal to the view direction.
+We also need a way to specify the roll, or sideways tilt, of the camera: the rotation around the lookat-lookfrom axis. Another way to think about it is that even if you keep `lookfrom` and `lookat` constant, you can still rotate your head around your nose. What we need is a way to specify an "up" vector for the camera. This up vector should lie in the plane orthogonal to the view direction.
 
 ![Figure \[cam-view-dir\]: Camera view direction](../images/fig-1.15-cam-view-dir.jpg)
 
-We can actually use any up vector we want, and simply project it onto this plane to get an up vector
-for the camera. I use the common convention of naming a "view up" (*vup*) vector. A couple of cross
-products, and we now have a complete orthonormal basis $(u,v,w)$ to describe our camera's
-orientation.
+We can actually use any up vector we want, and simply project it onto this plane to get an up vector for the camera. I use the common convention of naming a "view up" (*vup*) vector. A couple of cross products, and we now have a complete orthonormal basis $(u,v,w)$ to describe our camera's orientation.
 
 ![Figure \[cam-view-up\]: Camera view up direction](../images/fig-1.16-cam-view-up.jpg)
 
-Remember that `vup`, `v`, and `w` are all in the same plane. Note that, like before when our fixed
-camera faced -Z, our arbitrary view camera faces -w. And keep in mind that we can -- but we don't
-have to -- use world up $(0,1,0)$ to specify vup. This is convenient and will naturally keep your
-camera horizontally level until you decide to experiment with crazy camera angles.
+Remember that `vup`, `v`, and `w` are all in the same plane. Note that, like before when our fixed camera faced -Z, our arbitrary view camera faces -w. And keep in mind that we can -- but we don't have to -- use world up $(0,1,0)$ to specify vup. This is convenient and will naturally keep your camera horizontally level until you decide to experiment with crazy camera angles.
 
 <Tabs>
   <Tab label="Rust">

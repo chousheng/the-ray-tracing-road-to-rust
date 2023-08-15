@@ -1541,8 +1541,7 @@ However, we are interested in a Lambertian distribution, which has a distributio
 
 ![Figure \[rand-unitvec\]: Generating a random unit vector](../images/fig-1.10-rand-unitvec.png)
 
-This `random_unit_vector()` is a drop-in replacement for the existing `random_in_unit_sphere()`
-function.
+This `random_unit_vector()` is a drop-in replacement for the existing `random_in_unit_sphere()` function.
 
 <Tabs>
   <Tab label="Rust">
@@ -1706,7 +1705,8 @@ After rendering we get a similar image:
 
 It's hard to tell the difference between these two diffuse methods, given that our scene of two spheres is so simple, but you should be able to notice two important visual differences:
 
-1.  The shadows are less pronounced after the change
-2.  Both spheres are lighter in appearance after the change
+1. The shadows are less pronounced after the change
+
+2. Both spheres are lighter in appearance after the change
 
 Both of these changes are due to the more uniform scattering of the light rays, fewer rays are scattering toward the normal. This means that for diffuse objects, they will appear *lighter* because more light bounces toward the camera. For the shadows, less light bounces straight-up, so the parts of the larger sphere directly underneath the smaller sphere are brighter.
