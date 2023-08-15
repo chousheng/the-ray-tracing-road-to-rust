@@ -1,10 +1,10 @@
 # Positionable Camera
 
-Cameras, like dielectrics, are a pain to debug. So I always develop mine incrementally. First, let's allow an adjustable field of view (*fov*). This is the angle you see through the portal. Since our image is not square, the fov is different horizontally and vertically. I always use vertical fov. I also usually specify it in degrees and change to radians inside a constructor -- a matter of personal taste.
+Cameras, like dielectrics, are hard to debug. So we'll develop incrementally. First, let's allow an adjustable field of view (*fov*). This is the angle you see through the portal. Since our image is not square, the fov is different horizontally and vertically. We'll use vertical fov. We'll also specify it in degrees and change to radians when creating the camera.
 
 ## Camera Viewing Geometry
 
-I first keep the rays coming from the origin and heading to the $z = -1$ plane. We could make it the $z = -2$ plane, or whatever, as long as we made $h$ a ratio to that distance. Here is our setup:
+We first keep the rays coming from the origin and heading to the $z = -1$ plane. We could make it the $z = -2$ plane, or whatever, as long as we made $h$ a ratio to that distance. Here is our setup:
 
 ![Figure \[cam-view-geom\]: Camera viewing geometry](../images/fig-1.14-cam-view-geom.jpg)
 
@@ -306,7 +306,7 @@ We also need a way to specify the roll, or sideways tilt, of the camera: the rot
 
 ![Figure \[cam-view-dir\]: Camera view direction](../images/fig-1.15-cam-view-dir.jpg)
 
-We can actually use any up vector we want, and simply project it onto this plane to get an up vector for the camera. I use the common convention of naming a "view up" (*vup*) vector. A couple of cross products, and we now have a complete orthonormal basis $(u,v,w)$ to describe our camera's orientation.
+We can actually use any up vector we want, and simply project it onto this plane to get an up vector for the camera. We use the common convention of naming a "view up" (*vup*) vector. A couple of cross products, and we now have a complete orthonormal basis $(u,v,w)$ to describe our camera's orientation.
 
 ![Figure \[cam-view-up\]: Camera view up direction](../images/fig-1.16-cam-view-up.jpg)
 
