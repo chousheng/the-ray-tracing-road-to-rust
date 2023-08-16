@@ -5,7 +5,7 @@
     "import-code": "node scripts/import-code.mjs"
   },
   "dependencies": {
-    "next": "^13.4.12",
+    "next": "^13.4.16",
     "nextra": "2.9.0",
     "nextra-theme-docs": "2.9.0",
     "react": "^18.2.0",
@@ -17,7 +17,7 @@
     "@types/react": "18.2.14",
     "autoprefixer": "^10.4.14",
     "eslint": "^8.46.0",
-    "eslint-config-next": "^13.4.12",
+    "eslint-config-next": "^13.4.16",
     "eslint-config-prettier": "^8.9.0",
     "glob": "^10.3.3",
     "nodemon": "^3.0.1",
