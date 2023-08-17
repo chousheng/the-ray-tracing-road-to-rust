@@ -12,7 +12,7 @@ const remarkConfig = {
     // Generate a table of contents in `## Contents`
     //[remarkToc, {heading: 'contents'}]
     remarkMath,
-    remarkMdx,
+    [remarkMdx, { printWidth: 100 }],
   ],
 };
 
