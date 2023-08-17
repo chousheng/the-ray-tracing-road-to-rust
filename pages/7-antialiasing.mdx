@@ -77,7 +77,7 @@ We add the following code snippet:
 
 For a given pixel we have several samples within that pixel and send rays through each of the samples. The colors of these rays are then averaged:
 
-![Figure \[pixel-samples\]: Pixel samples](../images/fig-1.07-pixel-samples.jpg)
+<Fig caption="Pixel samples" src="fig-1.07-pixel-samples.jpg" label="pixel-samples" />
 
 Now's a good time to create a `Camera` struct to manage our virtual camera and the related tasks of scene sampling. The following struct implements a simple camera using the axis-aligned camera from before:
 
@@ -164,7 +164,7 @@ Now's a good time to create a `Camera` struct to manage our virtual camera and t
   </Tab>
 </Tabs>
 
-To handle the multi-sampled color computation, we'll update the `write_color()` function. Rather than adding in a fractional contribution each time we accumulate more light to the color, just add the full color each iteration, and then perform a single divide at the end (by the number of samples) when writing out the color. In addition, we'll add a handy utility function to the `common` module: `clamp(x, min, max)`, which clamps the value `x` to the range [min, max]:
+To handle the multi-sampled color computation, we'll update the `write_color()` function. Rather than adding in a fractional contribution each time we accumulate more light to the color, just add the full color each iteration, and then perform a single divide at the end (by the number of samples) when writing out the color. In addition, we'll add a handy utility function to the `common` module: `clamp(x, min, max)`, which clamps the value `x` to the range \[min, max]:
 
 <Tabs>
   <Tab label="Rust">
@@ -467,4 +467,4 @@ Main is also changed:
 
 Zooming into the image that is produced, we can see the difference in edge pixels.
 
-![Image 6: Before and after antialiasing](../images/img-1.06-antialias-before-after.png)
+<Img caption="Before and after antialiasing" src="img-1.06-antialias-before-after.png" />

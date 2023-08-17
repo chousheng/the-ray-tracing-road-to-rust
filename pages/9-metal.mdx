@@ -6,9 +6,9 @@ If we want different objects to have different materials, we have a design decis
 
 For our program the material needs to do two things:
 
-1. Produce a scattered ray (or say it absorbed the incident ray).
+1.  Produce a scattered ray (or say it absorbed the incident ray).
 
-2. If scattered, say how much the ray should be attenuated.
+2.  If scattered, say how much the ray should be attenuated.
 
 This suggests:
 
@@ -816,7 +816,7 @@ In service of this, we'll create a new vector method -- `Vec3::near_zero()` -- t
 
 For smooth metals the ray won't be randomly scattered. The key math is: how does a ray get reflected from a metal mirror? Vector math is our friend here:
 
-![Figure \[reflection\]: Ray reflection](../images/fig-1.11-reflection.jpg)
+<Fig caption="Ray reflection" src="fig-1.11-reflection.jpg" label="reflection" />
 
 The reflected ray direction in red is just $\mathbf{v} + 2\mathbf{b}$. In our design, $\mathbf{n}$ is a unit vector, but $\mathbf{v}$ may not be. The length of $\mathbf{b}$ should be $\mathbf{v} \cdot \mathbf{n}$. Because $\mathbf{v}$ points in, we will need a minus sign, yielding:
 
@@ -1707,13 +1707,13 @@ Now let's add some metal spheres to our scene:
 
 Which gives:
 
-![Image 11: Shiny metal](../images/img-1.11-metal-shiny.png)
+<Img caption="Shiny metal" src="img-1.11-metal-shiny.png" />
 
 ## Fuzzy Reflection
 
 We can also randomize the reflected direction by using a small sphere and choosing a new endpoint for the ray:
 
-![Figure \[reflect-fuzzy\]: Generating fuzzed reflection rays](../images/fig-1.12-reflect-fuzzy.jpg)
+<Fig caption="Generating fuzzed reflection rays" src="fig-1.12-reflect-fuzzy.jpg" label="reflect-fuzzy" />
 
 The bigger the sphere, the fuzzier the reflections will be. This suggests adding a fuzziness parameter that is just the radius of the sphere (so zero is no perturbation). The catch is that for big spheres or grazing rays, we may scatter below the surface. We can just have the surface absorb those.
 
@@ -2078,4 +2078,4 @@ We can try that out by adding fuzziness 0.3 and 1.0 to the metals:
   </Tab>
 </Tabs>
 
-![Image 12: Fuzzed metal](../images/img-1.12-metal-fuzz.png)
+<Img caption="Fuzzed metal" src="img-1.12-metal-fuzz.png" />

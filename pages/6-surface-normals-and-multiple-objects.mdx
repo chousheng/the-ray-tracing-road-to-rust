@@ -4,7 +4,7 @@ First, let's get ourselves a surface normal so we can shade. This is a vector th
 
 For a sphere, the outward normal is in the direction of the hit point minus the center:
 
-![Figure \[sphere-normal\]: Sphere surface-normal geometry](../images/fig-1.05-sphere-normal.jpg)
+<Fig caption="Sphere surface-normal geometry" src="fig-1.05-sphere-normal.jpg" label="sphere-normal" />
 
 On the earth, this implies that the vector from the earth's center to you points straight up. Let's throw that into the code now, and shade it. We don't have any lights or anything yet, so let's just visualize the normals with a color map.
 
@@ -169,7 +169,7 @@ These changes in the code let us compute and visualize $\mathbf{n}$:
 
 And that yields this picture:
 
-![Image 4: A sphere colored according to its normal vectors](../images/img-1.04-normals-sphere.png)
+<Img caption="A sphere colored according to its normal vectors" src="img-1.04-normals-sphere.png" />
 
 ## Simplifying the Ray-Sphere Intersection Code
 
@@ -525,7 +525,7 @@ And here's the sphere:
 
 Another design decision for storing normals in `HitRecord` is whether they should always point outward or they should points against the incident ray.
 
-![Figure \[normal-sides\]: Possible directions for sphere surface-normal geometry](../images/fig-1.06-normal-sides.jpg)
+<Fig caption="Possible directions for sphere surface-normal geometry" src="fig-1.06-normal-sides.jpg" label="normal-sides" />
 
 We need to choose one of these possibilities because we will eventually want to determine which side of the surface that the ray is coming from. This is important for objects that are rendered differently on each side, like the text on a two-sided sheet of paper, or for objects that have an inside and an outside, like glass balls.
 
@@ -999,4 +999,4 @@ And the new main:
 
 This yields a picture that is really just a visualization of where the spheres are along with their surface normal. This is often a great way to look at your model for flaws and characteristics.
 
-![Image 5: Resulting render of normals-colored sphere with ground](../images/img-1.05-normals-sphere-ground.png)
+<Img caption="Resulting render of normals-colored sphere with ground" src="img-1.05-normals-sphere-ground.png" />

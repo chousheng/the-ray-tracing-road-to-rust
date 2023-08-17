@@ -6,7 +6,7 @@ Now that we have objects and multiple rays per pixel, we can make some realistic
 
 Diffuse objects that don't emit light merely take on the color of their surroundings, but they modulate that with their own intrinsic color. Light that reflects off a diffuse surface has its direction randomized. So, if we send three rays into a crack between two diffuse surfaces they will each have different random behavior:
 
-![Figure \[light-bounce\]: Light ray bounces](../images/fig-1.08-light-bounce.jpg)
+<Fig caption="Light ray bounces" src="fig-1.08-light-bounce.jpg" label="light-bounce" />
 
 They also might be absorbed rather than reflected. The darker the surface, the more likely absorption is. (That's why it is dark!) Really any algorithm that randomizes direction will produce surfaces that look matte.
 
@@ -14,7 +14,7 @@ There are two unit radius spheres tangent to the hit point $p$ of a surface. The
 
 Let's select the tangent unit radius sphere that is on the same side of the surface as the ray origin. Pick a random point $\mathbf{S}$ inside this unit radius sphere and send a ray from the hit point $\mathbf{P}$ to the random point $\mathbf{S}$ (this is the vector $(\mathbf{S}-\mathbf{P})$):
 
-![Figure \[rand-vec\]: Generating a random diffuse bounce ray](../images/fig-1.09-rand-vec.jpg)
+<Fig caption="Generating a random diffuse bounce ray" src="fig-1.09-rand-vec.jpg" label="rand-vec" />
 
 We need a way to pick a random point in a unit radius sphere. We'll use what is usually the easiest
 algorithm: a rejection method. First, pick a random point in the unit cube where x, y, and z all
@@ -958,7 +958,7 @@ There's one potential problem lurking here. Notice that the `ray_color` function
 
 This gives us:
 
-![Image 7: First render of a diffuse sphere](../images/img-1.07-first-diffuse.png)
+<Img caption="First render of a diffuse sphere" src="img-1.07-first-diffuse.png" />
 
 ## Using Gamma Correction for Accurate Color Intensity
 
@@ -1036,7 +1036,7 @@ Note the shadowing under the sphere. This picture is very dark, but our spheres 
 
 That yields light grey, as we desire:
 
-![Image 8: Diffuse sphere, with gamma correction](../images/img-1.08-gamma-correct.png)
+<Img caption="Diffuse sphere with gamma correction" src="img-1.08-gamma-correct.png" />
 
 ## Fixing Shadow Acne
 
@@ -1539,7 +1539,7 @@ However, we are interested in a Lambertian distribution, which has a distributio
   </Tab>
 </Tabs>
 
-![Figure \[rand-unitvec\]: Generating a random unit vector](../images/fig-1.10-rand-unitvec.png)
+<Fig caption="Generating a random unit vector" src="fig-1.10-rand-unitvec.png" label="rand-unitvec" />
 
 This `random_unit_vector()` is a drop-in replacement for the existing `random_in_unit_sphere()` function.
 
@@ -1701,12 +1701,12 @@ This `random_unit_vector()` is a drop-in replacement for the existing `random_in
 
 After rendering we get a similar image:
 
-![Image 9: Correct rendering of Lambertian spheres](../images/img-1.09-correct-lambertian.png)
+<Img caption="Correct rendering of Lambertian spheres" src="img-1.09-correct-lambertian.png" />
 
 It's hard to tell the difference between these two diffuse methods, given that our scene of two spheres is so simple, but you should be able to notice two important visual differences:
 
-1. The shadows are less pronounced after the change
+1.  The shadows are less pronounced after the change
 
-2. Both spheres are lighter in appearance after the change
+2.  Both spheres are lighter in appearance after the change
 
 Both of these changes are due to the more uniform scattering of the light rays, fewer rays are scattering toward the normal. This means that for diffuse objects, they will appear *lighter* because more light bounces toward the camera. For the shadows, less light bounces straight-up, so the parts of the larger sphere directly underneath the smaller sphere are brighter.

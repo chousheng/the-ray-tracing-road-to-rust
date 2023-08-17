@@ -2,7 +2,7 @@
 
 The one thing that all ray tracers have is a ray struct and a computation of what color is seen along a ray. Let's think of a ray as a function $\mathbf{P}(t) = \mathbf{A} + t \mathbf{b}$. Here $\mathbf{P}$ is a 3D position along a line in 3D. $\mathbf{A}$ is the ray origin and $\mathbf{b}$ is the ray direction. The ray parameter $t$ is a real number (`f64` in the code). Plug in a different $t$ and $\mathbf{P}(t)$ moves the point along the ray. Add in negative $t$ values and you can go anywhere on the 3D line. For positive $t$, you get only the parts in front of $\mathbf{A}$, and this is what is often called a half-line or ray.
 
-![Linear interpolation](../images/fig-1.02-lerp.jpg)
+<Fig caption="Linear interpolation" src="fig-1.02-lerp.jpg" label="lerp" />
 
 The function $\mathbf{P}(t)$ in more verbose code form we call `ray::at(t)`:
 
@@ -85,7 +85,7 @@ In addition to setting up the pixel dimensions for the rendered image, we also n
 
 We'll put the "eye" (or camera center if you think of a camera) at $(0,0,0)$. We will have the y-axis go up, and the x-axis to the right. In order to respect the convention of a right handed coordinate system, into the screen is the negative z-axis. We will traverse the screen from the upper left hand corner, and use two offset vectors along the screen sides to move the ray endpoint across the screen. Note that we do not make the ray direction a unit length vector because not doing that makes for simpler and slightly faster code.
 
-![Camera geometry](../images/fig-1.03-cam-geom.jpg)
+<Fig caption="Camera geometry" src="fig-1.03-cam-geom.jpg" label="camera-geom" />
 
 Below in code, the ray `r` goes to approximately the pixel centers (We won't worry about exactness for now because we'll add antialiasing later):
 
@@ -216,4 +216,4 @@ $$
 
 with $t$ going from zero to one. In our case this produces:
 
-![Image 2: A blue-to-white gradient depending on ray Y coordinate ](../images/img-1.02-blue-to-white.png)
+<Img caption="A blue-to-white gradient depending on ray Y coordinate " src="img-1.02-blue-to-white.png" />

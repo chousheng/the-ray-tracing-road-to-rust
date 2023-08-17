@@ -12,11 +12,11 @@ In a physical camera, the focus distance is controlled by the distance between t
 
 A real camera has a complicated compound lens. For our code we could simulate the order: sensor, then lens, then aperture. Then we could figure out where to send the rays, and flip the image after it's computed (the image is projected upside down on the film). Graphics people, however, usually use a thin lens approximation:
 
-![Figure \[cam-lens\]: Camera lens model](../images/fig-1.17-cam-lens.jpg)
+<Fig caption="Camera lens model" src="fig-1.17-cam-lens.jpg" label="cam-lens" />
 
 We don't need to simulate any of the inside of the camera. For the purposes of rendering an image outside the camera, that would be unnecessary complexity. Instead, we start rays from the lens, and send them toward the focus plane (`focus_dist` away from the lens), where everything on that plane is in perfect focus.
 
-![Figure \[cam-film-plane\]: Camera focus plane](../images/fig-1.18-cam-film-plane.jpg)
+<Fig caption="Camera focus plane" src="fig-1.18-cam-film-plane.jpg" label="cam-film-plane" />
 
 ## Generating Sample Rays
 
@@ -778,4 +778,4 @@ Using a big aperture:
 
 We get:
 
-![Image 20: Spheres with depth-of-field](../images/img-1.20-depth-of-field.png)
+<Img caption="Spheres with depth-of-field" src="img-1.20-depth-of-field.png" />

@@ -6,7 +6,7 @@ Cameras, like dielectrics, are hard to debug. So we'll develop incrementally. Fi
 
 We first keep the rays coming from the origin and heading to the $z = -1$ plane. We could make it the $z = -2$ plane, or whatever, as long as we made $h$ a ratio to that distance. Here is our setup:
 
-![Figure \[cam-view-geom\]: Camera viewing geometry](../images/fig-1.14-cam-view-geom.jpg)
+<Fig caption="Camera viewing geometry" src="fig-1.14-cam-view-geom.jpg" label="cam-view-geom" />
 
 This implies $h = \tan(\frac{\theta}{2})$. Our camera now becomes:
 
@@ -296,7 +296,7 @@ When calling it with camera `cam(90, aspect_ratio)` and these spheres:
 
 gives:
 
-![Image 17: A wide-angle view](../images/img-1.17-wide-view.png)
+<Img caption="A wide-angle view" src="img-1.17-wide-view.png" />
 
 ## Positioning and Orienting the Camera
 
@@ -304,11 +304,11 @@ To get an arbitrary viewpoint, let's first name the points we care about. We'll 
 
 We also need a way to specify the roll, or sideways tilt, of the camera: the rotation around the lookat-lookfrom axis. Another way to think about it is that even if you keep `lookfrom` and `lookat` constant, you can still rotate your head around your nose. What we need is a way to specify an "up" vector for the camera. This up vector should lie in the plane orthogonal to the view direction.
 
-![Figure \[cam-view-dir\]: Camera view direction](../images/fig-1.15-cam-view-dir.jpg)
+<Fig caption="Camera view direction" src="fig-1.15-cam-view-dir.jpg" label="cam-view-dir" />
 
 We can actually use any up vector we want, and simply project it onto this plane to get an up vector for the camera. We use the common convention of naming a "view up" (*vup*) vector. A couple of cross products, and we now have a complete orthonormal basis $(u,v,w)$ to describe our camera's orientation.
 
-![Figure \[cam-view-up\]: Camera view up direction](../images/fig-1.16-cam-view-up.jpg)
+<Fig caption="Camera view up direction" src="fig-1.16-cam-view-up.jpg" label="cam-view-up" />
 
 Remember that `vup`, `v`, and `w` are all in the same plane. Note that, like before when our fixed camera faced -Z, our arbitrary view camera faces -w. And keep in mind that we can -- but we don't have to -- use world up $(0,1,0)$ to specify vup. This is convenient and will naturally keep your camera horizontally level until you decide to experiment with crazy camera angles.
 
@@ -640,7 +640,7 @@ We'll change back to the prior scene, and use the new viewpoint:
 
 to get:
 
-![Image 18: A distant view](../images/img-1.18-view-distant.png)
+<Img caption="A distant view" src="img-1.18-view-distant.png" />
 
 And we can change field of view:
 
@@ -868,4 +868,4 @@ And we can change field of view:
 
 to get:
 
-![Image 19: Zooming in](../images/img-1.19-view-zoom.png)
+<Img caption="Zooming in" src="img-1.19-view-zoom.png" />

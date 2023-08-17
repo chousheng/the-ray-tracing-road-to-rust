@@ -1,3 +1,4 @@
+import { Fig, Img } from "components/Image";
 import { Tab, Tabs } from "components/Tabs";
 import { Callout } from "nextra/components";
 
@@ -10,6 +11,8 @@ const config = {
     Callout: Callout,
     Tabs: Tabs,
     Tab: Tab,
+    Fig: Fig,
+    Img: Img,
   },
   footer: {
     component: null,
