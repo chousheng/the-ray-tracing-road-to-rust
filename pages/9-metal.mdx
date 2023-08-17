@@ -145,14 +145,13 @@ To achieve this, we must have a pointer to the material for our `Sphere` struct 
 
 <Tabs>
   <Tab label="Rust">
-    ```rust filename="sphere.rs | Ray-sphere intersection with added Material information" {1-2,4,6-7,12,16,20,51}
+    ```rust filename="sphere.rs | Ray-sphere intersection with added Material information" {1-2,4,11,15,19,50}
     use std::rc::Rc;
 
     use crate::hittable::{HitRecord, Hittable};
     use crate::material::Material;
     use crate::ray::Ray;
-    use crate::vec3;
-    use crate::vec3::Point3;
+    use crate::vec3::{self, Point3};
 
     pub struct Sphere {
         center: Point3,
