@@ -1713,7 +1713,11 @@ Which gives:
 
 We can also randomize the reflected direction by using a small sphere and choosing a new endpoint for the ray:
 
-<Fig caption="Generating fuzzed reflection rays" src="fig-1.12-reflect-fuzzy.jpg" label="reflect-fuzzy" />
+<Fig
+  caption="Generating fuzzed reflection rays"
+  src="fig-1.12-reflect-fuzzy.jpg"
+  label="reflect-fuzzy"
+/>
 
 The bigger the sphere, the fuzzier the reflections will be. This suggests adding a fuzziness parameter that is just the radius of the sphere (so zero is no perturbation). The catch is that for big spheres or grazing rays, we may scatter below the surface. We can just have the surface absorb those.
 

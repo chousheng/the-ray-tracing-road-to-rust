@@ -14,7 +14,11 @@ There are two unit radius spheres tangent to the hit point $p$ of a surface. The
 
 Let's select the tangent unit radius sphere that is on the same side of the surface as the ray origin. Pick a random point $\mathbf{S}$ inside this unit radius sphere and send a ray from the hit point $\mathbf{P}$ to the random point $\mathbf{S}$ (this is the vector $(\mathbf{S}-\mathbf{P})$):
 
-<Fig caption="Generating a random diffuse bounce ray" src="fig-1.09-rand-vec.jpg" label="rand-vec" />
+<Fig
+  caption="Generating a random diffuse bounce ray"
+  src="fig-1.09-rand-vec.jpg"
+  label="rand-vec"
+/>
 
 We need a way to pick a random point in a unit radius sphere. We'll use what is usually the easiest
 algorithm: a rejection method. First, pick a random point in the unit cube where x, y, and z all
@@ -1539,7 +1543,11 @@ However, we are interested in a Lambertian distribution, which has a distributio
   </Tab>
 </Tabs>
 
-<Fig caption="Generating a random unit vector" src="fig-1.10-rand-unitvec.png" label="rand-unitvec" />
+<Fig
+  caption="Generating a random unit vector"
+  src="fig-1.10-rand-unitvec.png"
+  label="rand-unitvec"
+/>
 
 This `random_unit_vector()` is a drop-in replacement for the existing `random_in_unit_sphere()` function.
 
