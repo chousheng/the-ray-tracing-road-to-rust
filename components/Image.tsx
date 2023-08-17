@@ -1,17 +1,21 @@
 import NextImage from "next/image";
+import { CSSProperties } from "react";
 
 type ImgProps = {
   caption: string;
   src: string;
+  style: CSSProperties;
 };
 
-export const Img = ({ caption, src }: ImgProps) => {
+export const Img = ({ caption, src, style }: ImgProps) => {
   return (
     <figure className="mt-6 first:mt-0 flex flex-col items-center justify-center">
-      <NextImage src={require("../images/" + src)} alt={caption} />
-      <figcaption className="text-sm text-neutral-600 dark:text-neutral-400">
-        {caption}
-      </figcaption>
+      <NextImage
+        src={require("../images/" + src)}
+        alt={caption}
+        style={style}
+      />
+      <figcaption className="mt-1 text-sm">{caption}</figcaption>
     </figure>
   );
 };
@@ -25,10 +29,14 @@ type FigProps = {
 export const Fig = ({ caption, src }: FigProps) => {
   return (
     <figure className="mt-6 first:mt-0 flex flex-col items-center justify-center">
-      <NextImage src={require("../images/" + src)} alt={caption} />
-      <figcaption className="text-sm text-neutral-600 dark:text-neutral-400">
-        {caption}
-      </figcaption>
+      <NextImage
+        src={require("../images/" + src)}
+        alt={caption}
+        style={{
+          width: "600px",
+        }}
+      />
+      <figcaption className="mt-1 text-sm">{caption}</figcaption>
     </figure>
   );
 };
