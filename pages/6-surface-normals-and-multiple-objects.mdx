@@ -12,7 +12,11 @@ For a sphere, the outward normal is in the direction of the hit point minus the 
 
 On the earth, this implies that the vector from the earth's center to you points straight up. Let's throw that into the code now, and shade it. We don't have any lights or anything yet, so let's just visualize the normals with a color map.
 
-A common trick used for visualizing normals (because it's easy and somewhat intuitive to assume $\mathbf{n}$ is a unit length vector -- so each component is between -1 and 1) is to map each component to the interval from 0 to 1, and then map (x, y, z) to (r, g, b). For the normal, we need the hit point, not just whether we hit or not. We only have one sphere in the scene, and it's directly in front of the camera, so we won't worry about negative values of $t$ yet. We'll just assume the closest hit point (smallest $t$).
+A common trick used for visualizing normals (because it's easy and somewhat intuitive to assume $\mathbf{n}$ is a unit length vector -- so each component is between -1 and 1) is to map each component to the interval from 0 to 1, and then map (x, y, z) to (r, g, b). For the normal, we need the hit point, not just whether we hit or not. We only have one sphere in the scene, and it's directly in front of the camera, so we won't worry about negative values of $t$ yet. We'll just assume the closest hit point (smallest $t$):
+
+$$
+t = \frac{-b - \sqrt{b^2 - 4ac}}{2a}
+$$
 
 These changes in the code let us compute and visualize $\mathbf{n}$:
 
@@ -180,25 +184,25 @@ And that yields this picture:
 Let's revisit the ray-sphere equation:
 
 $$
-t = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
+t = \frac{-b - \sqrt{b^2 - 4ac}}{2a}
 $$
 
 First, recall that a vector dotted with itself is equal to the squared length of that vector. Second, notice how the equation for `b` has a factor of two in it. Consider what happens to the quadratic equation if $b = 2h$:
 
 $$
-t = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
+t = \frac{-b - \sqrt{b^2 - 4ac}}{2a}
 $$
 
 $$
-= \frac{-2h \pm \sqrt{(2h)^2 - 4ac}}{2a}
+= \frac{-2h - \sqrt{(2h)^2 - 4ac}}{2a}
 $$
 
 $$
-= \frac{-2h \pm 2\sqrt{h^2 - ac}}{2a}
+= \frac{-2h - 2\sqrt{h^2 - ac}}{2a}
 $$
 
 $$
-= \frac{-h \pm \sqrt{h^2 - ac}}{a}
+= \frac{-h - \sqrt{h^2 - ac}}{a}
 $$
 
 Using these observations, we can now simplify the sphere-intersection code to this:

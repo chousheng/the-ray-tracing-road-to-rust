@@ -48,9 +48,23 @@ t^2 \mathbf{b} \cdot \mathbf{b}
    + (\mathbf{A}-\mathbf{C}) \cdot (\mathbf{A}-\mathbf{C}) - r^2 = 0
 $$
 
-The vectors and $r$ in that equation are all constant and known. The unknown is $t$, and the equation is a quadratic, like you probably saw in your high school math class. You can solve for $t$
-and there is a square root part that is either positive (meaning two real solutions), negative (meaning no real solutions), or zero (meaning one real solution). In graphics, the algebra almost
-always relates very directly to the geometry. What we have is:
+The vectors and $r$ in that equation are all constant and known. The unknown is $t$, and the equation is a quadratic, like you probably saw in your high school math class. We can solve for $t$ using the quadratic formula:
+
+$$
+t = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
+$$
+
+Where:
+
+$$
+\begin{aligned}
+    a & = \mathbf{b} \cdot \mathbf{b} \\
+    b & = 2 \mathbf{b} \cdot (\mathbf{A}-\mathbf{C}) \\
+    c & = (\mathbf{A}-\mathbf{C}) \cdot (\mathbf{A}-\mathbf{C}) - r^2
+\end{aligned}
+$$
+
+The square root part is called discriminant. It is either positive (meaning two real solutions), zero (meaning one real solution), or negative (meaning no real solutions). In graphics, the algebra almost always relates very directly to the geometry. What we have is:
 
 <Fig caption="Ray-sphere intersection results" src="fig-1.04-ray-sphere.jpg" label="ray-sphere" />
 
