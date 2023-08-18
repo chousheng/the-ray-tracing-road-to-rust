@@ -4,9 +4,16 @@ import { Callout } from "nextra/components";
 
 const config = {
   logo: <span>The Ray Tracing Road to Rust 🦀</span>,
-  project: {
-    link: "https://github.com/chousheng/raytracing-cpp-rust",
+  useNextSeoProps: () => {
+    return {
+      titleTemplate: "%s – The Ray Tracing Road to Rust 🦀",
+    };
   },
+  project: {
+    link: "https://github.com/chousheng/theraytracingroadtorust",
+  },
+  docsRepositoryBase:
+    "https://github.com/chousheng/theraytracingroadtorust/tree/main",
   components: {
     Callout: Callout,
     Tabs: Tabs,
@@ -16,6 +23,10 @@ const config = {
   },
   footer: {
     component: null,
+  },
+  gitTimestamp: null,
+  feedback: {
+    content: "Give us feedback",
   },
 };
 

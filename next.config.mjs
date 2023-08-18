@@ -10,4 +10,13 @@ const withNextra = nextra({
   },
 });
 
-export default withNextra();
+const nextConfig = {
+  images: {
+    unoptimized: true,
+  },
+  experimental: {
+    appDir: false,
+  },
+};
+
+export default withNextra(nextConfig);
