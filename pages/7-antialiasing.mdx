@@ -73,6 +73,10 @@ We add the following code snippet:
   </Tab>
 </Tabs>
 
+<Callout emoji="🦀">
+  Rust does not have a random number generator in the standard library. However, we can add an external library using Cargo. The code above uses the `rand` crate. We can install the crate by running `cargo add rand` in the terminal and Cargo will update the dependency in `Cargo.toml` for us.
+</Callout>
+
 ## Generating Pixels with Multiple Samples
 
 For a given pixel we have several samples within that pixel and send rays through each of the samples. The colors of these rays are then averaged:
