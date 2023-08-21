@@ -11,12 +11,12 @@ const withNextra = nextra({
 });
 
 const nextConfig = {
-  images: {
-    unoptimized: true,
-  },
-  experimental: {
-    appDir: false,
-  },
+  //images: {
+  //  unoptimized: true,
+  //},
+  //experimental: {
+  //  appDir: false,
+  //},
 };
 
 export default withNextra(nextConfig);
