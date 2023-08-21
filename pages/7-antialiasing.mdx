@@ -74,7 +74,13 @@ We add the following code snippet:
 </Tabs>
 
 <Callout emoji="🦀">
-  Rust does not have a random number generator in the standard library. However, we can add an external library using Cargo. The code above uses the `rand` crate. We can install the crate by running `cargo add rand` in the terminal and Cargo will update the dependency in `Cargo.toml` for us.
+  Rust does not have a built-in random number generator in the standard library. However, we can add an external library using Cargo. The code above uses the `rand` crate. We can run below in the terminal:
+
+  ```sh
+  cargo add rand
+  ```
+
+  Cargo will install and update the dependency in `Cargo.toml`.
 </Callout>
 
 ## Generating Pixels with Multiple Samples
