@@ -8,6 +8,10 @@ const withNextra = nextra({
   mdxOptions: {
     remarkPlugins: [smartypants],
   },
+  flexsearch: {
+    codeblocks: false,
+  },
+  defaultShowCopyCode: true,
 });
 
 const nextConfig = {
