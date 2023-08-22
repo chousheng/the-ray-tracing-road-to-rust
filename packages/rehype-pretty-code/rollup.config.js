@@ -1,5 +1,5 @@
-import commonjs from '@rollup/plugin-commonjs';
 import { babel } from '@rollup/plugin-babel';
+import commonjs from '@rollup/plugin-commonjs';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import { defineConfig } from 'rollup';
 
@@ -26,12 +26,12 @@ export default defineConfig([
       format: 'esm',
     },
   },
-  {
-    ...common,
-    output: {
-      exports: 'default',
-      file: './dist/rehype-pretty-code.cjs',
-      format: 'cjs',
-    },
-  },
+  //{
+  //  ...common,
+  //  output: {
+  //    exports: 'default',
+  //    file: './dist/rehype-pretty-code.cjs',
+  //    format: 'cjs',
+  //  },
+  //},
 ]);
