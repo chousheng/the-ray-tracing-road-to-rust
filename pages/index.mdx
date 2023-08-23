@@ -1,7 +1,47 @@
 # Introduction
 
-This website is based on the awesome book: [Ray Tracing in One Weekend](https://raytracing.github.io/) (v3.2.3) by Peter Shirley.
+Welcome! This is a tutorial to write a ray tracer in Rust, based on the awesome book: [Ray Tracing in One Weekend](https://raytracing.github.io/v3/index.html) by Peter Shirley, Trevor David Black, and Steve Hollasch.
 
-In this version, Rust code blocks are added (along with C++ code for comparison). We hope that this interesting project helps people learn the basics of Rust.
+The goal of this tutorial is to help you learn Rust by writing this interesting project. If you have completed some Rust learning resources (e.g., [the Book](https://doc.rust-lang.org/book/)), this is a good project to do.
+
+To help you learn Rust, we adapt the original book and provide a reference implementation in Rust. We use smart pointers throughout the tutorial to avoid explicit lifetime annotations -- you won't learn much about Rust's lifetimes, but this also makes code much nicer to work with.
+
+We modify the original C++ code to be more Rust-ish and let you switch languages with tabs. If you know a bit about C++, you can compare Rust with C++. The C++ code is formatted with clang-format and linted with clang-tidy to ensure the code looks idiomatic enough. To facilitate comparison, we minimize content jumping when you switch languages.
+
+Finally, additional chapters are added in the appendix. You will learn how to parallelize the program with Rayon and make the rust code rustier.
+
+Along the way, you will learn and use the following Rust features:
+
+*   Basic syntax
+
+*   Ownership
+
+*   References and borrowing
+
+*   Move and copy semantics
+
+*   Modules, Cargo, and crates
+
+*   Generics, traits, trait bounds, and supertraits
+
+*   Common traits: Copy, Clone, Default, Write
+
+*   Operator overloading traits: Add, Sub, Mul, Div, Neg, etc.
+
+*   Concurrency Traits: Send and Sync
+
+*   Trait objects
+
+*   The `Box<T>` smart pointer to allocation memory on heap
+
+*   The `RC<T>` smart pointer to share ownership
+
+*   The `Arc<T>` smart pointer to share data between threads
+
+*   The `Option<T>` enum to safely model optional or nullable data
+
+*   Closures
+
+*   And more ...
 
 Have fun!
