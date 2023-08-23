@@ -427,7 +427,6 @@ Normally, all scene rays originate from the `lookfrom` point. In order to accomp
         vertical: Vec3,
         u: Vec3,
         v: Vec3,
-        w: Vec3,
         lens_radius: f64,
     }
 
@@ -464,7 +463,6 @@ Normally, all scene rays originate from the `lookfrom` point. In order to accomp
                 vertical,
                 u,
                 v,
-                w,
                 lens_radius,
             }
         }
@@ -506,7 +504,7 @@ Normally, all scene rays originate from the `lookfrom` point. In order to accomp
             auto viewport_height = 2.0 * h;
             auto viewport_width = aspect_ratio * viewport_height;
 
-            w = unit_vector(lookfrom - lookat);
+            auto w = unit_vector(lookfrom - lookat);
             u = unit_vector(cross(vup, w));
             v = cross(w, u);
 
@@ -535,7 +533,6 @@ Normally, all scene rays originate from the `lookfrom` point. In order to accomp
         Vec3 vertical;
         Vec3 u;
         Vec3 v;
-        Vec3 w;
         double lens_radius;
     };
 
