@@ -8,14 +8,14 @@ import { visit } from "unist-util-visit";
 import remarkConfig from "../.remarkrc.mjs";
 
 export const getSortedMdxFilenames = () => {
-  let mdxFilenames = globSync("pages/*-*.mdx");
+  let mdxFilenames = globSync("pages/**/*-*.mdx");
 
-  const parseChapterNo = (str) => {
-    return parseInt(str.match(/[0-9]+/)[0], 10);
-  };
-
-  mdxFilenames.sort((a, b) => {
-    return parseChapterNo(a) - parseChapterNo(b);
+  // Use "natural" sort
+  mdxFilenames = mdxFilenames.sort(function (a, b) {
+    return a.localeCompare(b, undefined, {
+      numeric: true,
+      sensitivity: "base",
+    });
   });
 
   return mdxFilenames;
