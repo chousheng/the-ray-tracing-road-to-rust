@@ -2,7 +2,8 @@
   "scripts": {
     "dev": "nodemon",
     "export-code": "node scripts/export-code.mjs",
-    "import-code": "node scripts/import-code.mjs"
+    "import-code": "node scripts/import-code.mjs",
+    "inspect": "NODE_OPTIONS='--inspect' next dev"
   },
   "dependencies": {
     "next": "^13.4.19",

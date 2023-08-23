@@ -12,6 +12,7 @@ const withNextra = nextra({
     codeblocks: false,
   },
   defaultShowCopyCode: true,
+  //codeHighlight: false,
 });
 
 const nextConfig = {
