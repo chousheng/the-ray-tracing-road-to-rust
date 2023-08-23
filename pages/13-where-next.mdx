@@ -37,8 +37,8 @@ First let's make the image on the cover of this book -- lots of random spheres:
 
         let mut rec = HitRecord::new();
         if world.hit(r, 0.001, common::INFINITY, &mut rec) {
-            let mut scattered = Ray::default();
             let mut attenuation = Color::default();
+            let mut scattered = Ray::default();
             if rec
                 .mat
                 .as_ref()
@@ -194,8 +194,8 @@ First let's make the image on the cover of this book -- lots of random spheres:
 
         auto rec = HitRecord();
         if (world.hit(r, 0.001, INFINITY, rec)) {
-            auto scattered = Ray();
             auto attenuation = Color();
+            auto scattered = Ray();
             if (rec.mat->scatter(r, rec, attenuation, scattered)) {
                 return attenuation * ray_color(scattered, world, depth - 1);
             }

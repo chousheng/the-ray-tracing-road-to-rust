@@ -474,8 +474,8 @@ And the dielectric material that always refracts is:
                 scatter_direction = rec.normal;
             }
 
-            *scattered = Ray::new(rec.p, scatter_direction);
             *attenuation = self.albedo;
+            *scattered = Ray::new(rec.p, scatter_direction);
             true
         }
     }
@@ -504,8 +504,8 @@ And the dielectric material that always refracts is:
         ) -> bool {
             let reflected = vec3::reflect(vec3::unit_vector(r_in.direction()), rec.normal);
 
-            *scattered = Ray::new(rec.p, reflected + self.fuzz * vec3::random_in_unit_sphere());
             *attenuation = self.albedo;
+            *scattered = Ray::new(rec.p, reflected + self.fuzz * vec3::random_in_unit_sphere());
             vec3::dot(scattered.direction(), rec.normal) > 0.0
         }
     }
@@ -586,8 +586,8 @@ And the dielectric material that always refracts is:
                 scatter_direction = rec.normal;
             }
 
-            scattered = Ray(rec.p, scatter_direction);
             attenuation = albedo;
+            scattered = Ray(rec.p, scatter_direction);
             return true;
         }
 
@@ -607,8 +607,8 @@ And the dielectric material that always refracts is:
         ) const override {
             auto reflected = reflect(unit_vector(r_in.direction()), rec.normal);
 
-            scattered = Ray(rec.p, reflected + fuzz * random_in_unit_sphere());
             attenuation = albedo;
+            scattered = Ray(rec.p, reflected + fuzz * random_in_unit_sphere());
             return dot(scattered.direction(), rec.normal) > 0.0;
         }
 
@@ -681,8 +681,8 @@ Now we'll update the scene to change the left and center spheres to glass:
 
         let mut rec = HitRecord::new();
         if world.hit(r, 0.001, common::INFINITY, &mut rec) {
-            let mut scattered = Ray::default();
             let mut attenuation = Color::default();
+            let mut scattered = Ray::default();
             if rec
                 .mat
                 .as_ref()
@@ -786,8 +786,8 @@ Now we'll update the scene to change the left and center spheres to glass:
 
         auto rec = HitRecord();
         if (world.hit(r, 0.001, INFINITY, rec)) {
-            auto scattered = Ray();
             auto attenuation = Color();
+            auto scattered = Ray();
             if (rec.mat->scatter(r, rec, attenuation, scattered)) {
                 return attenuation * ray_color(scattered, world, depth - 1);
             }
@@ -934,8 +934,8 @@ And the dielectric material that always refracts when possible is:
                 scatter_direction = rec.normal;
             }
 
-            *scattered = Ray::new(rec.p, scatter_direction);
             *attenuation = self.albedo;
+            *scattered = Ray::new(rec.p, scatter_direction);
             true
         }
     }
@@ -964,8 +964,8 @@ And the dielectric material that always refracts when possible is:
         ) -> bool {
             let reflected = vec3::reflect(vec3::unit_vector(r_in.direction()), rec.normal);
 
-            *scattered = Ray::new(rec.p, reflected + self.fuzz * vec3::random_in_unit_sphere());
             *attenuation = self.albedo;
+            *scattered = Ray::new(rec.p, reflected + self.fuzz * vec3::random_in_unit_sphere());
             vec3::dot(scattered.direction(), rec.normal) > 0.0
         }
     }
@@ -1054,8 +1054,8 @@ And the dielectric material that always refracts when possible is:
                 scatter_direction = rec.normal;
             }
 
-            scattered = Ray(rec.p, scatter_direction);
             attenuation = albedo;
+            scattered = Ray(rec.p, scatter_direction);
             return true;
         }
 
@@ -1075,8 +1075,8 @@ And the dielectric material that always refracts when possible is:
         ) const override {
             auto reflected = reflect(unit_vector(r_in.direction()), rec.normal);
 
-            scattered = Ray(rec.p, reflected + fuzz * random_in_unit_sphere());
             attenuation = albedo;
+            scattered = Ray(rec.p, reflected + fuzz * random_in_unit_sphere());
             return dot(scattered.direction(), rec.normal) > 0.0;
         }
 
@@ -1154,8 +1154,8 @@ Attenuation is always 1 -- the glass surface absorbs nothing. If we try that out
 
         let mut rec = HitRecord::new();
         if world.hit(r, 0.001, common::INFINITY, &mut rec) {
-            let mut scattered = Ray::default();
             let mut attenuation = Color::default();
+            let mut scattered = Ray::default();
             if rec
                 .mat
                 .as_ref()
@@ -1259,8 +1259,8 @@ Attenuation is always 1 -- the glass surface absorbs nothing. If we try that out
 
         auto rec = HitRecord();
         if (world.hit(r, 0.001, INFINITY, rec)) {
-            auto scattered = Ray();
             auto attenuation = Color();
+            auto scattered = Ray();
             if (rec.mat->scatter(r, rec, attenuation, scattered)) {
                 return attenuation * ray_color(scattered, world, depth - 1);
             }
@@ -1375,8 +1375,8 @@ Now real glass has reflectivity that varies with angle -- look at a window at a 
                 scatter_direction = rec.normal;
             }
 
-            *scattered = Ray::new(rec.p, scatter_direction);
             *attenuation = self.albedo;
+            *scattered = Ray::new(rec.p, scatter_direction);
             true
         }
     }
@@ -1405,8 +1405,8 @@ Now real glass has reflectivity that varies with angle -- look at a window at a 
         ) -> bool {
             let reflected = vec3::reflect(vec3::unit_vector(r_in.direction()), rec.normal);
 
-            *scattered = Ray::new(rec.p, reflected + self.fuzz * vec3::random_in_unit_sphere());
             *attenuation = self.albedo;
+            *scattered = Ray::new(rec.p, reflected + self.fuzz * vec3::random_in_unit_sphere());
             vec3::dot(scattered.direction(), rec.normal) > 0.0
         }
     }
@@ -1504,8 +1504,8 @@ Now real glass has reflectivity that varies with angle -- look at a window at a 
                 scatter_direction = rec.normal;
             }
 
-            scattered = Ray(rec.p, scatter_direction);
             attenuation = albedo;
+            scattered = Ray(rec.p, scatter_direction);
             return true;
         }
 
@@ -1525,8 +1525,8 @@ Now real glass has reflectivity that varies with angle -- look at a window at a 
         ) const override {
             auto reflected = reflect(unit_vector(r_in.direction()), rec.normal);
 
-            scattered = Ray(rec.p, reflected + fuzz * random_in_unit_sphere());
             attenuation = albedo;
+            scattered = Ray(rec.p, reflected + fuzz * random_in_unit_sphere());
             return dot(scattered.direction(), rec.normal) > 0.0;
         }
 
@@ -1615,8 +1615,8 @@ An interesting and easy trick with dielectric spheres is to note that if you use
 
         let mut rec = HitRecord::new();
         if world.hit(r, 0.001, common::INFINITY, &mut rec) {
-            let mut scattered = Ray::default();
             let mut attenuation = Color::default();
+            let mut scattered = Ray::default();
             if rec
                 .mat
                 .as_ref()
@@ -1725,8 +1725,8 @@ An interesting and easy trick with dielectric spheres is to note that if you use
 
         auto rec = HitRecord();
         if (world.hit(r, 0.001, INFINITY, rec)) {
-            auto scattered = Ray();
             auto attenuation = Color();
+            auto scattered = Ray();
             if (rec.mat->scatter(r, rec, attenuation, scattered)) {
                 return attenuation * ray_color(scattered, world, depth - 1);
             }

@@ -302,8 +302,8 @@ For the Lambertian (diffuse) case we already have, it can either scatter always 
         ) -> bool {
             let mut scatter_direction = rec.normal + vec3::random_unit_vector();
 
-            *scattered = Ray::new(rec.p, scatter_direction);
             *attenuation = self.albedo;
+            *scattered = Ray::new(rec.p, scatter_direction);
             true
         }
     }
@@ -343,8 +343,8 @@ For the Lambertian (diffuse) case we already have, it can either scatter always 
         ) const override {
             auto scatter_direction = rec.normal + random_unit_vector();
 
-            scattered = Ray(rec.p, scatter_direction);
             attenuation = albedo;
+            scattered = Ray(rec.p, scatter_direction);
             return true;
         }
 
@@ -751,8 +751,8 @@ In service of this, we'll create a new vector method -- `Vec3::near_zero()` -- t
                 scatter_direction = rec.normal;
             }
 
-            *scattered = Ray::new(rec.p, scatter_direction);
             *attenuation = self.albedo;
+            *scattered = Ray::new(rec.p, scatter_direction);
             true
         }
     }
@@ -797,8 +797,8 @@ In service of this, we'll create a new vector method -- `Vec3::near_zero()` -- t
                 scatter_direction = rec.normal;
             }
 
-            scattered = Ray(rec.p, scatter_direction);
             attenuation = albedo;
+            scattered = Ray(rec.p, scatter_direction);
             return true;
         }
 
@@ -1217,8 +1217,8 @@ The metal material just reflects rays using that formula:
                 scatter_direction = rec.normal;
             }
 
-            *scattered = Ray::new(rec.p, scatter_direction);
             *attenuation = self.albedo;
+            *scattered = Ray::new(rec.p, scatter_direction);
             true
         }
     }
@@ -1243,8 +1243,8 @@ The metal material just reflects rays using that formula:
         ) -> bool {
             let reflected = vec3::reflect(vec3::unit_vector(r_in.direction()), rec.normal);
 
-            *scattered = Ray::new(rec.p, reflected);
             *attenuation = self.albedo;
+            *scattered = Ray::new(rec.p, reflected);
             vec3::dot(scattered.direction(), rec.normal) > 0.0
         }
     }
@@ -1290,8 +1290,8 @@ The metal material just reflects rays using that formula:
                 scatter_direction = rec.normal;
             }
 
-            scattered = Ray(rec.p, scatter_direction);
             attenuation = albedo;
+            scattered = Ray(rec.p, scatter_direction);
             return true;
         }
 
@@ -1311,8 +1311,8 @@ The metal material just reflects rays using that formula:
         ) const override {
             auto reflected = reflect(unit_vector(r_in.direction()), rec.normal);
 
-            scattered = Ray(rec.p, reflected);
             attenuation = albedo;
+            scattered = Ray(rec.p, reflected);
             return dot(scattered.direction(), rec.normal) > 0.0;
         }
 
@@ -1358,8 +1358,8 @@ We need to modify the `ray_color()` function to use this:
 
         let mut rec = HitRecord::new();
         if world.hit(r, 0.001, common::INFINITY, &mut rec) {
-            let mut scattered = Ray::default();
             let mut attenuation = Color::default();
+            let mut scattered = Ray::default();
             if rec
                 .mat
                 .as_ref()
@@ -1439,8 +1439,8 @@ We need to modify the `ray_color()` function to use this:
 
         auto rec = HitRecord();
         if (world.hit(r, 0.001, INFINITY, rec)) {
-            auto scattered = Ray();
             auto attenuation = Color();
+            auto scattered = Ray();
             if (rec.mat->scatter(r, rec, attenuation, scattered)) {
                 return attenuation * ray_color(scattered, world, depth - 1);
             }
@@ -1534,8 +1534,8 @@ Now let's add some metal spheres to our scene:
 
         let mut rec = HitRecord::new();
         if world.hit(r, 0.001, common::INFINITY, &mut rec) {
-            let mut scattered = Ray::default();
             let mut attenuation = Color::default();
+            let mut scattered = Ray::default();
             if rec
                 .mat
                 .as_ref()
@@ -1639,8 +1639,8 @@ Now let's add some metal spheres to our scene:
 
         auto rec = HitRecord();
         if (world.hit(r, 0.001, INFINITY, rec)) {
-            auto scattered = Ray();
             auto attenuation = Color();
+            auto scattered = Ray();
             if (rec.mat->scatter(r, rec, attenuation, scattered)) {
                 return attenuation * ray_color(scattered, world, depth - 1);
             }
@@ -1763,8 +1763,8 @@ The bigger the sphere, the fuzzier the reflections will be. This suggests adding
                 scatter_direction = rec.normal;
             }
 
-            *scattered = Ray::new(rec.p, scatter_direction);
             *attenuation = self.albedo;
+            *scattered = Ray::new(rec.p, scatter_direction);
             true
         }
     }
@@ -1793,8 +1793,8 @@ The bigger the sphere, the fuzzier the reflections will be. This suggests adding
         ) -> bool {
             let reflected = vec3::reflect(vec3::unit_vector(r_in.direction()), rec.normal);
 
-            *scattered = Ray::new(rec.p, reflected + self.fuzz * vec3::random_in_unit_sphere());
             *attenuation = self.albedo;
+            *scattered = Ray::new(rec.p, reflected + self.fuzz * vec3::random_in_unit_sphere());
             vec3::dot(scattered.direction(), rec.normal) > 0.0
         }
     }
@@ -1840,8 +1840,8 @@ The bigger the sphere, the fuzzier the reflections will be. This suggests adding
                 scatter_direction = rec.normal;
             }
 
-            scattered = Ray(rec.p, scatter_direction);
             attenuation = albedo;
+            scattered = Ray(rec.p, scatter_direction);
             return true;
         }
 
@@ -1861,8 +1861,8 @@ The bigger the sphere, the fuzzier the reflections will be. This suggests adding
         ) const override {
             auto reflected = reflect(unit_vector(r_in.direction()), rec.normal);
 
-            scattered = Ray(rec.p, reflected + fuzz * random_in_unit_sphere());
             attenuation = albedo;
+            scattered = Ray(rec.p, reflected + fuzz * random_in_unit_sphere());
             return dot(scattered.direction(), rec.normal) > 0.0;
         }
 
@@ -1911,8 +1911,8 @@ We can try that out by adding fuzziness 0.3 and 1.0 to the metals:
 
         let mut rec = HitRecord::new();
         if world.hit(r, 0.001, common::INFINITY, &mut rec) {
-            let mut scattered = Ray::default();
             let mut attenuation = Color::default();
+            let mut scattered = Ray::default();
             if rec
                 .mat
                 .as_ref()
@@ -2016,8 +2016,8 @@ We can try that out by adding fuzziness 0.3 and 1.0 to the metals:
 
         auto rec = HitRecord();
         if (world.hit(r, 0.001, INFINITY, rec)) {
-            auto scattered = Ray();
             auto attenuation = Color();
+            auto scattered = Ray();
             if (rec.mat->scatter(r, rec, attenuation, scattered)) {
                 return attenuation * ray_color(scattered, world, depth - 1);
             }
