@@ -13,7 +13,8 @@ export const Img = ({ caption, src, style }: ImgProps) => {
       <NextImage
         src={require("../images/" + src)}
         alt={caption}
-        style={style}
+        style={{ imageRendering: "pixelated", ...style }}
+        sizes="100vw"
       />
       <figcaption className="mt-1 text-sm">{caption}</figcaption>
     </figure>
