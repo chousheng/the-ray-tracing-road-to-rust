@@ -1,5 +1,19 @@
 # Using More Option Enum
 
+In Rust, it is common to use the `Option<T>` enum to express a return type that either has an unwrappable value or does not have a value at all.
+
+Let's revisit the `Hittable` trait:
+
+```rust
+pub trait Hittable: Send + Sync {
+    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool;
+}
+```
+
+We are mutating `HitRecord` only when we hit something, which is a perfect place to use `Option<T>` enum.
+
+Let's refactor our code to use the `Option<T>` enum:
+
 ```rust filename="hittable.rs | Changing Hittable::hit() to return Option<HitRecord>" {32}
 use std::sync::Arc;
 
@@ -36,6 +50,8 @@ pub trait Hittable: Send + Sync {
 }
 ```
 
+Since we'll return either `Some(HitRecord)` or `None` in `Hittable::hit()`, we can remove `Option` and require all fields of the `HitRecord` struct to be initialized when creating. We can also remove its `Default` trait and the `new()` method:
+
 ```rust filename="hittable.rs | Updating HitRecord struct" {6,10,15-16}
 use std::sync::Arc;
 
@@ -66,6 +82,8 @@ pub trait Hittable: Send + Sync {
     fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
 }
 ```
+
+We refactor the `HittableList` implementation using the `if let` expression:
 
 ```rust filename="hittable_list.rs | Updating HittableList struct" {20-21,25-27,31}
 use crate::hittable::{HitRecord, Hittable};
@@ -102,6 +120,8 @@ impl Hittable for HittableList {
     }
 }
 ```
+
+And modify the `Sphere` implementation:
 
 ```rust filename="sphere.rs | Updating Sphere struct" {25,32,42,46-52,55}
 use std::sync::Arc;
@@ -162,6 +182,8 @@ impl Hittable for Sphere {
     }
 }
 ```
+
+Similar to the `Hittable` trait, we can refactor the `scatter()` function to return `Option<ScatterRecord>`:
 
 ```rust filename="material.rs | Change Material::scatter() to return Option<ScatterRecord>" {5-9,12}
 use crate::color::Color;
@@ -292,6 +314,8 @@ impl Material for Dielectric {
 }
 ```
 
+And modify the implementations:
+
 ```rust filename="material.rs | Updating Material structs" {26,34-37,56,58,60-67,91,111-114}
 use crate::color::Color;
 use crate::hittable::HitRecord;
@@ -410,6 +434,8 @@ impl Material for Dielectric {
     }
 }
 ```
+
+Finally, we refactor the `main()` function:
 
 ```rust filename="main.rs | Updating ray_color()" {18,31-33}
 mod camera;
@@ -576,3 +602,5 @@ fn main() {
     eprint!("\nDone.\n");
 }
 ```
+
+The code now looks much nicer!
