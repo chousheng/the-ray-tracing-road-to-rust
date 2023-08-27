@@ -22,14 +22,18 @@ type Props = {
   children?: ReactNode;
 };
 
-export function Tabs({ labels, storageKey = "tab", children = null }: Props) {
+export function Tabs({
+  labels,
+  storageKey = "tab.lang",
+  children = null,
+}: Props) {
   // labels in this parent "Tabs" takes higher priority than labels in children "Tab"
   const lbs = labels ?? extractChildrenLabels(children);
 
   // Save tab in localStorage
   const [activeTabLabel, saveActiveTabLabel] = useLocalStorage(
     storageKey,
-    lbs[0]
+    lbs[0],
   );
 
   let activeTabIdx = lbs.indexOf(activeTabLabel);
