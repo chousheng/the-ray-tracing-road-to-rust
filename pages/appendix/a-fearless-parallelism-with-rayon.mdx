@@ -1,5 +1,17 @@
 # Fearless Parallelism with Rayon
 
+One of Rust's greatest strengths is that Rust guarantees there is no data race if the code compiles -- we can parallelize our code with confidence.
+
+We'll use [Rayon](https://github.com/rayon-rs/rayon), a data parallelism library, to parallelize the code and utilize all CPU cores of our machine.
+
+Let's install the crate:
+
+```sh
+cargo add rayon
+```
+
+We modify the inner loop, which generates the pixels of each horizontal scanline:
+
 ```rust filename="main.rs | new main() using Rayon to calculate scanline pixels in parallel" {13-14,152-165} addCargoDep="rayon"
 mod camera;
 mod color;
@@ -174,6 +186,36 @@ fn main() {
 }
 ```
 
+Here's what the code above does for each scanline:
+
+1.  Use `into_par_iter()` to convert the `Range` into a `ParallelIterator`.
+
+2.  Use `map()` with a closure specifying how the result of each pixel is calculated when iterating `i`. It will return another type implementing `ParallelIterator`.
+
+3.  Use `collect()` to iterate, execute, and gather the results into a `Vec<Color>`.
+
+4.  Write each pixel out in the `Vec<Color>`.
+
+<Callout emoji="🦀">
+  It is worth noting that the [`collect()`](https://docs.rs/rayon/latest/rayon/iter/trait.ParallelIterator.html#method.collect) function has a generic type in the return position. This means the caller gets to choose any implemented return type (e.g., [`Vec`](https://docs.rs/rayon/latest/rayon/iter/trait.FromParallelIterator.html#impl-FromParallelIterator%3CT%3E-for-Vec%3CT%3E), [`LinkedList`](https://docs.rs/rayon/latest/rayon/iter/trait.FromParallelIterator.html#impl-FromParallelIterator%3CT%3E-for-LinkedList%3CT%3E), etc.). That's why we have to explicitly annotate the type `Vec<_>` in the code since the compiler cannot infer the type in this case. Alternatively, we can insert a turbofish `collect::<Vec<_>>()` to tell the compiler which type we want.
+</Callout>
+
+And that's it. We've finished modifying the code with only a few lines of change!
+
+However, it does not actually work yet. If you run `cargo check`, the compiler will complain:
+
+```
+error[E0277]: `(dyn Hittable + 'static)` cannot be shared between threads safely
+```
+
+The reason is that we have not made our code thread-safe yet.
+
+One way to fix the error is to replace every occurrence of `dyn Hittable` with `dyn Hittable + Sync`, telling the compiler we will pass `Hittable` trait objects that also implement the `Sync` trait. However, this will make the code look repetitive all over the place.
+
+Another way to fix the error is to specify "supertraits" for `Hittable` trait, which ensures that every type implementing the `Hittable` trait also implements the supertraits.
+
+For full thread safety, let's make the supertraits of the `Hittable` trait both `Send` (safe to be sent between threads) and `Sync` (safe to be shared between threads):
+
 ```rust filename="hittable.rs | Adding Send and Sync supertraits to Hittable trait" {31}
 use std::rc::Rc;
 
@@ -209,6 +251,8 @@ pub trait Hittable: Send + Sync {
     fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool;
 }
 ```
+
+And we do the same for the `Material` trait:
 
 ```rust filename="material.rs | Adding Send and Sync supertraits to Material trait" {6}
 use crate::color::Color;
@@ -339,6 +383,21 @@ impl Material for Dielectric {
     }
 }
 ```
+
+Now, if we run `cargo check`, we'll get similar errors but for the `Rc` type:
+
+```
+error[E0277]: `Rc<(dyn Material + 'static)>` cannot be shared between threads safely
+error[E0277]: `Rc<(dyn Material + 'static)>` cannot be sent between threads safely
+```
+
+While [most primitive types](https://google.github.io/comprehensive-rust/concurrency/send-sync/examples.html) in Rust are both `Send` and `Sync`, `Rc` is not one of them. To fix the errors, we can replace `Rc` with `Arc`, which is both `Send` and `Sync` and thus can be shared and sent between threads safely.
+
+<Callout emoji="🦀">
+  `Send` and `Sync` are marker traits built into Rust's type system. Any type composed entirely of `Send` types is automatically `Send`. Same thing for the `Sync` trait.
+</Callout>
+
+Let's replace `Rc` with `Arc` in all modules:
 
 ```rust filename="sphere.rs | Updating Sphere struct" {1,11,15}
 use std::sync::Arc;
@@ -605,3 +664,7 @@ fn main() {
     eprint!("\nDone.\n");
 }
 ```
+
+And this time, our code compiles!
+
+If you try to generate the image again, it should be much faster and use all CPU cores available.
