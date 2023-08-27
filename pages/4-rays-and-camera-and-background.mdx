@@ -79,7 +79,9 @@ The function $\mathbf{P}(t)$ in more verbose code form we call `ray::at(t)`:
 
 ## Sending Rays Into the Scene
 
-Now we are ready to turn the corner and make a ray tracer. At the core, the ray tracer sends rays through pixels and computes the color seen in the direction of those rays. The involved steps are (1) calculate the ray from the eye to the pixel, (2) determine which objects the ray intersects, and (3) compute a color for that intersection point. When first developing a ray tracer, we tend to do a simple camera for getting the code up and running. We also make a simple `ray_color(ray)` function that returns the color of the background (a simple gradient).
+Now we are ready to turn the corner and make a ray tracer. At the core, the ray tracer sends rays through pixels and computes the color seen in the direction of those rays. The involved steps are (1) calculate the ray from the eye to the pixel, (2) determine which objects the ray intersects, and (3) compute a color for that intersection point.
+
+When first developing a ray tracer, we can do a simple camera for getting the code up and running. We also can make a simple `ray_color()` function that returns the color of the background (e.g., a simple gradient).
 
 It's common to get into trouble using square images for debugging because transposing $x$ and $y$ is a common operation, so we'll use a non-square image. For now we'll use a 16:9 aspect ratio, since that's so common.
 
@@ -208,7 +210,7 @@ Below in code, the ray `r` goes to approximately the pixel centers (We won't wor
   </Tab>
 </Tabs>
 
-The `ray_color(ray)` function linearly blends white and blue depending on the height of the $y$ coordinate *after* scaling the ray direction to unit length (so $-1.0 < y < 1.0$). Because we're looking at the $y$ height after normalizing the vector, you'll notice a horizontal gradient to the color in addition to the vertical gradient.
+The `ray_color()` function linearly blends white and blue depending on the height of the $y$ coordinate *after* scaling the ray direction to unit length (so $-1.0 < y < 1.0$). Because we're looking at the $y$ height after normalizing the vector, you'll notice a horizontal gradient to the color in addition to the vertical gradient.
 
 We then did a standard graphics trick of scaling that to $0.0 ≤ t ≤ 1.0$. When $t = 1.0$ we want blue. When $t = 0.0$ we want white. In between, we want a blend. This forms a "linear blend", or "linear interpolation", or "lerp" for short, between two things. A lerp is always of the form:
 

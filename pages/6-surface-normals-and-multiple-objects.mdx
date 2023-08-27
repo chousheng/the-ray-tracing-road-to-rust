@@ -545,7 +545,7 @@ We need to choose one of these possibilities because we will eventually want to 
 
 This decision is determined by whether you want to determine the side of the surface at the time of geometry intersection or at the time of coloring. In this book we have more material types than we have geometry types, so we'll put the determination at geometry time, i.e., making the normal always point against the ray. This is simply a matter of preference, and you'll see both implementations in the literature.
 
-We'll add the `front_face` bool to the `HitRecord` struct. We'll also add a `set_face_normal` function to solve the calculation by taking the dot product of the ray direction and the outward normal of the sphere (in the direction of the center to the intersection point). If the product is negative, the ray is from the outside. Otherwise, it is from the inside.
+We'll add the `front_face` bool to the `HitRecord` struct. We'll also add a `set_face_normal()` function to solve the calculation by taking the dot product of the ray direction and the outward normal of the sphere (in the direction of the center to the intersection point). If the product is negative, the ray is from the outside. Otherwise, it is from the inside.
 
 Here is the code:
 

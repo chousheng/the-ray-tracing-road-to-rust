@@ -80,6 +80,10 @@ Here's the basic part of the `Vec3` struct:
 
 We use `f64` here, but some ray tracers use single-precision. Either one is fine -- follow your own tastes.
 
+<Callout emoji="🦀">
+  Note that we use "derive" macro to ask the compiler to implement the [`Copy`](https://doc.rust-lang.org/std/marker/trait.Copy.html) trait for `Vec3`, which changes the variable binding from "move semantics" to "copy semantics". This is helpful because we can reuse and pass `Vec3` variables without borrowing (taking references), making arithmetic operations easier. Besides, `Vec3` is considered a small struct. For small structs, it is often [more efficient to pass by-copy than by-borrow](https://www.forrestthewoods.com/blog/should-small-rust-structs-be-passed-by-copy-or-by-borrow/). As a result, we will always pass `Vec3` (and its aliases `Point3` and `Color`) by-copy in this tutorial.
+</Callout>
+
 ## Vec3 Utility Functions
 
 The other part of `Vec3` contains vector utility functions:

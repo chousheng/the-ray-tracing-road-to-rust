@@ -6,6 +6,16 @@ When a real camera takes a picture, there are usually no jaggies along edges bec
 
 One thing we need is a random number generator that returns real random numbers. We need a function that returns a canonical random number which by convention returns a random real in the range $0 ≤ r < 1$. The "less than" before the 1 is important as we will sometimes take advantage of that.
 
+<Callout emoji="🦀">
+  Rust does not have a built-in random number generator in the standard library. However, we can add an external library using Cargo. We can run below in the terminal:
+
+  ```sh
+  cargo add rand
+  ```
+
+  Cargo will install the `rand` crate and update the dependency in `Cargo.toml`.
+</Callout>
+
 We add the following code snippet:
 
 <Tabs>
@@ -74,13 +84,7 @@ We add the following code snippet:
 </Tabs>
 
 <Callout emoji="🦀">
-  Rust does not have a built-in random number generator in the standard library. However, we can add an external library using Cargo. The code above uses the `rand` crate. We can run below in the terminal:
-
-  ```sh
-  cargo add rand
-  ```
-
-  Cargo will install and update the dependency in `Cargo.toml`.
+  Note that the [`gen()`](https://rust-random.github.io/rand/rand/rngs/struct.ThreadRng.html#method.gen) function has a generic type in the return position. This means that the caller gets to choose which type `gen()` will return. In this case, the compiler infers that we want `f64` from the definition of the enclosing `random_double()` function.
 </Callout>
 
 ## Generating Pixels with Multiple Samples
@@ -475,10 +479,14 @@ Main is also changed:
   </Tab>
 </Tabs>
 
-Zooming into the image that is produced, we can see the difference in edge pixels.
+Zooming into the image that is produced, we can see the difference in edge pixels:
 
 <Img
   caption="Before and after antialiasing"
   src="img-1.06-antialias-before-after.png"
   style={{ minWidth: "400px", imageRendering: "pixelated"}}
 />
+
+<Callout emoji="🦀">
+  By default, Cargo build and run the program in debug mode, which may be slow. Try use `cargo run --release` to build and run in release mode. It will be much faster.
+</Callout>
