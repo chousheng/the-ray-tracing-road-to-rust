@@ -2,7 +2,7 @@
 
 One of Rust's greatest strengths is that Rust guarantees there is no data race if the code compiles -- we can parallelize our code with confidence.
 
-We'll use [Rayon](https://github.com/rayon-rs/rayon), a data parallelism library, to parallelize the code and utilize all CPU cores of our machine.
+We'll use the [rayon](https://crates.io/crates/rayon) crate, a data parallelism library, to parallelize the code and utilize all CPU cores of our machine.
 
 Let's install the crate:
 
@@ -188,11 +188,11 @@ fn main() {
 
 Here's what the code above does for each scanline:
 
-1.  Use `into_par_iter()` to convert the `Range` into a `ParallelIterator`.
+1.  Use [`into_par_iter()`](https://docs.rs/rayon/latest/rayon/iter/trait.IntoParallelIterator.html#tymethod.into_par_iter) to convert the `Range` into a [`ParallelIterator`](https://docs.rs/rayon/latest/rayon/iter/trait.ParallelIterator.html).
 
-2.  Use `map()` with a closure specifying how the result of each pixel is calculated when iterating `i`. It will return another type implementing `ParallelIterator`.
+2.  Use [`map()`](https://docs.rs/rayon/latest/rayon/iter/trait.ParallelIterator.html#method.map) with a closure specifying how the result of each pixel is calculated when iterating `i`. It will return another type implementing `ParallelIterator`.
 
-3.  Use `collect()` to iterate, execute, and gather the results into a `Vec<Color>`.
+3.  Use [`collect()`](https://docs.rs/rayon/latest/rayon/iter/trait.ParallelIterator.html#method.collect) to iterate, execute, and gather the results into a `Vec<Color>`.
 
 4.  Write each pixel out in the `Vec<Color>`.
 
@@ -202,15 +202,15 @@ Here's what the code above does for each scanline:
 
 And that's it. We've finished modifying the code with only a few lines of change!
 
-However, it does not actually work yet. If you run `cargo check`, the compiler will complain:
+However, it does not actually work yet. If you run `cargo check`, the compiler will show:
 
 ```
 error[E0277]: `(dyn Hittable + 'static)` cannot be shared between threads safely
 ```
 
-The reason is that we have not made our code thread-safe yet.
+The reason is that we have not made our code thread-safe.
 
-One way to fix the error is to replace every occurrence of `dyn Hittable` with `dyn Hittable + Sync`, telling the compiler we will pass `Hittable` trait objects that also implement the `Sync` trait. However, this will make the code look repetitive all over the place.
+One way to fix the error above is to replace every occurrence of `dyn Hittable` with `dyn Hittable + Sync`, telling the compiler we will pass `Hittable` trait objects that also implement the `Sync` trait. However, this will make the code look repetitive all over the place.
 
 Another way to fix the error is to specify "supertraits" for `Hittable` trait, which ensures that every type implementing the `Hittable` trait also implements the supertraits.
 
@@ -394,7 +394,7 @@ error[E0277]: `Rc<(dyn Material + 'static)>` cannot be sent between threads safe
 While [most primitive types](https://google.github.io/comprehensive-rust/concurrency/send-sync/examples.html) in Rust are both `Send` and `Sync`, `Rc` is not one of them. To fix the errors, we can replace `Rc` with `Arc`, which is both `Send` and `Sync` and thus can be shared and sent between threads safely.
 
 <Callout emoji="🦀">
-  `Send` and `Sync` are marker traits built into Rust's type system. Any type composed entirely of `Send` types is automatically `Send`. Same thing for the `Sync` trait.
+  `Send` and `Sync` are marker traits built into Rust's type system. Any type composed entirely of `Send` types is automatically `Send`. The same applies to the `Sync` trait.
 </Callout>
 
 Let's replace `Rc` with `Arc` in all modules:

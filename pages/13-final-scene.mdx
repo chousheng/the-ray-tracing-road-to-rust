@@ -312,13 +312,15 @@ An interesting thing you might note is the glass balls don't really have shadows
 
 You now have a cool ray tracer! What next? Here are some ideas to further explore Rust features:
 
-*   Parallelize the program using Rayon
+*   Parallelize the program using the [`rayon`](https://crates.io/crates/rayon) crate
 
 *   Instead of returning boolean in `Hittable::hit()`, use `Option<T>` to return the optional data
 
-*   Replace trait objects (dynamic dispatch) with enum and pattern matching (static dispatch)
+*   Replace trait objects (dynamic dispatch) with enum and pattern matching
 
-*   Write some tests using Rust's built-in test macros
+*   Write some tests using the [`test`](https://doc.rust-lang.org/book/ch11-03-test-organization.html) attribute
+
+*   Use the [`bench`](https://doc.rust-lang.org/nightly/unstable-book/library-features/test.html) attribute or the [`criterion`](https://crates.io/crates/criterion) crate to do benchmarking
 
 If you want to learn more about ray tracing, be sure to check out the original Ray Tracing in One Weekend [series](https://raytracing.github.io/):
 
@@ -327,5 +329,7 @@ If you want to learn more about ray tracing, be sure to check out the original R
 *   [Ray Tracing: The Next Week](https://raytracing.github.io/books/RayTracingTheNextWeek.html)
 
 *   [Ray Tracing: The Rest of Your Life](https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html)
+
+Note that this tutorial is based on [version 3 of the first book](https://raytracing.github.io/v3/index.html). The original authors are working on version 4. The final scene is the same, but they introduce a new `interval` class and move some code from the `main()` function to the `camera` class. Before you continue to follow the original series with version 4, you might want to implement those changes.
 
 Finally, if you like this tutorial, leave a star on {<a href={config.project.link}>GitHub</a>}!

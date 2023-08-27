@@ -1497,6 +1497,10 @@ We need to modify the `ray_color()` function to use this:
   </Tab>
 </Tabs>
 
+<Callout emoji="🦀">
+  If you look at the definition of [`unwrap()`](https://doc.rust-lang.org/std/option/enum.Option.html#method.unwrap), you will find that it consumes (moves) the `self` value instead of taking a `&self` reference. That's why we need to use [`as_ref()`](https://doc.rust-lang.org/std/option/enum.Option.html#method.as_ref) to get a new owned `Option<&T>` value for `unwarp()` to consume. If we remove the `as_ref()`, the compiler will say that the `rec` is invalid to be used in the `scatter()` function because `rec.mat` has been moved into the `unwrap()`.
+</Callout>
+
 ## A Scene with Metal Spheres
 
 Now let's add some metal spheres to our scene:
