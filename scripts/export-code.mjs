@@ -4,8 +4,16 @@ import fs from "node:fs";
 import { simpleGit } from "simple-git";
 import slugify from "slugify";
 
+import { program } from "commander";
+
 import { getMdxListingsByLang } from "./util.mjs";
 
+program //
+  .option("--compile")
+  .option("--gen-image");
+program.parse();
+
+const opts = program.opts();
 
 const exportCodeFromMdxToGit = async () => {
   let listingsByLang = getMdxListingsByLang();
@@ -64,7 +72,7 @@ const exportCodeFromMdxToGit = async () => {
         if (lang == "rust") {
           execSync(`cd ${base}; cargo +nightly fmt`);
         } else if (lang == "cpp") {
-          execSync(`cd ${base}; clang-format -i src/*`)
+          execSync(`cd ${base}; clang-format -i src/*`);
         }
       }
 
@@ -72,26 +80,27 @@ const exportCodeFromMdxToGit = async () => {
         await git.add(".").commit(`Listing: ${listing.title}`);
       }
 
-      if (COMPILE_CODE && listing.genImage) {
+      if (opts.compile && listing.genImage) {
         console.log(`Compiling`);
         if (lang == "rust") {
           execSync(`cd ${base}; cargo build --release`);
-        } else if (lang=="cpp") {
+        } else if (lang == "cpp") {
           execSync(`cd ${base}; make clean; make build-release`);
         }
       }
 
-      if (GEN_IMAGE && listing.genImage && listing.title != "Final scene") {
+      if (opts.genImage && listing.genImage && listing.title != "Final scene") {
         let filename = `image${i}`;
         if (ADD_SLUGIFY_IMAGE_TITLE) {
-          filename += "-" + slugify(listing.title, {remove: /[*+~.()'"!:@]/g});
+          filename +=
+            "-" + slugify(listing.title, { remove: /[*+~.()'"!:@]/g });
         }
         filename += ".ppm";
 
         console.log(`Generating image: ${filename}`);
         if (lang == "rust") {
           execSync(`cd ${base}; cargo run --release > ${filename}`);
-        } else if (lang=="cpp") {
+        } else if (lang == "cpp") {
           execSync(`cd ${base}; make run-release > ${filename}`);
         }
         ++i;

@@ -169,7 +169,7 @@ const importCodeFromGitToMdx = async (importSpecs) => {
 
     if (hasError) {
       console.log("Error: aborting because of errors");
-      return;
+      process.exit(1);
     }
 
     //
@@ -277,8 +277,8 @@ const importCodeFromGitToMdx = async (importSpecs) => {
                 }
 
                 if (meta != node.meta) {
-                  console.log("old meta: ", node.meta);
-                  console.log("new meta: ", meta);
+                  console.log("old meta:", node.meta);
+                  console.log("new meta:", meta);
                   node.meta = meta;
                 }
               };
@@ -306,9 +306,6 @@ const importCodeFromGitToMdx = async (importSpecs) => {
 
 const main = async () => {
   const importSpecs = [];
-
-  //importSpecs.push("rust" + ":" + __dirname + "/../../ray-tracing-impl-rust");
-  //importSpecs.push("cpp" + ":" + __dirname + "/../../ray-tracing-impl-cpp");
   importSpecs.push("rust" + ":" + __dirname + "/../code/rust");
   importSpecs.push("cpp" + ":" + __dirname + "/../code/cpp");
 
