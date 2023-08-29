@@ -8,9 +8,9 @@ The website is built with Nextra, Next.js, TypeScript, React, Tailwind CSS, Rema
 
 Prerequisites:
 
-- Node.js 18
-- pnpm
-- Turbopack (optional)
+*   Node.js 18
+*   pnpm
+*   Turbopack
 
 Install packages:
 
@@ -18,13 +18,7 @@ Install packages:
 pnpm install
 ```
 
-Start development server to live reload when editing pages/*.mdx files:
-
-```
-pnpm next
-```
-
-If `packages/*` need to be modified, use Turbopack to rebuild the packages and do the live reloading:
+Start development server:
 
 ```
 turbo dev
