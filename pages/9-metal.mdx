@@ -139,7 +139,11 @@ The `HitRecord` is to avoid a bunch of arguments so we can stuff whatever info w
   </Tab>
 </Tabs>
 
-What we have set up here is that `Material` will tell us how rays interact with the surface. `HitRecord` is just a way to stuff a bunch of arguments into a struct so we can send them as a group. When a ray hits a surface (a particular sphere for example), the material pointer in the `HitRecord` will be set to point at the material pointer the sphere was given when it was set up in `main()` when we start. When the `ray_color()` routine gets the `HitRecord` it can call member functions of the material pointer to find out what ray, if any, is scattered.
+What we have set up here is that `Material` will tell us how rays interact with the surface. `HitRecord` is just a way to stuff a bunch of arguments into a struct so we can send them as a group. When a ray hits a surface (a particular sphere for example), the material pointer in the `HitRecord` will be set to point at the material pointer the sphere was given when it was set up in `main()` when we start. When the `ray_color()` routine gets the `HitRecord` it can call methods of the material pointer to find out what ray, if any, is scattered.
+
+<Callout emoji="🦀">
+  The `Rc` smart pointer allow us to share ownership. Here we have to wrap `Option` around `Rc` because the corresponding C++ implementation uses `std::shared_ptr`, which by default initializes the value as `nullptr`. In Rust, `Rc` is not nullable. But we can use the `Option` enum to express the nullability while still achieving memory safety. In the Appendix, we will revisit the code and remove this `Option`.
+</Callout>
 
 To achieve this, we must have a pointer to the material for our `Sphere` struct to return within `HitRecord`. See the highlighted lines below:
 
@@ -1498,7 +1502,7 @@ We need to modify the `ray_color()` function to use this:
 </Tabs>
 
 <Callout emoji="🦀">
-  If you look at the definition of [`unwrap()`](https://doc.rust-lang.org/std/option/enum.Option.html#method.unwrap), you will find that it consumes (moves) the `self` value instead of taking a `&self` reference. That's why we need to use [`as_ref()`](https://doc.rust-lang.org/std/option/enum.Option.html#method.as_ref) to get a new owned `Option<&T>` value for `unwarp()` to consume. If we remove the `as_ref()`, the compiler will say that the `rec` is invalid to be used in the `scatter()` function because `rec.mat` has been moved into the `unwrap()`.
+  Here, we use [`as_ref()`](https://doc.rust-lang.org/std/option/enum.Option.html#method.as_ref) to create a new `Option<&dyn Material>` value from the `Option<dyn Material>` owned by `rec.mat`. Then we use [`unwrap()`](https://doc.rust-lang.org/std/option/enum.Option.html#method.unwrap) to get the borrowed `&dyn Material`. Using `as_ref()` is necessary because `unwrap()` moves the `self` value. If we remove the `as_ref()` call, the compiler will say that `rec` cannot be used in the `scatter()` method as a whole because `rec.mat` has been moved by the `unwrap()` call.
 </Callout>
 
 ## A Scene with Metal Spheres

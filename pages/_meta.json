@@ -1,10 +1,10 @@
 {
   "index": "Introduction",
   "1-getting-started": "1. Getting Started",
-  "2-generating-image": "2. Generating an Image",
+  "2-creating-an-image": "2. Creating an Image",
   "3-the-vec3-struct": "3. The Vec3 Struct",
-  "4-rays-and-camera-and-background": "4. Rays, a Camera, and Background",
-  "5-adding-sphere": "5. Adding a Sphere",
+  "4-rays-and-a-camera-and-background": "4. Rays, a Camera, and Background",
+  "5-adding-a-sphere": "5. Adding a Sphere",
   "6-surface-normals-and-multiple-objects": "6. Surface Normals and Multiple Objects",
   "7-antialiasing": "7. Antialiasing",
   "8-diffuse-materials": "8. Diffuse Materials",
