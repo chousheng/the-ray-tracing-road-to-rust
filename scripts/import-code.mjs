@@ -227,13 +227,14 @@ const importCodeFromGitToMdx = async (importSpecs) => {
                   let lineBelowStr = lineMap.get(lineBelow);
 
                   if (lineAboveStr == "" && lineBelowStr != "") {
+                    // One of the lines is blank, highlight the blank
                     hiStr += lineAbove.toString();
                   } else if (lineAboveStr != "" && lineBelowStr == "") {
+                    // One of the lines is blank, highlight the blank
                     hiStr += lineBelow.toString();
                   } else {
-                    console.log(
-                      "Warning: remove only block with a rare less-than-ideal case!",
-                    );
+                    // Both of the lines are not blank, highlight the both lines
+                    // Todo: better to show removed lines directly
                     hiStr += lineAbove.toString() + "-" + lineBelow.toString();
                   }
                 } else if (diffRange.count2 == 1) {

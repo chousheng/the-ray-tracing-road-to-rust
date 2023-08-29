@@ -399,7 +399,7 @@ While [most primitive types](https://google.github.io/comprehensive-rust/concurr
 
 Let's replace `Rc` with `Arc` in all modules:
 
-```rust filename="sphere.rs | Updating Sphere struct" {25,32,42,46-52,55}
+```rust filename="sphere.rs | Using Arc in Sphere struct" {1,11,15}
 use std::sync::Arc;
 
 use crate::hittable::{HitRecord, Hittable};
@@ -424,14 +424,14 @@ impl Sphere {
 }
 
 impl Hittable for Sphere {
-    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
         let oc = r.origin() - self.center;
         let a = r.direction().length_squared();
         let half_b = vec3::dot(oc, r.direction());
         let c = oc.length_squared() - self.radius * self.radius;
         let discriminant = half_b * half_b - a * c;
         if discriminant < 0.0 {
-            return None;
+            return false;
         }
 
         let sqrt_d = f64::sqrt(discriminant);
@@ -441,25 +441,21 @@ impl Hittable for Sphere {
         if root <= t_min || t_max <= root {
             root = (-half_b + sqrt_d) / a;
             if root <= t_min || t_max <= root {
-                return None;
+                return false;
             }
         }
 
-        let mut rec = HitRecord {
-            t: root,
-            p: r.at(root),
-            mat: self.mat.clone(),
-            normal: Default::default(),
-            front_face: false,
-        };
+        rec.t = root;
+        rec.p = r.at(rec.t);
         let outward_normal = (rec.p - self.center) / self.radius;
         rec.set_face_normal(r, outward_normal);
-        Some(rec)
+        rec.mat = Some(self.mat.clone());
+        true
     }
 }
 ```
 
-```rust filename="hittable.rs | Updating Hittable struct" {1,11}
+```rust filename="hittable.rs | Using Arc in Hittable struct" {1,11}
 use std::sync::Arc;
 
 use crate::material::Material;
@@ -495,7 +491,7 @@ pub trait Hittable: Send + Sync {
 }
 ```
 
-```rust filename="main.rs | Updating main()" {12,54,74,80,84,91,98,105}
+```rust filename="main.rs | Using Arc in main()" {12,54,74,80,84,91,98,105}
 mod camera;
 mod color;
 mod common;

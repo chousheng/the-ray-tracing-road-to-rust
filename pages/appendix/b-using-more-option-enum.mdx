@@ -50,9 +50,9 @@ pub trait Hittable: Send + Sync {
 }
 ```
 
-Since we'll return either `Some(HitRecord)` or `None` in `Hittable::hit()`, we can remove `Option` and require all fields of the `HitRecord` struct to be initialized when creating. We can also remove its `Default` trait and the `new()` method:
+Since we'll return either `Some(HitRecord)` or `None` in `Hittable::hit()`, we can remove `Option` and require all fields of the `HitRecord` struct to be initialized when creating. We can also remove its `Default` trait and the `new()` function:
 
-```rust filename="hittable.rs | Updating HitRecord struct" {6,10,15-16}
+```rust filename="hittable.rs | Removing Option in HitRecord struct" {6,10,15-16}
 use std::sync::Arc;
 
 use crate::material::Material;
@@ -85,7 +85,7 @@ pub trait Hittable: Send + Sync {
 
 We refactor the `HittableList` implementation using the `if let` expression:
 
-```rust filename="hittable_list.rs | Updating HittableList struct" {20-21,25-27,31}
+```rust filename="hittable_list.rs | Using Option in HittableList struct" {20-21,25-27,31}
 use crate::hittable::{HitRecord, Hittable};
 use crate::ray::Ray;
 
@@ -123,7 +123,7 @@ impl Hittable for HittableList {
 
 And modify the `Sphere` implementation:
 
-```rust filename="sphere.rs | Updating Sphere struct" {25,32,42,46-52,55}
+```rust filename="sphere.rs | Using Option in Sphere struct" {25}
 use std::sync::Arc;
 
 use crate::hittable::{HitRecord, Hittable};
@@ -155,7 +155,7 @@ impl Hittable for Sphere {
         let c = oc.length_squared() - self.radius * self.radius;
         let discriminant = half_b * half_b - a * c;
         if discriminant < 0.0 {
-            return None;
+            return false;
         }
 
         let sqrt_d = f64::sqrt(discriminant);
@@ -165,27 +165,23 @@ impl Hittable for Sphere {
         if root <= t_min || t_max <= root {
             root = (-half_b + sqrt_d) / a;
             if root <= t_min || t_max <= root {
-                return None;
+                return false;
             }
         }
 
-        let mut rec = HitRecord {
-            t: root,
-            p: r.at(root),
-            mat: self.mat.clone(),
-            normal: Default::default(),
-            front_face: false,
-        };
+        rec.t = root;
+        rec.p = r.at(rec.t);
         let outward_normal = (rec.p - self.center) / self.radius;
         rec.set_face_normal(r, outward_normal);
-        Some(rec)
+        rec.mat = Some(self.mat.clone());
+        true
     }
 }
 ```
 
 Similar to the `Hittable` trait, we can refactor the `scatter()` function to return `Option<ScatterRecord>`:
 
-```rust filename="material.rs | Change Material::scatter() to return Option<ScatterRecord>" {5-9,12}
+```rust filename="material.rs | Changing Material::scatter() to return Option<ScatterRecord>" {5-9,12}
 use crate::color::Color;
 use crate::hittable::HitRecord;
 use crate::ray::Ray;
@@ -316,7 +312,7 @@ impl Material for Dielectric {
 
 And modify the implementations:
 
-```rust filename="material.rs | Updating Material structs" {26,34-37,56,59-66,90,110-113}
+```rust filename="material.rs | Using Option in Material structs" {26,34-37,56,59-66,90,110-113}
 use crate::color::Color;
 use crate::hittable::HitRecord;
 use crate::ray::Ray;
@@ -436,7 +432,7 @@ impl Material for Dielectric {
 
 Finally, we refactor the `main()` function:
 
-```rust filename="main.rs | Updating ray_color()" {18,31-33}
+```rust filename="main.rs | Using Option in ray_color()" {18,31-33}
 mod camera;
 mod color;
 mod common;

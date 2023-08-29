@@ -2,6 +2,7 @@
   "scripts": {
     "dev": "nodemon",
     "export": "node scripts/export-code.mjs",
+    "export:gen-image": "npm run export -- --gen-image",
     "import": "node scripts/import-code.mjs",
     "roundtrip": "npm run export && npm run import",
     "inspect": "NODE_OPTIONS='--inspect' next dev"
