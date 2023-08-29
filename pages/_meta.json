@@ -2,7 +2,7 @@
   "index": "Introduction",
   "1-getting-started": "1. Getting Started",
   "2-generating-image": "2. Generating an Image",
-  "3-vec3-struct": "3. The Vec3 Struct",
+  "3-the-vec3-struct": "3. The Vec3 Struct",
   "4-rays-and-camera-and-background": "4. Rays, a Camera, and Background",
   "5-adding-sphere": "5. Adding a Sphere",
   "6-surface-normals-and-multiple-objects": "6. Surface Normals and Multiple Objects",
