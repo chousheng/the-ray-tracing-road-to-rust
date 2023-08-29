@@ -1,5 +1,10 @@
 {
+  "name": "the-ray-tracing-road-to-rust",
+  "author": "Sheng Chou",
+  "license": "MIT",
+  "private": true,
   "scripts": {
+    "build": "next build",
     "dev": "nodemon",
     "export": "node scripts/export-code.mjs",
     "export:gen-image": "npm run export -- --gen-image",
