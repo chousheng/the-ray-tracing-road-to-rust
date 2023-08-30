@@ -33,12 +33,6 @@
     "prebuild": "rm -rf dist",
     "prepublishOnly": "NODE_ENV='production' npm run build"
   },
-  "engines": {
-    "node": ">=16"
-  },
-  "browserslist": [
-    "node 16"
-  ],
   "prettier": {
     "singleQuote": true
   },
