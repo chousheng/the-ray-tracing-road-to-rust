@@ -8,13 +8,17 @@ type ImgProps = {
 };
 
 export const Img = ({ caption, src, style }: ImgProps) => {
+  const isPNG = src.includes(".png");
   return (
     <figure className="mt-6 first:mt-0 flex flex-col items-center justify-center">
       <NextImage
         src={require("../images/" + src)}
         alt={caption}
-        style={{ imageRendering: "pixelated", ...style }}
+        style={{ ...(isPNG && { imageRendering: "pixelated" }), ...style }}
         sizes="100vw"
+        placeholder="blur"
+        unoptimized={isPNG}
+        quality={95}
       />
       <figcaption className="mt-1 text-sm">{caption}</figcaption>
     </figure>
@@ -36,6 +40,8 @@ export const Fig = ({ caption, src }: FigProps) => {
         style={{
           width: "600px",
         }}
+        sizes="100vw"
+        placeholder="blur"
       />
       <figcaption className="mt-1 text-sm">{caption}</figcaption>
     </figure>
