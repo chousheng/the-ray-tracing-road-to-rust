@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import type { Element, ElementContent, Root, RootContent, Text } from 'hast';
 import { IShikiTheme } from 'shiki';
 

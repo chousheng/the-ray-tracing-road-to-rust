@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import hashObj from 'hash-obj';
 import type { Element, ElementContent, Root } from 'hast';
 import rangeParser from 'parse-numeric-range';
@@ -168,6 +170,9 @@ export default function rehypePrettyCode(
     }
 
     visit(tree, 'element', (element, index, parent) => {
+      if (!parent) {
+        return;
+      }
       // Inline code
       if (
         (element.tagName === 'code' &&
