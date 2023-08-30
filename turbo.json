@@ -12,7 +12,7 @@
       "dependsOn": ["^build"]
     },
     "//#build": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["rehype-pretty-code#build"]
     }
   }
 }
