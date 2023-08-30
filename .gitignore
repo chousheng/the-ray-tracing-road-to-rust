@@ -16,3 +16,4 @@ yarn.lock
 .pnpm-store/
 
 code/
+.vercel
