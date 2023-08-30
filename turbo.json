@@ -7,6 +7,12 @@
     "//#dev": { // Opt in to run dev task in the root package when running "turbo run dev"
       "cache": false,
       "persistent": true
+    },
+    "build": {
+      "dependsOn": ["^build"]
+    },
+    "//#build": {
+      "dependsOn": ["^build"]
     }
   }
 }
