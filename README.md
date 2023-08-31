@@ -10,7 +10,6 @@ Prerequisites:
 
 *   Node.js 18
 *   pnpm
-*   Turbopack
 
 Install packages:
 
@@ -18,8 +17,8 @@ Install packages:
 pnpm install
 ```
 
-Start development server:
+Start the development server:
 
 ```
-turbo dev
+pnpm dev
 ```
