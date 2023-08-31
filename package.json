@@ -9,7 +9,7 @@
     "dev": "concurrently -n rehype-pretty-code,next 'npm run dev:rpc' 'nodemon'",
     "dev:rpc": "cd packages/rehype-pretty-code; npm run dev",
     "export": "node scripts/export-code.mjs",
-    "export:check-compile": "npm run export -- ---check-compile",
+    "export:check-compile": "npm run export -- --check-compile",
     "export:gen-image": "npm run export -- --gen-image",
     "export:gen-all-image": "npm run export -- --gen-image --gen-large-image",
     "import": "node scripts/import-code.mjs",
