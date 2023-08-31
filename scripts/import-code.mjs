@@ -124,6 +124,14 @@ const importCodeFromGitToMdx = async (importSpecs) => {
 
     const titleToMdxListing = {};
     for (const listing of mdxListingsByLang[lang]) {
+      if (listing.title in titleToMdxListing) {
+        console.log(
+          "Error: Found duplicate listing titles:",
+          "lang=" + lang,
+          "title=" + listing.title,
+        );
+        process.exit(1);
+      }
       titleToMdxListing[listing.title] = listing;
     }
 
