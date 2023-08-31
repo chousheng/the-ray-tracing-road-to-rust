@@ -123,7 +123,7 @@ impl Hittable for HittableList {
 
 And modify the `Sphere` implementation:
 
-```rust filename="sphere.rs | Using Option in Sphere struct" {25}
+```rust filename="sphere.rs | Using Option in Sphere struct" {25,32,42,46-52,55}
 use std::sync::Arc;
 
 use crate::hittable::{HitRecord, Hittable};
@@ -155,7 +155,7 @@ impl Hittable for Sphere {
         let c = oc.length_squared() - self.radius * self.radius;
         let discriminant = half_b * half_b - a * c;
         if discriminant < 0.0 {
-            return false;
+            return None;
         }
 
         let sqrt_d = f64::sqrt(discriminant);
@@ -165,16 +165,20 @@ impl Hittable for Sphere {
         if root <= t_min || t_max <= root {
             root = (-half_b + sqrt_d) / a;
             if root <= t_min || t_max <= root {
-                return false;
+                return None;
             }
         }
 
-        rec.t = root;
-        rec.p = r.at(rec.t);
+        let mut rec = HitRecord {
+            t: root,
+            p: r.at(root),
+            mat: self.mat.clone(),
+            normal: Default::default(),
+            front_face: Default::default(),
+        };
         let outward_normal = (rec.p - self.center) / self.radius;
         rec.set_face_normal(r, outward_normal);
-        rec.mat = Some(self.mat.clone());
-        true
+        Some(rec)
     }
 }
 ```
@@ -312,7 +316,7 @@ impl Material for Dielectric {
 
 And modify the implementations:
 
-```rust filename="material.rs | Using Option in Material structs" {26,34-37,56,59-66,90,110-113}
+```rust filename="material.rs | Using Option in Material structs" {26,34-37,56,58,60-67,91,111-114}
 use crate::color::Color;
 use crate::hittable::HitRecord;
 use crate::ray::Ray;
@@ -370,11 +374,12 @@ impl Metal {
 impl Material for Metal {
     fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<ScatterRecord> {
         let reflected = vec3::reflect(vec3::unit_vector(r_in.direction()), rec.normal);
+        let scattered = Ray::new(rec.p, reflected + self.fuzz * vec3::random_in_unit_sphere());
 
         if vec3::dot(scattered.direction(), rec.normal) > 0.0 {
             Some(ScatterRecord {
                 attenuation: self.albedo,
-                scattered: Ray::new(rec.p, reflected + self.fuzz * vec3::random_in_unit_sphere()),
+                scattered,
             })
         } else {
             None
@@ -432,7 +437,7 @@ impl Material for Dielectric {
 
 Finally, we refactor the `main()` function:
 
-```rust filename="main.rs | Using Option in ray_color()" {18,31-33}
+```rust filename="main.rs | Using Option in ray_color()" {18,31-33} genLargeImage
 mod camera;
 mod color;
 mod common;

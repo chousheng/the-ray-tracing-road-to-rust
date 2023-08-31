@@ -7,9 +7,13 @@
     "build": "next build",
     "dev": "nodemon",
     "export": "node scripts/export-code.mjs",
+    "export:check-compile": "npm run export -- ---check-compile",
     "export:gen-image": "npm run export -- --gen-image",
+    "export:gen-all-image": "npm run export -- --gen-image --gen-large-image",
     "import": "node scripts/import-code.mjs",
-    "roundtrip": "npm run export && npm run import",
+    "roundtrip": "npm run export:check-compile && npm run import",
+    "roundtrip:gen-image": "npm run export:gen-image && npm run import",
+    "roundtrip:gen-all-image": "npm run export:gen-all-image && npm run import",
     "inspect": "NODE_OPTIONS='--inspect' next dev"
   },
   "dependencies": {

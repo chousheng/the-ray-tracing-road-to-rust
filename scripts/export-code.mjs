@@ -8,9 +8,10 @@ import { program } from "commander";
 
 import { getMdxListingsByLang } from "./util.mjs";
 
-program //
-  .option("--compile")
-  .option("--gen-image");
+program
+  .option("--check-compile")
+  .option("--gen-image")
+  .option("--gen-large-image");
 program.parse();
 
 const opts = program.opts();
@@ -32,8 +33,6 @@ const exportCodeFromMdxToGit = async () => {
   const WRITE_CODE = true;
   const FORMAT_CODE = true;
   const COMMIT_CODE = true;
-  const COMPILE_CODE = true;
-  const GEN_IMAGE = true;
   const ADD_SLUGIFY_IMAGE_TITLE = true;
 
   for (let lang in listingsByLang) {
@@ -80,7 +79,10 @@ const exportCodeFromMdxToGit = async () => {
         await git.add(".").commit(`Listing: ${listing.title}`);
       }
 
-      if (opts.compile && listing.genImage) {
+      if (
+        (opts.checkCompile || opts.genImage || opts.genLargeImage) &&
+        (listing.checkCompile || listing.genImage || listing.genLargeImage)
+      ) {
         console.log(`Compiling`);
         if (lang == "rust") {
           execSync(`cd ${base}; cargo build --release`);
@@ -89,7 +91,10 @@ const exportCodeFromMdxToGit = async () => {
         }
       }
 
-      if (opts.genImage && listing.genImage && listing.title != "Final scene") {
+      if (
+        (opts.genImage && listing.genImage) ||
+        (opts.genLargeImage && listing.genLargeImage)
+      ) {
         let filename = `image${i}`;
         if (ADD_SLUGIFY_IMAGE_TITLE) {
           filename +=

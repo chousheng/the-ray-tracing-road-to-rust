@@ -28,6 +28,8 @@ export const parseMdAstNodeMeta = (node) => {
     title: "",
     addCargoDep: "",
     genImage: false,
+    genLargeImage: false,
+    checkCompile: false,
   };
 
   if (!node.meta) {
@@ -48,6 +50,16 @@ export const parseMdAstNodeMeta = (node) => {
   let genImage = node.meta.match(/(^|\s)genImage(\s|$)/);
   if (genImage) {
     meta.genImage = true;
+  }
+
+  let genLargeImage = node.meta.match(/(^|\s)genLargeImage(\s|$)/);
+  if (genLargeImage) {
+    meta.genLargeImage = true;
+  }
+
+  let checkCompile = node.meta.match(/(^|\s)checkCompile(\s|$)/);
+  if (checkCompile) {
+    meta.checkCompile = true;
   }
 
   return meta;
@@ -79,6 +91,8 @@ export const getMdxListingsByLang = () => {
         listing.title = meta.title;
         listing.addCargoDep = meta.addCargoDep;
         listing.genImage = meta.genImage;
+        listing.genLargeImage = meta.genLargeImage;
+        listing.checkCompile = meta.checkCompile;
         listing.code = node.value;
         if (!(listing.lang in listingsByLang)) {
           listingsByLang[listing.lang] = [];
