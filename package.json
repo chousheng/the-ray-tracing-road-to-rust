@@ -19,6 +19,7 @@
     "inspect": "NODE_OPTIONS='--inspect' next dev"
   },
   "dependencies": {
+    "@vercel/analytics": "^1.0.2",
     "next": "^13.4.19",
     "nextra": "2.9.0",
     "nextra-theme-docs": "2.9.0",
