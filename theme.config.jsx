@@ -1,27 +1,35 @@
 import { Fig, Img } from "components/Image";
 import { Tab, Tabs } from "components/Tabs";
+import { useRouter } from "next/router";
 import { Callout } from "nextra/components";
 
+const baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL
+  ? "https://" + process.env.NEXT_PUBLIC_VERCEL_URL
+  : "http://localhost:3000";
+
+const title = "The Ray Tracing Road to Rust 🦀";
+const description = "A tutorial to learn Rust by writing a ray tracer.";
+const ogImage = baseUrl + "/og.jpg";
+
 const config = {
-  logo: <span>The Ray Tracing Road to Rust 🦀</span>,
+  logo: <span>{title}</span>,
   useNextSeoProps: () => {
-    return {
-      titleTemplate: "%s – The Ray Tracing Road to Rust 🦀",
-    };
+    const { asPath } = useRouter();
+    if (asPath === "/") {
+      return {
+        titleTemplate: title,
+      };
+    } else {
+      return {
+        titleTemplate: `%s – ${title}`,
+      };
+    }
   },
   head: () => {
-    const baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL
-      ? "https://" + process.env.NEXT_PUBLIC_VERCEL_URL
-      : "http://localhost:3000";
-
-    const appTitle = "The Ray Tracing Road to Rust";
-    const description = "A tutorial to learn Rust by writing a ray tracer.";
-    const ogImage = baseUrl + "/og.jpg";
-
     return (
       <>
         <meta httpEquiv="Content-Language" content="en" />
-        <meta name="apple-mobile-web-app-title" content={appTitle} />
+        <meta name="apple-mobile-web-app-title" content={title} />
         <meta name="msapplication-TileColor" content="#fff" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="twitter:card" content="summary_large_image" />
