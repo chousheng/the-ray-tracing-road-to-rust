@@ -4,13 +4,18 @@ import { useRouter } from "next/router";
 import { useConfig } from "nextra-theme-docs";
 import { Callout } from "nextra/components";
 
-const baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL
-  ? "https://" + process.env.NEXT_PUBLIC_VERCEL_URL
-  : "http://localhost:3000";
-
 const websiteTitle = "The Ray Tracing Road to Rust";
 const websiteTitleWithEmoji = "The Ray Tracing Road to Rust 🦀";
 const description = "A tutorial to learn Rust by writing a ray tracer.";
+
+let baseUrl = "http://localhost:3000";
+const m = process.env.NEXT_PUBLIC_VERCEL_URL?.match(
+  /(.*)-(.{9})-(.*).vercel.app/,
+);
+if (m) {
+  baseUrl = "https://" + m[1] + ".vercel.app";
+}
+
 const ogImage = baseUrl + "/og.jpg";
 
 const config = {
