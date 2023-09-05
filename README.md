@@ -1,6 +1,6 @@
 # The Ray Tracing Road to Rust
 
-This is the repository for the website: The Ray Tracing Road to Rust, a tutorial to help people learn Rust by building a ray tracer and comparing Rust with C++ using tabs interactively.
+This is the repository for the website: [The Ray Tracing Road to Rust](https://the-ray-tracing-road-to-rust.vercel.app/), a tutorial to help people learn Rust by building a ray tracer and comparing Rust with C++ using tabs interactively.
 
 The tutorial is adapted from the awesome book: [Ray Tracing in One Weekend](https://raytracing.github.io/v3/books/RayTracingInOneWeekend.html) by Peter Shirley, Trevor David Black, and Steve Hollasch.
 
