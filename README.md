@@ -6,23 +6,69 @@ The tutorial is adapted from the awesome book: [Ray Tracing in One Weekend](http
 
 The website is built with Nextra, Next.js, TypeScript, React, Tailwind CSS, Remark, and MDX.
 
-## Development
-
-Prerequisites:
+## Prerequisites
 
 *   Node.js 18
-*   pnpm
+*   Git
 
-Install packages:
+## Development setup
+
+### Installing pnpm
+
+Using Node.js's built-in pnpm:
+
+```
+corepack enable pnpm
+```
+
+Or installing pnpm as a global package:
+
+```
+npm install -g pnpm
+```
+
+### Installing packages
 
 ```
 pnpm install
 ```
 
-Start the development server:
+## Starting the development server
 
 ```
 pnpm dev
+```
+
+## Exporting the tutorial code into git repositories
+
+### Initializing project templates
+
+```
+git submodule update --init --recursive
+```
+
+This will download the project starter templates in the `templates` folder.
+
+### Exporting code
+
+```
+pnpm run export
+```
+
+This will export code from the tutorial to `code/rust` and `code/cpp` git repositories with full change history.
+
+### Exporting tutorial code and generating images
+
+Generate images (small images only):
+
+```
+pnpm run export --gen-image
+```
+
+Generate all images:
+
+```
+pnpm run export --gen-large-image
 ```
 
 # License
