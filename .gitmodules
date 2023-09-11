@@ -1,0 +1,6 @@
+[submodule "templates/ray-tracing-starter-rust"]
+	path = templates/ray-tracing-starter-rust
+	url = https://github.com/chousheng/ray-tracing-starter-rust.git
+[submodule "templates/ray-tracing-starter-cpp"]
+	path = templates/ray-tracing-starter-cpp
+	url = https://github.com/chousheng/ray-tracing-starter-cpp.git
