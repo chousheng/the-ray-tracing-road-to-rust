@@ -25,8 +25,8 @@ const exportCodeFromMdxToGit = async () => {
   fs.mkdirSync(EXPORT_FOLDER, { recursive: true }, () => {});
 
   const starterRepoPathByLang = {
-    rust: "../../ray-tracing-starter-rust",
-    cpp: "../../ray-tracing-starter-cpp",
+    rust: "../templates/ray-tracing-starter-rust",
+    cpp: "../templates/ray-tracing-starter-cpp",
   };
 
   const ADD_CARGO_DEP_AND_COMMIT = true;
